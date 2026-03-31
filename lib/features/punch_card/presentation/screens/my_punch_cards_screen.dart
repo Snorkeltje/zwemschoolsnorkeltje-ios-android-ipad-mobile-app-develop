@@ -4,6 +4,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../data/models/punch_card_model.dart';
+import 'punch_card_detail_screen.dart';
+import 'punch_card_order_screen.dart';
 
 class MyPunchCardsScreen extends StatelessWidget {
   const MyPunchCardsScreen({super.key});
@@ -75,7 +77,18 @@ class MyPunchCardsScreen extends StatelessWidget {
             else
               ..._activeCards.map((card) => Padding(
                     padding: const EdgeInsets.only(bottom: AppDimensions.md),
-                    child: _PunchCardWidget(punchCard: card),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                PunchCardDetailScreen(punchCard: card),
+                          ),
+                        );
+                      },
+                      child: _PunchCardWidget(punchCard: card),
+                    ),
                   )),
 
             const SizedBox(height: AppDimensions.md),
@@ -86,7 +99,12 @@ class MyPunchCardsScreen extends StatelessWidget {
               height: AppDimensions.buttonHeight,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // TODO: Navigate to purchase punch card
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PunchCardOrderScreen(),
+                    ),
+                  );
                 },
                 icon: const Icon(Icons.add),
                 label: const Text(
@@ -122,7 +140,18 @@ class MyPunchCardsScreen extends StatelessWidget {
               const SizedBox(height: AppDimensions.md),
               ..._expiredCards.map((card) => Padding(
                     padding: const EdgeInsets.only(bottom: AppDimensions.md),
-                    child: _PunchCardWidget(punchCard: card, isExpired: true),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                PunchCardDetailScreen(punchCard: card),
+                          ),
+                        );
+                      },
+                      child: _PunchCardWidget(punchCard: card, isExpired: true),
+                    ),
                   )),
             ],
           ],

@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -58,3 +60,7 @@ app.*.map.json
 # Generated
 *.g.dart
 *.freezed.dart
+
+# Figma source and screenshots
+imagesscreenshotsforclaude/
+assets/fonts/inter.zip

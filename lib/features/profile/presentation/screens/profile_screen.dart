@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/router/route_names.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -90,18 +92,53 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Mijn kinderen',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Mijn kinderen',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          // TODO: Navigate to add child
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.add, size: 16, color: AppColors.primaryBlue),
+                              SizedBox(width: 4),
+                              Text(
+                                'Toevoegen',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryBlue,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  _buildChildTile('Emma Murtaza', 'Beginner', 'EM'),
+                  _buildChildTile(context, 'Emma Murtaza', 'Beginner', 'EM', 6),
                   const Divider(height: 1, color: AppColors.divider),
-                  _buildChildTile('Noah Murtaza', 'Starter', 'NM'),
+                  _buildChildTile(context, 'Noah Murtaza', 'Starter', 'NM', 4),
                 ],
               ),
             ),
@@ -115,25 +152,47 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuItem(
                     Icons.edit_outlined,
                     'Profiel bewerken',
-                    onTap: () {},
+                    onTap: () => context.pushNamed(RouteNames.editProfile),
+                  ),
+                  _buildDivider(),
+                  _buildMenuItem(
+                    Icons.people_outline,
+                    'Noodcontacten',
+                    onTap: () {
+                      // TODO: Navigate to emergency contacts
+                    },
                   ),
                   _buildDivider(),
                   _buildMenuItem(
                     Icons.notifications_outlined,
                     'Notificatie-instellingen',
-                    onTap: () {},
+                    onTap: () => context.pushNamed(RouteNames.notificationSettings),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
                     Icons.payment_outlined,
                     'Betalingsgeschiedenis',
-                    onTap: () {},
+                    onTap: () => context.pushNamed(RouteNames.paymentHistory),
+                  ),
+                  _buildDivider(),
+                  _buildMenuItem(
+                    Icons.credit_card_outlined,
+                    'Betaalmethoden',
+                    onTap: () => context.pushNamed(RouteNames.paymentMethod),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
                     Icons.help_outline,
                     'Veelgestelde vragen',
-                    onTap: () {},
+                    onTap: () => context.pushNamed(RouteNames.faq),
+                  ),
+                  _buildDivider(),
+                  _buildMenuItem(
+                    Icons.description_outlined,
+                    'Algemene voorwaarden',
+                    onTap: () {
+                      // TODO: Navigate to terms
+                    },
                   ),
                   _buildDivider(),
                   _buildMenuItem(
@@ -174,57 +233,79 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChildTile(String name, String level, String initials) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
-            child: Text(
-              initials,
-              style: const TextStyle(
-                color: AppColors.primaryBlue,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+  Widget _buildChildTile(BuildContext context, String name, String level, String initials, int age) {
+    return GestureDetector(
+      onTap: () {
+        // TODO: Navigate to edit child
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+              child: Text(
+                initials,
+                style: const TextStyle(
+                  color: AppColors.primaryBlue,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    level,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.primaryBlue,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          level,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.primaryBlue,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$age jaar',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const Icon(
+              Icons.chevron_right,
+              color: AppColors.textLight,
+              size: 22,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -310,6 +391,7 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
               // TODO: Call auth provider logout
+              context.goNamed(RouteNames.login);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,

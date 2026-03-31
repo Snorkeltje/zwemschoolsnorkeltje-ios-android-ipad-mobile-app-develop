@@ -1,36 +1,17 @@
-import 'package:dio/dio.dart';
 import '../constants/api_constants.dart';
 
+/// HTTP client - simplified for UI phase
 class ApiClient {
-  late final Dio _dio;
+  String? _authToken;
 
-  ApiClient() {
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: '${ApiConstants.baseUrl}${ApiConstants.apiVersion}',
-        connectTimeout: const Duration(
-          milliseconds: ApiConstants.connectTimeout,
-        ),
-        receiveTimeout: const Duration(
-          milliseconds: ApiConstants.receiveTimeout,
-        ),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      ),
-    );
+  void setAuthToken(String token) => _authToken = token;
+  void clearAuthToken() => _authToken = null;
 
-    // TODO: Add interceptors for auth token, logging, error handling
-  }
+  Map<String, String> get headers => {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    if (_authToken != null) 'Authorization': 'Bearer $_authToken',
+  };
 
-  Dio get dio => _dio;
-
-  void setAuthToken(String token) {
-    _dio.options.headers['Authorization'] = 'Bearer $token';
-  }
-
-  void clearAuthToken() {
-    _dio.options.headers.remove('Authorization');
-  }
+  String get baseUrl => '${ApiConstants.baseUrl}${ApiConstants.apiVersion}';
 }

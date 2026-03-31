@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../data/models/booking_model.dart';
+import 'reservation_detail_screen.dart';
 
 class MyReservationsScreen extends StatefulWidget {
   const MyReservationsScreen({super.key});
@@ -155,12 +156,24 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
       itemCount: bookings.length,
       separatorBuilder: (_, __) => const SizedBox(height: AppDimensions.md),
       itemBuilder: (context, index) {
-        return _BookingCard(
-          booking: bookings[index],
-          isUpcoming: isUpcoming,
-          onCancel: isUpcoming
-              ? () => _showCancelDialog(bookings[index])
-              : null,
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ReservationDetailScreen(
+                  booking: bookings[index],
+                ),
+              ),
+            );
+          },
+          child: _BookingCard(
+            booking: bookings[index],
+            isUpcoming: isUpcoming,
+            onCancel: isUpcoming
+                ? () => _showCancelDialog(bookings[index])
+                : null,
+          ),
         );
       },
     );

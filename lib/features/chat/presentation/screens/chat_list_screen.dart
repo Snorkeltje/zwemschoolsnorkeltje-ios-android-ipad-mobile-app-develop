@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/router/route_names.dart';
 
 class _ChatPreview {
   final String id;
@@ -9,6 +11,7 @@ class _ChatPreview {
   final String lastMessage;
   final String timestamp;
   final int unreadCount;
+  final bool isOnline;
 
   const _ChatPreview({
     required this.id,
@@ -17,6 +20,7 @@ class _ChatPreview {
     required this.lastMessage,
     required this.timestamp,
     this.unreadCount = 0,
+    this.isOnline = false,
   });
 }
 
@@ -32,6 +36,7 @@ class ChatListScreen extends StatelessWidget {
               'Emma heeft vandaag goed haar best gedaan met de borstcrawl!',
           timestamp: '14:32',
           unreadCount: 2,
+          isOnline: true,
         ),
         _ChatPreview(
           id: 'chat_002',
@@ -40,6 +45,7 @@ class ChatListScreen extends StatelessWidget {
           lastMessage: 'De les van vrijdag is verplaatst naar 10:30.',
           timestamp: 'Gisteren',
           unreadCount: 0,
+          isOnline: false,
         ),
         _ChatPreview(
           id: 'chat_003',
@@ -49,6 +55,7 @@ class ChatListScreen extends StatelessWidget {
               'Noah maakt goede voortgang met watergewenning. Ik stuur de oefeninstructies mee.',
           timestamp: 'Ma',
           unreadCount: 1,
+          isOnline: true,
         ),
         _ChatPreview(
           id: 'chat_004',
@@ -57,6 +64,7 @@ class ChatListScreen extends StatelessWidget {
           lastMessage: 'Bedankt voor uw bericht. We zien u volgende week!',
           timestamp: '22 mrt',
           unreadCount: 0,
+          isOnline: false,
         ),
       ];
 
@@ -69,6 +77,14 @@ class ChatListScreen extends StatelessWidget {
         backgroundColor: AppColors.white,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, color: AppColors.textSecondary),
+            onPressed: () {
+              // TODO: Implement search
+            },
+          ),
+        ],
       ),
       body: _conversations.isEmpty
           ? _buildEmptyState()
@@ -80,7 +96,15 @@ class ChatListScreen extends StatelessWidget {
                 child: Divider(height: 1, color: AppColors.divider),
               ),
               itemBuilder: (context, index) {
-                return _ChatListTile(conversation: _conversations[index]);
+                return _ChatListTile(
+                  conversation: _conversations[index],
+                  onTap: () {
+                    context.pushNamed(
+                      RouteNames.chat,
+                      pathParameters: {'chatId': _conversations[index].id},
+                    );
+                  },
+                );
               },
             ),
     );
@@ -117,17 +141,16 @@ class ChatListScreen extends StatelessWidget {
 
 class _ChatListTile extends StatelessWidget {
   final _ChatPreview conversation;
+  final VoidCallback onTap;
 
-  const _ChatListTile({required this.conversation});
+  const _ChatListTile({required this.conversation, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final hasUnread = conversation.unreadCount > 0;
 
     return InkWell(
-      onTap: () {
-        // TODO: Navigate to chat detail
-      },
+      onTap: onTap,
       child: Container(
         color: AppColors.white,
         padding: const EdgeInsets.symmetric(
@@ -136,18 +159,36 @@ class _ChatListTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Instructor avatar
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.primaryBlue,
-              child: Text(
-                conversation.instructorInitials,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+            // Instructor avatar with online indicator
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: AppColors.primaryBlue,
+                  child: Text(
+                    conversation.instructorInitials,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
+                if (conversation.isOnline)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: AppColors.success,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.white, width: 2),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 12),
             // Message content

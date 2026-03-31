@@ -2,11 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'route_names.dart';
+// Auth
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/registration_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/auth/presentation/screens/terms_conditions_screen.dart';
+// Instructor
+import '../../features/instructor/presentation/screens/instructor_home_screen.dart';
+// Home
 import '../../features/home/presentation/screens/home_screen.dart';
+// Booking
 import '../../features/booking/presentation/screens/booking_type_screen.dart';
+import '../../features/booking/presentation/screens/book_lesson_screen.dart';
+import '../../features/booking/presentation/screens/fixed_slot_calendar_screen.dart';
+import '../../features/booking/presentation/screens/booking_summary_screen.dart';
+import '../../features/booking/presentation/screens/booking_success_screen.dart';
+import '../../features/booking/presentation/screens/my_reservations_screen.dart';
+import '../../features/booking/presentation/screens/reservation_detail_screen.dart';
+// Punch Cards
+import '../../features/punch_card/presentation/screens/my_punch_cards_screen.dart';
+import '../../features/punch_card/presentation/screens/punch_card_detail_screen.dart';
+import '../../features/punch_card/presentation/screens/punch_card_order_screen.dart';
+import '../../features/punch_card/presentation/screens/all_punch_card_prices_screen.dart';
+import '../../features/punch_card/presentation/screens/confirm_order_screen.dart';
+// Progress
+import '../../features/student_progress/presentation/screens/child_progress_screen.dart';
+// Profile
+import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
+import '../../features/profile/presentation/screens/add_edit_child_screen.dart';
+import '../../features/profile/presentation/screens/emergency_contact_screen.dart';
+// Payment
+import '../../features/payment/presentation/screens/payment_method_screen.dart';
+import '../../features/payment/presentation/screens/payment_history_screen.dart';
+import '../../features/payment/presentation/screens/stripe_payment_screen.dart';
+import '../../features/payment/presentation/screens/invoice_receipt_screen.dart';
+// Chat
+import '../../features/chat/presentation/screens/chat_list_screen.dart';
+import '../../features/chat/presentation/screens/chat_screen.dart';
+// FAQ
+import '../../features/faq/presentation/screens/faq_screen.dart';
+import '../../features/faq/presentation/screens/faq_detail_screen.dart';
+// Notifications
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -28,6 +70,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: RouteNames.login,
         builder: (context, state) => const LoginScreen(),
       ),
+      GoRoute(
+        path: '/register',
+        name: RouteNames.registration,
+        builder: (context, state) => const RegistrationScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: RouteNames.forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        name: RouteNames.resetPassword,
+        builder: (context, state) => const ResetPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/terms-conditions',
+        name: RouteNames.termsConditions,
+        builder: (context, state) => const TermsConditionsScreen(),
+      ),
 
       // === MAIN APP (with bottom nav shell) ===
       ShellRoute(
@@ -48,33 +110,133 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/cards',
             name: RouteNames.myPunchCards,
-            builder: (context, state) => const Scaffold(
-              body: Center(child: Text('Mijn Knipkaarten')),
-            ),
+            builder: (context, state) => const MyPunchCardsScreen(),
           ),
           GoRoute(
             path: '/profile',
             name: RouteNames.profile,
-            builder: (context, state) => const Scaffold(
-              body: Center(child: Text('Profiel')),
-            ),
+            builder: (context, state) => const ProfileScreen(),
           ),
         ],
       ),
 
       // === BOOKING FLOW ===
       GoRoute(
+        path: '/booking/lesson-type',
+        builder: (context, state) => const BookLessonScreen(),
+      ),
+      GoRoute(
+        path: '/booking/fixed-slot',
+        builder: (context, state) => const FixedSlotCalendarScreen(),
+      ),
+      GoRoute(
+        path: '/booking/extra-lesson',
+        builder: (context, state) => const FixedSlotCalendarScreen(), // reuses calendar
+      ),
+      GoRoute(
+        path: '/booking/location',
+        builder: (context, state) => const BookLessonScreen(), // placeholder
+      ),
+      GoRoute(
+        path: '/booking/holiday',
+        builder: (context, state) => const BookLessonScreen(), // placeholder
+      ),
+      GoRoute(
         path: '/booking/summary',
         name: RouteNames.bookingSummary,
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Boekingsoverzicht')),
-        ),
+        builder: (context, state) => const BookingSummaryScreen(),
       ),
       GoRoute(
         path: '/booking/success',
         name: RouteNames.bookingSuccess,
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Boeking Bevestigd!')),
+        builder: (context, state) => const BookingSuccessScreen(),
+      ),
+
+      // === RESERVATIONS ===
+      GoRoute(
+        path: '/reservations',
+        name: RouteNames.myReservations,
+        builder: (context, state) => const MyReservationsScreen(),
+      ),
+      GoRoute(
+        path: '/reservation/:id',
+        name: RouteNames.reservationDetail,
+        builder: (context, state) => const ReservationDetailScreen(),
+      ),
+
+      // === PUNCH CARDS ===
+      GoRoute(
+        path: '/punch-card/:id',
+        name: RouteNames.punchCardDetail,
+        builder: (context, state) => const PunchCardDetailScreen(),
+      ),
+      GoRoute(
+        path: '/punch-card-order',
+        name: RouteNames.purchasePunchCard,
+        builder: (context, state) => const PunchCardOrderScreen(),
+      ),
+      GoRoute(
+        path: '/all-punch-card-prices',
+        builder: (context, state) => const AllPunchCardPricesScreen(),
+      ),
+      GoRoute(
+        path: '/confirm-order',
+        builder: (context, state) => const ConfirmOrderScreen(),
+      ),
+
+      // === CHILD PROGRESS ===
+      GoRoute(
+        path: '/child-progress',
+        name: RouteNames.childProgress,
+        builder: (context, state) => const ChildProgressScreen(),
+      ),
+
+      // === PAYMENT ===
+      GoRoute(
+        path: '/payment-method',
+        name: RouteNames.paymentMethod,
+        builder: (context, state) => const PaymentMethodScreen(),
+      ),
+      GoRoute(
+        path: '/payment-history',
+        name: RouteNames.paymentHistory,
+        builder: (context, state) => const PaymentHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/stripe-payment',
+        name: RouteNames.stripePayment,
+        builder: (context, state) => const StripePaymentScreen(),
+      ),
+      GoRoute(
+        path: '/invoice/:id',
+        builder: (context, state) => const InvoiceReceiptScreen(),
+      ),
+
+      // === CHAT ===
+      GoRoute(
+        path: '/chat-list',
+        name: RouteNames.chatList,
+        builder: (context, state) => const ChatListScreen(),
+      ),
+      GoRoute(
+        path: '/chat/:id',
+        name: RouteNames.chat,
+        builder: (context, state) => ChatScreen(
+          chatId: state.pathParameters['id'] ?? '1',
+        ),
+      ),
+
+      // === FAQ ===
+      GoRoute(
+        path: '/faq',
+        name: RouteNames.faq,
+        builder: (context, state) => const FaqScreen(),
+      ),
+      GoRoute(
+        path: '/faq/:id',
+        name: RouteNames.faqDetail,
+        builder: (context, state) => FaqDetailScreen(
+          faqId: state.pathParameters['id'] ?? '1',
         ),
       ),
 
@@ -82,9 +244,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications',
         name: RouteNames.notifications,
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Meldingen')),
-        ),
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/notification-settings',
+        name: RouteNames.notificationSettings,
+        builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+
+      // === INSTRUCTOR ===
+      GoRoute(
+        path: '/instructor/home',
+        name: RouteNames.instructorHome,
+        builder: (context, state) => const InstructorHomeScreen(),
+      ),
+
+      // === PROFILE DETAILS ===
+      GoRoute(
+        path: '/edit-profile',
+        name: RouteNames.editProfile,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/add-child',
+        builder: (context, state) => const AddEditChildScreen(),
+      ),
+      GoRoute(
+        path: '/emergency-contacts',
+        builder: (context, state) => const EmergencyContactScreen(),
       ),
     ],
   );
