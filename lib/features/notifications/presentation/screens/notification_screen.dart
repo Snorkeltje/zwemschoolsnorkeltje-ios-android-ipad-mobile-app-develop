@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/router/route_names.dart';
 
 enum NotificationType { booking, payment, progress, chat, reminder }
 
@@ -233,7 +235,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
       color: item.isRead ? AppColors.white : AppColors.primaryBlue.withValues(alpha: 0.03),
       child: InkWell(
         onTap: () {
-          // TODO: Navigate based on notification type
+          switch (item.type) {
+            case NotificationType.booking:
+              context.pushNamed(RouteNames.myReservations);
+              break;
+            case NotificationType.payment:
+              context.push('/payment-history');
+              break;
+            case NotificationType.progress:
+              context.pushNamed(RouteNames.childProgress);
+              break;
+            case NotificationType.chat:
+              context.pushNamed(RouteNames.chatList);
+              break;
+            case NotificationType.reminder:
+              context.pushNamed(RouteNames.myReservations);
+              break;
+          }
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(

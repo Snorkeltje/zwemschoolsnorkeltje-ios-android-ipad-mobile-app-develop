@@ -246,7 +246,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
               const Spacer(),
               GestureDetector(
                 onTap: () {
-                  // TODO: Make phone call
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Bellen naar ${contact.phone}...')));
                 },
                 child: Container(
                   padding:
@@ -359,7 +359,9 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  // TODO: Save contact
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Contact opgeslagen'), backgroundColor: Color(0xFF27AE60)),
+                  );
                 },
                 child: Text(
                   existingContact != null ? 'Opslaan' : 'Toevoegen',

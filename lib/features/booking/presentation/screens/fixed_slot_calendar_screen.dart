@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_dimensions.dart';
-import '../../data/models/time_slot_model.dart';
+import '../../../../core/router/route_names.dart';
 
 class FixedSlotCalendarScreen extends StatefulWidget {
   const FixedSlotCalendarScreen({super.key});
@@ -15,198 +13,119 @@ class FixedSlotCalendarScreen extends StatefulWidget {
 }
 
 class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-  String? _selectedSlotId;
+  // Current displayed month
+  int _displayMonth = 4; // April
+  int _displayYear = 2026;
 
-  // Mock available dates (within 14-day window)
-  late final Set<DateTime> _availableDates;
-  late final Set<DateTime> _fullDates;
+  // Selected day (null = none)
+  int? _selectedDay;
 
-  // Mock time slots for selected date
-  final Map<String, List<TimeSlotModel>> _slotsByDate = {};
+  // Mock data: available days (green), full days (red)
+  final Set<int> _availableDays = {7, 14, 21, 28}; // Mondays in April 2026
+  final Set<int> _fullDays = {8, 15, 22};
 
-  @override
-  void initState() {
-    super.initState();
-    _initMockData();
+  static const List<String> _dayHeaders = [
+    'Ma',
+    'Di',
+    'Wo',
+    'Do',
+    'Vr',
+    'Za',
+    'Zo'
+  ];
+
+  static const List<String> _monthNames = [
+    'januari',
+    'februari',
+    'maart',
+    'april',
+    'mei',
+    'juni',
+    'juli',
+    'augustus',
+    'september',
+    'oktober',
+    'november',
+    'december',
+  ];
+
+  static const List<String> _dayNames = [
+    'Maandag',
+    'Dinsdag',
+    'Woensdag',
+    'Donderdag',
+    'Vrijdag',
+    'Zaterdag',
+    'Zondag',
+  ];
+
+  String get _monthLabel =>
+      '${_monthNames[_displayMonth - 1]} $_displayYear';
+
+  void _prevMonth() {
+    setState(() {
+      if (_displayMonth == 1) {
+        _displayMonth = 12;
+        _displayYear--;
+      } else {
+        _displayMonth--;
+      }
+      _selectedDay = null;
+    });
   }
 
-  void _initMockData() {
-    final now = DateTime.now();
-
-    _availableDates = {
-      now.add(const Duration(days: 2)),
-      now.add(const Duration(days: 5)),
-      now.add(const Duration(days: 7)),
-      now.add(const Duration(days: 9)),
-      now.add(const Duration(days: 12)),
-    }.map((d) => DateTime(d.year, d.month, d.day)).toSet();
-
-    _fullDates = {
-      now.add(const Duration(days: 3)),
-      now.add(const Duration(days: 6)),
-    }.map((d) => DateTime(d.year, d.month, d.day)).toSet();
-
-    // Slots for some dates
-    for (final date in _availableDates) {
-      final key = DateFormat('yyyy-MM-dd').format(date);
-      _slotsByDate[key] = [
-        TimeSlotModel(
-          id: 'ts_${key}_1',
-          startTime: '09:00',
-          endTime: '09:30',
-          instructorName: 'Anna de Vries',
-          availableSpots: 1,
-          maxSpots: 1,
-          isAvailable: true,
-        ),
-        TimeSlotModel(
-          id: 'ts_${key}_2',
-          startTime: '10:00',
-          endTime: '10:30',
-          instructorName: 'Jan Bakker',
-          availableSpots: 1,
-          maxSpots: 1,
-          isAvailable: true,
-        ),
-        TimeSlotModel(
-          id: 'ts_${key}_3',
-          startTime: '14:00',
-          endTime: '14:30',
-          instructorName: 'Lisa Jansen',
-          availableSpots: 0,
-          maxSpots: 1,
-          isAvailable: false,
-        ),
-        TimeSlotModel(
-          id: 'ts_${key}_4',
-          startTime: '15:00',
-          endTime: '15:30',
-          instructorName: 'Anna de Vries',
-          availableSpots: 1,
-          maxSpots: 1,
-          isAvailable: true,
-        ),
-      ];
-    }
+  void _nextMonth() {
+    setState(() {
+      if (_displayMonth == 12) {
+        _displayMonth = 1;
+        _displayYear++;
+      } else {
+        _displayMonth++;
+      }
+      _selectedDay = null;
+    });
   }
 
-  List<TimeSlotModel> _getSlotsForDay(DateTime day) {
-    final key = DateFormat('yyyy-MM-dd').format(day);
-    return _slotsByDate[key] ?? [];
+  /// Returns the weekday index (0=Mon, 6=Sun) for the 1st of the displayed month.
+  int get _firstWeekday {
+    final d = DateTime(_displayYear, _displayMonth, 1);
+    return d.weekday - 1; // DateTime: 1=Mon => 0
   }
 
-  bool _isWithin14Days(DateTime day) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final diff = day.difference(today).inDays;
-    return diff >= 0 && diff <= 14;
+  int get _daysInMonth {
+    return DateTime(_displayYear, _displayMonth + 1, 0).day;
+  }
+
+  String _selectedDateLabel() {
+    if (_selectedDay == null) return '';
+    final d = DateTime(_displayYear, _displayMonth, _selectedDay!);
+    final dayName = _dayNames[d.weekday - 1];
+    return '$dayName, $_selectedDay ${_monthNames[_displayMonth - 1]} $_displayYear';
   }
 
   @override
   Widget build(BuildContext context) {
-    final slots =
-        _selectedDay != null ? _getSlotsForDay(_selectedDay!) : <TimeSlotModel>[];
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(AppStrings.fixedSlot),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-      ),
       body: Column(
         children: [
-          // Fixed slot info banner
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.all(AppDimensions.screenPadding),
-            padding: const EdgeInsets.all(AppDimensions.cardPadding),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primaryBlue, Color(0xFF0480E8)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Uw vaste tijdstip:',
-                  style: TextStyle(fontSize: 13, color: Colors.white70),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Maandag om 15:00',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'De Bilt',
-                  style: TextStyle(fontSize: 14, color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-
-          // 14-day rule indicator
-          _build14DayIndicator(),
-
-          // Calendar
+          _buildGradientHeader(context),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  _buildCalendar(),
-                  const SizedBox(height: AppDimensions.md),
-                  // Legend
+                  // Overlapping fixed slot info card
+                  Transform.translate(
+                    offset: const Offset(0, -14),
+                    child: _buildFixedSlotInfoCard(),
+                  ),
+                  // Calendar card
+                  _buildCalendarCard(),
+                  const SizedBox(height: 16),
                   _buildLegend(),
-                  const SizedBox(height: AppDimensions.md),
-                  // Time slots
-                  if (_selectedDay != null) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimensions.screenPadding,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Beschikbare tijden voor ${DateFormat('EEEE d MMMM', 'nl').format(_selectedDay!)}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: AppDimensions.md),
-                          if (slots.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: Center(
-                                child: Text(
-                                  'Geen beschikbare tijden op deze datum.',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            ...slots.map((slot) => _buildSlotCard(slot)),
-                        ],
-                      ),
-                    ),
-                  ],
+                  const SizedBox(height: 16),
+                  // Selected date details
+                  if (_selectedDay != null) _buildSelectedDateDetails(),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -214,63 +133,137 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _selectedSlotId != null
+      bottomNavigationBar: _selectedDay != null
           ? SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(AppDimensions.screenPadding),
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Navigate to booking summary
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: AppColors.textWhite,
-                    minimumSize:
-                        const Size(double.infinity, AppDimensions.buttonHeight),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusMd),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: const Text(
-                    'Boek deze les',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                child: _buildBookButton(context),
               ),
             )
           : null,
     );
   }
 
-  Widget _build14DayIndicator() {
-    return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppDimensions.screenPadding),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.info.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-          border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+  Widget _buildGradientHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        child: const Row(
-          children: [
-            Icon(Icons.info_outline, size: 18, color: AppColors.info),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'U kunt tot 14 dagen vooruit boeken op uw vaste tijdstip.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Back button
+              GestureDetector(
+                onTap: () => context.pop(),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
               ),
+              const SizedBox(height: 16),
+              const Text(
+                'Vast Tijdstip',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Selecteer een datum',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white.withOpacity(0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFixedSlotInfoCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Gradient clock icon
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.access_time,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Maandag 15:00',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'De Bilt Zwembad \u00B7 Wekelijks',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -278,279 +271,360 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
     );
   }
 
-  Widget _buildCalendar() {
-    return Container(
-      margin: const EdgeInsets.all(AppDimensions.screenPadding),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: AppDimensions.shadowBlur,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TableCalendar(
-        firstDay: DateTime.now(),
-        lastDay: DateTime.now().add(const Duration(days: 60)),
-        focusedDay: _focusedDay,
-        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-        onDaySelected: (selectedDay, focusedDay) {
-          if (!_isWithin14Days(selectedDay)) return;
-          setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
-            _selectedSlotId = null;
-          });
-        },
-        onPageChanged: (focusedDay) {
-          _focusedDay = focusedDay;
-        },
-        calendarStyle: CalendarStyle(
-          outsideDaysVisible: false,
-          todayDecoration: BoxDecoration(
-            border: Border.all(color: AppColors.primaryBlue, width: 2),
-            shape: BoxShape.circle,
-          ),
-          todayTextStyle: const TextStyle(
-            color: AppColors.primaryBlue,
-            fontWeight: FontWeight.w600,
-          ),
-          selectedDecoration: const BoxDecoration(
-            color: AppColors.slotSelected,
-            shape: BoxShape.circle,
-          ),
-          defaultTextStyle: const TextStyle(color: AppColors.textPrimary),
-          weekendTextStyle: const TextStyle(color: AppColors.textPrimary),
-          disabledTextStyle: const TextStyle(color: AppColors.slotPast),
+  Widget _buildCalendarCard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
-        headerStyle: const HeaderStyle(
-          formatButtonVisible: false,
-          titleCentered: true,
-          titleTextStyle: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-          leftChevronIcon:
-              Icon(Icons.chevron_left, color: AppColors.primaryBlue),
-          rightChevronIcon:
-              Icon(Icons.chevron_right, color: AppColors.primaryBlue),
+        child: Column(
+          children: [
+            // Month header with gradient
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF0365C4), Color(0xFF034DA9)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: _prevMonth,
+                    child: const Icon(Icons.chevron_left,
+                        color: Colors.white, size: 28),
+                  ),
+                  Text(
+                    _monthLabel[0].toUpperCase() + _monthLabel.substring(1),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _nextMonth,
+                    child: const Icon(Icons.chevron_right,
+                        color: Colors.white, size: 28),
+                  ),
+                ],
+              ),
+            ),
+            // Day of week headers
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 14, 8, 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: _dayHeaders
+                    .map((d) => SizedBox(
+                          width: 38,
+                          child: Center(
+                            child: Text(
+                              d,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
+            // Calendar grid
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+              child: _buildCalendarGrid(),
+            ),
+          ],
         ),
-        daysOfWeekStyle: const DaysOfWeekStyle(
-          weekdayStyle: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary,
-          ),
-          weekendStyle: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        enabledDayPredicate: (day) => _isWithin14Days(day),
-        calendarBuilders: CalendarBuilders(
-          defaultBuilder: (context, day, focusedDay) {
-            final normalized = DateTime(day.year, day.month, day.day);
-            if (_availableDates.contains(normalized)) {
-              return _buildDayCell(
-                day.day.toString(),
-                AppColors.slotAvailable,
-                Colors.white,
-              );
-            }
-            if (_fullDates.contains(normalized)) {
-              return _buildDayCell(
-                day.day.toString(),
-                AppColors.slotFull,
-                Colors.white,
-              );
-            }
-            return null;
-          },
-        ),
-        locale: 'nl_NL',
-        startingDayOfWeek: StartingDayOfWeek.monday,
       ),
     );
   }
 
-  Widget _buildDayCell(String text, Color bgColor, Color textColor) {
-    return Center(
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: bgColor,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
+  Widget _buildCalendarGrid() {
+    final totalCells = _firstWeekday + _daysInMonth;
+    final rows = (totalCells / 7).ceil();
+
+    return Column(
+      children: List.generate(rows, (row) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(7, (col) {
+              final index = row * 7 + col;
+              final day = index - _firstWeekday + 1;
+
+              if (day < 1 || day > _daysInMonth) {
+                return const SizedBox(width: 38, height: 38);
+              }
+
+              final isSelected = _selectedDay == day;
+              final isAvailable = _availableDays.contains(day);
+              final isFull = _fullDays.contains(day);
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedDay = day;
+                  });
+                },
+                child: _buildDayCell(day, isSelected, isAvailable, isFull),
+              );
+            }),
           ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildDayCell(int day, bool isSelected, bool isAvailable, bool isFull) {
+    BoxDecoration decoration;
+    TextStyle textStyle;
+
+    if (isSelected) {
+      decoration = BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-      ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0365C4).withOpacity(0.35),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      );
+      textStyle = const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Colors.white,
+      );
+    } else if (isAvailable) {
+      decoration = BoxDecoration(
+        color: const Color(0xFFE8F8F0),
+        borderRadius: BorderRadius.circular(12),
+      );
+      textStyle = const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF27AE60),
+      );
+    } else if (isFull) {
+      decoration = BoxDecoration(
+        color: const Color(0xFFFDE8E8),
+        borderRadius: BorderRadius.circular(12),
+      );
+      textStyle = const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFFE74C3C),
+      );
+    } else {
+      decoration = BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+      );
+      textStyle = const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      );
+    }
+
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: decoration,
+      alignment: Alignment.center,
+      child: Text(day.toString(), style: textStyle),
     );
   }
 
   Widget _buildLegend() {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppDimensions.screenPadding),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _legendItem(AppColors.slotAvailable, 'Beschikbaar'),
+          _legendItem(const Color(0xFFE8F8F0), const Color(0xFF27AE60), 'Beschikbaar'),
           const SizedBox(width: 20),
-          _legendItem(AppColors.slotFull, 'Vol'),
+          _legendItem(null, const Color(0xFF0365C4), 'Geselecteerd', isGradient: true),
           const SizedBox(width: 20),
-          _legendItem(AppColors.slotSelected, 'Geselecteerd'),
+          _legendItem(const Color(0xFFFDE8E8), const Color(0xFFE74C3C), 'Vol'),
         ],
       ),
     );
   }
 
-  Widget _legendItem(Color color, String label) {
+  Widget _legendItem(Color? bgColor, Color textColor, String label,
+      {bool isGradient = false}) {
     return Row(
       children: [
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: isGradient ? null : bgColor ?? textColor,
+            gradient: isGradient
+                ? const LinearGradient(
+                    colors: [Color(0xFF0365C4), Color(0xFF00C1FF)])
+                : null,
+            borderRadius: BorderRadius.circular(3),
+          ),
         ),
         const SizedBox(width: 6),
         Text(
           label,
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSelectedDateDetails() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Date title with blue dot
+            Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF0365C4),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  _selectedDateLabel(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Detail rows
+            _buildDetailRow(
+              Icons.access_time,
+              const Color(0xFF0365C4),
+              '15:00 \u2013 15:30 (30 min)',
+            ),
+            const SizedBox(height: 12),
+            _buildDetailRow(
+              Icons.location_on_outlined,
+              const Color(0xFFFF5C00),
+              'De Bilt Zwembad',
+            ),
+            const SizedBox(height: 12),
+            _buildDetailRow(
+              Icons.person_outline,
+              const Color(0xFF27AE60),
+              'Jan de Vries',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, Color color, String text) {
+    return Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: color),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          text,
           style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
+            fontSize: 14,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSlotCard(TimeSlotModel slot) {
-    final isSelected = _selectedSlotId == slot.id;
-    final isAvailable = slot.isAvailable;
-
-    Color borderColor;
-    Color bgColor;
-    if (isSelected) {
-      borderColor = AppColors.slotSelected;
-      bgColor = AppColors.slotSelected.withValues(alpha: 0.05);
-    } else if (isAvailable) {
-      borderColor = AppColors.slotAvailable;
-      bgColor = AppColors.white;
-    } else {
-      borderColor = AppColors.slotFull;
-      bgColor = AppColors.slotFull.withValues(alpha: 0.03);
-    }
-
+  Widget _buildBookButton(BuildContext context) {
     return GestureDetector(
-      onTap: isAvailable
-          ? () {
-              setState(() {
-                _selectedSlotId = isSelected ? null : slot.id;
-              });
-            }
-          : null,
+      onTap: () {
+        context.pushNamed(RouteNames.bookingSummary);
+      },
       child: Container(
-        margin: const EdgeInsets.only(bottom: AppDimensions.sm),
-        padding: const EdgeInsets.all(AppDimensions.cardPadding),
+        width: double.infinity,
+        height: 56,
         decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 2 : 1,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
-        ),
-        child: Row(
-          children: [
-            // Time
-            Container(
-              width: 64,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-              decoration: BoxDecoration(
-                color: isAvailable
-                    ? AppColors.slotAvailable.withValues(alpha: 0.1)
-                    : AppColors.slotFull.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    slot.startTime,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: isAvailable
-                          ? AppColors.slotAvailable
-                          : AppColors.slotFull,
-                    ),
-                  ),
-                  Text(
-                    slot.endTime,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isAvailable
-                          ? AppColors.slotAvailable
-                          : AppColors.slotFull,
-                    ),
-                  ),
-                ],
-              ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0365C4).withOpacity(0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            const SizedBox(width: AppDimensions.md),
-            // Details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    slot.instructorName,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    isAvailable ? 'Beschikbaar' : 'Vol',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isAvailable
-                          ? AppColors.slotAvailable
-                          : AppColors.slotFull,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Selection indicator
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: AppColors.slotSelected,
-                size: 24,
-              )
-            else if (!isAvailable)
-              const Icon(
-                Icons.block,
-                color: AppColors.slotFull,
-                size: 20,
-              ),
           ],
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Deze les boeken \u2192',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
       ),
     );

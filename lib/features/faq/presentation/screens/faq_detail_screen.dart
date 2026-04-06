@@ -172,7 +172,7 @@ U ontvangt een bevestiging per e-mail en een push-notificatie. De les verschijnt
                         label: 'Nee',
                         color: AppColors.error,
                         onTap: () {
-                          // TODO: Show feedback form
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bedankt voor uw feedback!'), backgroundColor: Color(0xFF27AE60)));
                         },
                       ),
                     ],
@@ -204,7 +204,7 @@ U ontvangt een bevestiging per e-mail en een push-notificatie. De les verschijnt
                       padding: const EdgeInsets.only(bottom: 8),
                       child: InkWell(
                         onTap: () {
-                          // TODO: Navigate to related FAQ
+                          Navigator.pop(context);
                         },
                         child: Container(
                           width: double.infinity,

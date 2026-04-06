@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 
@@ -167,7 +168,7 @@ class WaitlistInvitationScreen extends StatelessWidget {
             // Contact support
             TextButton(
               onPressed: () {
-                // TODO: Navigate to chat/contact
+                context.push('/chat-list');
               },
               child: const Text(
                 'Heeft u vragen? Neem contact op',

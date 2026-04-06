@@ -1,556 +1,466 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_dimensions.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/route_names.dart';
 
-class _PunchCardOrderOption {
-  final String lessonType;
-  final int lessons;
-  final double price;
-  final double pricePerLesson;
-  final String description;
-  final bool isSpecial;
-
-  const _PunchCardOrderOption({
-    required this.lessonType,
-    required this.lessons,
-    required this.price,
-    required this.pricePerLesson,
-    required this.description,
-    this.isSpecial = false,
-  });
+class _Option {
+  final int count;
+  final int price;
+  final int perLesson;
+  final String? savings;
+  const _Option(this.count, this.price, this.perLesson, [this.savings]);
 }
 
 class PunchCardOrderScreen extends StatefulWidget {
   const PunchCardOrderScreen({super.key});
-
   @override
   State<PunchCardOrderScreen> createState() => _PunchCardOrderScreenState();
 }
 
 class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
-  int _selectedTabIndex = 0;
-  String? _selectedOptionKey;
+  String _cardType = '1-op-1';
+  int _selected = 0;
 
-  final List<_PunchCardOrderOption> _oneOnOneOptions = const [
-    _PunchCardOrderOption(
-      lessonType: '1-op-1',
-      lessons: 10,
-      price: 305,
-      pricePerLesson: 30.50,
-      description: 'Standaard knipkaart',
-    ),
-    _PunchCardOrderOption(
-      lessonType: '1-op-1',
-      lessons: 20,
-      price: 590,
-      pricePerLesson: 29.50,
-      description: 'Voordelig pakket',
-    ),
-    _PunchCardOrderOption(
-      lessonType: '1-op-1',
-      lessons: 30,
-      price: 870,
-      pricePerLesson: 29.00,
-      description: 'Beste waarde',
-    ),
-  ];
-
-  final List<_PunchCardOrderOption> _oneOnTwoOptions = const [
-    _PunchCardOrderOption(
-      lessonType: '1-op-2',
-      lessons: 10,
-      price: 230,
-      pricePerLesson: 23.00,
-      description: 'Standaard knipkaart',
-    ),
-    _PunchCardOrderOption(
-      lessonType: '1-op-2',
-      lessons: 20,
-      price: 440,
-      pricePerLesson: 22.00,
-      description: 'Voordelig pakket',
-    ),
-    _PunchCardOrderOption(
-      lessonType: '1-op-2',
-      lessons: 30,
-      price: 640,
-      pricePerLesson: 21.33,
-      description: 'Beste waarde',
-    ),
-  ];
-
-  final List<_PunchCardOrderOption> _specialOptions = const [
-    _PunchCardOrderOption(
-      lessonType: 'Vakantie',
-      lessons: 5,
-      price: 140,
-      pricePerLesson: 28.00,
-      description: 'Vakantie zwemles pakket',
-      isSpecial: true,
-    ),
-    _PunchCardOrderOption(
-      lessonType: 'Proef',
-      lessons: 3,
-      price: 99,
-      pricePerLesson: 33.00,
-      description: 'Proefles pakket - ideaal om te starten',
-      isSpecial: true,
-    ),
-  ];
-
-  List<_PunchCardOrderOption> get _currentOptions {
-    switch (_selectedTabIndex) {
-      case 0:
-        return _oneOnOneOptions;
-      case 1:
-        return _oneOnTwoOptions;
-      case 2:
-        return _specialOptions;
-      default:
-        return _oneOnOneOptions;
-    }
-  }
-
-  _PunchCardOrderOption? get _selectedOption {
-    if (_selectedOptionKey == null) return null;
-    final idx = int.tryParse(_selectedOptionKey!);
-    if (idx != null && idx < _currentOptions.length) {
-      return _currentOptions[idx];
-    }
-    return null;
-  }
+  Map<String, List<_Option>> get _options => {
+    '1-op-1': const [_Option(10, 380, 38), _Option(5, 190, 38), _Option(3, 114, 38)],
+    '1-op-2': const [_Option(10, 270, 27, '29%'), _Option(5, 135, 27, '29%'), _Option(3, 81, 27, '29%')],
+  };
 
   @override
   Widget build(BuildContext context) {
+    final opts = _options[_cardType]!;
+    final current = opts[_selected];
+    final included = [
+      '${current.count} zwemlessen ($_cardType)',
+      'Geldig 365 dagen na aankoop',
+      'Flexibel boeken — elk moment, elke locatie',
+      'Voortgangsrapportage inbegrepen',
+      'Gratis annuleren tot 24 uur van tevoren',
+    ];
+
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Knipkaart bestellen'),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-      ),
-      body: Column(
+      backgroundColor: const Color(0xFFF4F7FC),
+      body: Stack(
         children: [
-          // Tab selector
-          Container(
-            color: AppColors.white,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.screenPadding,
-              vertical: AppDimensions.sm,
-            ),
-            child: Row(
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 120),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTab('1-op-1', 0),
-                const SizedBox(width: AppDimensions.sm),
-                _buildTab('1-op-2', 1),
-                const SizedBox(width: AppDimensions.sm),
-                _buildTab('Speciaal', 2),
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: AppColors.border),
-
-          // Options list
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppDimensions.screenPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Section header
-                  _buildSectionInfo(),
-                  const SizedBox(height: AppDimensions.md),
-
-                  // Option cards
-                  ...List.generate(_currentOptions.length, (i) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: AppDimensions.md),
-                      child: _buildOptionCard(_currentOptions[i], i),
-                    );
-                  }),
-
-                  const SizedBox(height: AppDimensions.md),
-
-                  // Info box
-                  _buildInfoBox(),
-                ],
-              ),
-            ),
-          ),
-
-          // Bottom action bar
-          _buildBottomBar(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTab(String label, int index) {
-    final isSelected = _selectedTabIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedTabIndex = index;
-            _selectedOptionKey = null;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primaryBlue
-                : AppColors.primaryBlue.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : AppColors.primaryBlue,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionInfo() {
-    String title;
-    String subtitle;
-    IconData icon;
-    Color color;
-
-    switch (_selectedTabIndex) {
-      case 0:
-        title = '1-op-1 Zwemlessen';
-        subtitle = 'Priveles met uw kind en de instructeur';
-        icon = Icons.person;
-        color = AppColors.lessonExtra1on1;
-        break;
-      case 1:
-        title = '1-op-2 Zwemlessen';
-        subtitle = 'Gedeelde les met 2 kinderen';
-        icon = Icons.people;
-        color = AppColors.lessonExtra1on2;
-        break;
-      default:
-        title = 'Speciale knipkaarten';
-        subtitle = 'Vakantie en proefles pakketten';
-        icon = Icons.star;
-        color = AppColors.lessonHoliday;
-    }
-
-    return Row(
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-          ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOptionCard(_PunchCardOrderOption option, int index) {
-    final isSelected = _selectedOptionKey == index.toString();
-    final isBestValue = option.lessons >= 30 || option.description.contains('Beste');
-    Color accentColor;
-
-    switch (_selectedTabIndex) {
-      case 0:
-        accentColor = AppColors.lessonExtra1on1;
-        break;
-      case 1:
-        accentColor = AppColors.lessonExtra1on2;
-        break;
-      default:
-        accentColor = AppColors.lessonHoliday;
-    }
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedOptionKey = index.toString()),
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.cardPadding),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-          border: Border.all(
-            color: isSelected ? accentColor : AppColors.border,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: accentColor.withValues(alpha: 0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                // Hero header
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(32),
+                    bottomRight: Radius.circular(32),
                   ),
-                ]
-              : [
-                  BoxShadow(
-                    color: AppColors.shadow,
-                    blurRadius: AppDimensions.shadowBlur,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                '${option.lessons}',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: accentColor,
-                ),
-              ),
-            ),
-            const SizedBox(width: AppDimensions.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '${option.lessons} lessen',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(20, 58, 20, 40),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        stops: [0.0, 0.5, 1.0],
+                        colors: [Color(0xFF0365C4), Color(0xFF0D7FE8), Color(0xFF00C1FF)],
                       ),
-                      if (isBestValue) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'Beste waarde',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.success,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => context.pop(),
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                alignment: Alignment.center,
+                                child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
+                              ),
                             ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Bestel Knipkaart',
+                                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+                                Text('Kies uw ideale pakket',
+                                    style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // Toggle
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(child: _toggleBtn('1-op-1')),
+                              Expanded(child: _toggleBtn('1-op-2', showBadge: true)),
+                            ],
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ),
+
+                // Pricing cards
+                Transform.translate(
+                  offset: const Offset(0, -20),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: List.generate(opts.length, (i) {
+                        final opt = opts[i];
+                        final isSel = _selected == i;
+                        final isBest = i == 0;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selected = i),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isSel ? null : Colors.white,
+                                gradient: isSel
+                                    ? const LinearGradient(
+                                        begin: Alignment.topLeft, end: Alignment.bottomRight,
+                                        colors: [Color(0xFF0365C4), Color(0xFF0D7FE8)],
+                                      )
+                                    : null,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: isSel ? const Color(0xFF0365C4).withOpacity(0.25) : Colors.black.withOpacity(0.06),
+                                    blurRadius: isSel ? 32 : 16,
+                                    offset: Offset(0, isSel ? 12 : 4),
+                                  ),
+                                ],
+                              ),
+                              child: Stack(
+                                children: [
+                                  if (isBest)
+                                    Positioned(
+                                      top: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          gradient: isSel
+                                              ? null
+                                              : const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
+                                          color: isSel ? Colors.white.withOpacity(0.2) : null,
+                                          borderRadius: const BorderRadius.only(
+                                            bottomLeft: Radius.circular(14),
+                                          ),
+                                        ),
+                                        child: const Row(
+                                          children: [
+                                            Icon(Icons.star, color: Colors.white, size: 10),
+                                            SizedBox(width: 4),
+                                            Text('BESTE KEUZE',
+                                                style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 72,
+                                          height: 72,
+                                          decoration: BoxDecoration(
+                                            gradient: isSel
+                                                ? null
+                                                : LinearGradient(
+                                                    begin: Alignment.topLeft, end: Alignment.bottomRight,
+                                                    colors: _cardType == '1-op-1'
+                                                        ? [const Color(0xFFE8F0FE), const Color(0xFFF0F6FF)]
+                                                        : [const Color(0xFFFEF0E7), const Color(0xFFFFF8F0)],
+                                                  ),
+                                            color: isSel ? Colors.white.withOpacity(0.15) : null,
+                                            borderRadius: BorderRadius.circular(18),
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text('${opt.count}x',
+                                                  style: TextStyle(
+                                                    fontSize: 28,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isSel
+                                                        ? Colors.white
+                                                        : _cardType == '1-op-1'
+                                                            ? const Color(0xFF0365C4)
+                                                            : const Color(0xFFFF5C00),
+                                                  )),
+                                              Text('lessen',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: isSel ? Colors.white.withOpacity(0.7) : const Color(0xFF8E9BB3),
+                                                  )),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text('${opt.count}x $_cardType Zwemlessen',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isSel ? Colors.white : const Color(0xFF1A1A2E),
+                                                  )),
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                children: [
+                                                  Text('€${opt.price}',
+                                                      style: TextStyle(
+                                                        fontSize: 22,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: isSel ? Colors.white : const Color(0xFF0365C4),
+                                                      )),
+                                                  if (opt.savings != null) ...[
+                                                    const SizedBox(width: 8),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                      decoration: BoxDecoration(
+                                                        color: isSel ? const Color(0x4DFF5C00) : const Color(0xFFFEF0E7),
+                                                        borderRadius: BorderRadius.circular(999),
+                                                      ),
+                                                      child: Text('-${opt.savings}',
+                                                          style: TextStyle(
+                                                            fontSize: 10,
+                                                            fontWeight: FontWeight.w700,
+                                                            color: isSel ? const Color(0xFFFFB380) : const Color(0xFFFF5C00),
+                                                          )),
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text('€${opt.perLesson} per les · 365 dagen geldig',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: isSel ? Colors.white.withOpacity(0.6) : const Color(0xFF8E9BB3),
+                                                  )),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 28,
+                                          height: 28,
+                                          decoration: BoxDecoration(
+                                            color: isSel ? Colors.white : const Color(0xFFF0F4FA),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: isSel ? const Icon(Icons.check, color: Color(0xFF0365C4), size: 16) : null,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+
+                // Trust badges
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _TrustBadge(Icons.verified_user, 'Veilig betalen', Color(0xFF27AE60)),
+                        _TrustBadge(Icons.access_time, '365 dagen geldig', Color(0xFF0365C4)),
+                        _TrustBadge(Icons.credit_card, 'Direct starten', Color(0xFFFF5C00)),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // What's included
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Wat zit erin',
+                          style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 15, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                        ),
+                        child: Column(
+                          children: List.generate(included.length, (i) => Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              border: i > 0 ? const Border(top: BorderSide(color: Color(0xFFF0F4FA))) : null,
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: const BoxDecoration(color: Color(0xFFE8F8F0), shape: BoxShape.circle),
+                                  child: const Icon(Icons.check, color: Color(0xFF27AE60), size: 12),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(included[i], style: const TextStyle(color: Color(0xFF4A5568), fontSize: 13)),
+                              ],
+                            ),
+                          )),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '\u20AC${option.pricePerLesson.toStringAsFixed(2)} per les',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
+                ),
+              ],
+            ),
+          ),
+
+          // Sticky bottom CTA
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 16,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 24, offset: const Offset(0, -4))],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Totaal',
+                            style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 10)),
+                        Text('€${current.price}',
+                            style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 26, fontWeight: FontWeight.w700)),
+                        Text('${current.count}x $_cardType',
+                            style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 10)),
+                      ],
                     ),
                   ),
-                  if (option.isSpecial) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      option.description,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textLight,
+                  GestureDetector(
+                    onTap: () => context.pushNamed(RouteNames.confirmOrder),
+                    child: Container(
+                      height: 52,
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.35), blurRadius: 24, offset: const Offset(0, 8))],
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.credit_card, color: Colors.white, size: 18),
+                          SizedBox(width: 8),
+                          Text('Bestellen',
+                              style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '\u20AC${option.price.toStringAsFixed(0)}',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: isSelected ? accentColor : AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              isSelected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_off,
-              color: isSelected ? accentColor : AppColors.textLight,
-              size: 22,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoBox() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.cardPadding),
-      decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        border: Border.all(
-          color: AppColors.info.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.info_outline, color: AppColors.info, size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Hoe werkt een knipkaart?',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Na aankoop kunt u direct lessen boeken. '
-                  'Bij elke boeking wordt 1 les van uw knipkaart afgeschreven. '
-                  'Knipkaarten zijn 12 maanden geldig.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomBar() {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.screenPadding),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+  Widget _toggleBtn(String type, {bool showBadge = false}) {
+    final sel = _cardType == type;
+    return GestureDetector(
+      onTap: () => setState(() { _cardType = type; _selected = 0; }),
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: sel ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(11),
+          boxShadow: sel ? [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 12, offset: const Offset(0, 4))] : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (_selectedOption != null) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${_selectedOption!.lessons}x ${_selectedOption!.lessonType} lessen',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  Text(
-                    '\u20AC${_selectedOption!.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
+            Icon(Icons.credit_card, size: 14, color: sel ? const Color(0xFF0365C4) : Colors.white.withOpacity(0.7)),
+            const SizedBox(width: 6),
+            Text(type,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: sel ? const Color(0xFF0365C4) : Colors.white.withOpacity(0.7),
+                )),
+            if (showBadge) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF5C00),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text('KORTING',
+                    style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w700)),
               ),
-              const SizedBox(height: 12),
             ],
-            SizedBox(
-              width: double.infinity,
-              height: AppDimensions.buttonHeight,
-              child: ElevatedButton(
-                onPressed: _selectedOption != null
-                    ? () {
-                        // TODO: Navigate to ConfirmOrderScreen
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  foregroundColor: AppColors.textWhite,
-                  disabledBackgroundColor: AppColors.border,
-                  disabledForegroundColor: AppColors.textLight,
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusMd),
-                  ),
-                  elevation: _selectedOption != null ? 2 : 0,
-                ),
-                child: Text(
-                  _selectedOption != null
-                      ? 'Ga naar bestellen'
-                      : 'Selecteer een knipkaart',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _TrustBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  const _TrustBadge(this.icon, this.label, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 16),
+        const SizedBox(height: 4),
+        Text(label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Color(0xFF4A5568), fontSize: 9, fontWeight: FontWeight.w600, height: 1.3)),
+      ],
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 
@@ -97,7 +98,7 @@ class AllPunchCardPricesScreen extends StatelessWidget {
               height: AppDimensions.buttonHeight,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Navigate to PunchCardOrderScreen
+                  context.push('/punch-card-order');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,

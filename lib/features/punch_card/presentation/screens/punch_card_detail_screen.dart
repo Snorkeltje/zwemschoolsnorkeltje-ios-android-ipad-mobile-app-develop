@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/router/route_names.dart';
 import '../../data/models/punch_card_model.dart';
 
 class PunchCardDetailScreen extends StatelessWidget {
@@ -9,17 +10,16 @@ class PunchCardDetailScreen extends StatelessWidget {
 
   const PunchCardDetailScreen({super.key, this.punchCard});
 
-  // Fallback mock data
   PunchCardModel get _card =>
       punchCard ??
       PunchCardModel(
-        id: 'pc_001',
+        id: '22976',
         userId: 'usr_001',
         lessonType: '1-op-1',
         totalLessons: 10,
-        usedLessons: 3,
-        remainingLessons: 7,
-        validUntil: DateTime.now().add(const Duration(days: 180)),
+        usedLessons: 2,
+        remainingLessons: 8,
+        validUntil: DateTime(2027, 3, 24),
         isActive: true,
       );
 
@@ -28,197 +28,187 @@ class PunchCardDetailScreen extends StatelessWidget {
     final card = _card;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Knipkaart details'),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppDimensions.screenPadding),
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card visual
-            _buildPunchCardVisual(card),
-            const SizedBox(height: AppDimensions.sectionSpacing),
-
-            // Usage details
-            _buildInfoCard(
-              title: 'Gebruik',
-              children: [
-                _buildInfoRow('Totaal lessen', '${card.totalLessons}'),
-                const Divider(height: 24, color: AppColors.divider),
-                _buildInfoRow('Gebruikt', '${card.usedLessons}',
-                    valueColor: AppColors.primaryOrange),
-                const Divider(height: 24, color: AppColors.divider),
-                _buildInfoRow('Resterend', '${card.remainingLessons}',
-                    valueColor: AppColors.success),
-              ],
-            ),
-            const SizedBox(height: AppDimensions.md),
-
-            // Card info
-            _buildInfoCard(
-              title: 'Kaartinformatie',
-              children: [
-                _buildInfoRow('Lestype', card.lessonType),
-                const Divider(height: 24, color: AppColors.divider),
-                _buildInfoRow(
-                  'Geldig tot',
-                  DateFormat('d MMMM yyyy', 'nl').format(card.validUntil),
-                ),
-                const Divider(height: 24, color: AppColors.divider),
-                _buildInfoRow(
-                  'Status',
-                  card.isActive ? 'Actief' : 'Verlopen',
-                  valueColor: card.isActive ? AppColors.success : AppColors.error,
-                ),
-                const Divider(height: 24, color: AppColors.divider),
-                _buildInfoRow('Kaartnummer', '#${card.id.toUpperCase()}'),
-              ],
-            ),
-            const SizedBox(height: AppDimensions.sectionSpacing),
-
-            // Recent usage history
-            const Text(
-              'Recente lessen',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.md),
-            ..._buildMockUsageHistory(),
-
-            const SizedBox(height: AppDimensions.sectionSpacing),
-
-            // Book lesson button
-            if (card.isActive && card.remainingLessons > 0)
-              SizedBox(
-                width: double.infinity,
-                height: AppDimensions.buttonHeight,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Navigate to booking with this punch card
-                  },
-                  icon: const Icon(Icons.calendar_today, size: 20),
-                  label: const Text(
-                    'Boek een les',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+            // White header
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.arrow_back, size: 24),
+                    color: AppColors.textPrimary,
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'Kaartdetails',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: AppColors.textWhite,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusMd),
+                  const SizedBox(width: 48), // balance the back button
+                ],
+              ),
+            ),
+
+            // Scrollable content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Blue card visual
+                    _buildCardVisual(card),
+                    const SizedBox(height: 28),
+
+                    // Usage history section
+                    const Text(
+                      'Gebruiksgeschiedenis',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                    elevation: 2,
-                  ),
+                    const SizedBox(height: 14),
+                    _buildUsageHistoryList(),
+                    const SizedBox(height: 24),
+
+                    // Buy another punch card button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.goNamed(RouteNames.purchasePunchCard);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE8F4FD),
+                          foregroundColor: const Color(0xFF1A6FBF),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Nog een knipkaart kopen →',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
-
-            const SizedBox(height: AppDimensions.lg),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPunchCardVisual(PunchCardModel card) {
+  Widget _buildCardVisual(PunchCardModel card) {
+    final double progress = card.totalLessons > 0
+        ? card.remainingLessons / card.totalLessons
+        : 0;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.cardPadding + 4),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primaryBlue, Color(0xFF0480E8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryBlue.withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        color: const Color(0xFF1A6FBF),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${card.totalLessons}x ${card.lessonType} Zwemlessen',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          // Title row
+          const Text(
+            '💳 1-op-1 Zwemlessen',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
+          const SizedBox(height: 2),
+          const Text(
+            'Zwemschool Snorkeltje',
+            style: TextStyle(
+              fontSize: 12,
+              color: Color(0xFFB2D9FF),
+            ),
+          ),
           const SizedBox(height: 16),
+
+          // Big remaining count
           Text(
             '${card.remainingLessons}',
             style: const TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.w800,
+              fontSize: 56,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
+              height: 1.1,
             ),
           ),
           const Text(
             'lessen resterend',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white70,
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Progress dots
-          Row(
-            children: List.generate(
-              card.totalLessons > 20 ? 20 : card.totalLessons,
-              (index) {
-                final isUsed = index < card.usedLessons;
-                final dotSize = card.totalLessons > 15 ? 10.0 : 14.0;
-                return Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                    height: dotSize,
-                    decoration: BoxDecoration(
-                      color: isUsed
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(dotSize / 2),
-                    ),
-                  ),
-                );
-              },
+              color: Color(0xFFB2D9FF),
             ),
           ),
           const SizedBox(height: 16),
 
+          // Progress bar
+          Container(
+            height: 12,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFF80A6D9),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress.clamp(0.0, 1.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Bottom info row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Geldig tot: ${DateFormat('d MMM yyyy', 'nl').format(card.validUntil)}',
+                'Kaart #${card.id}',
                 style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white70,
+                  fontSize: 11,
+                  color: Color(0xFFB2D9FF),
                 ),
               ),
               Text(
-                '#${card.id.toUpperCase()}',
+                'Geldig: ${DateFormat('d MMM yyyy', 'nl').format(card.validUntil)}',
                 style: const TextStyle(
                   fontSize: 11,
-                  color: Colors.white54,
-                  fontFamily: 'monospace',
+                  color: Color(0xFFB2D9FF),
                 ),
               ),
             ],
@@ -228,149 +218,79 @@ class PunchCardDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard({
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.cardPadding),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: AppDimensions.shadowBlur,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: valueColor ?? AppColors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  List<Widget> _buildMockUsageHistory() {
+  Widget _buildUsageHistoryList() {
     final usageHistory = [
       {
-        'date': DateTime.now().subtract(const Duration(days: 3)),
-        'location': 'De Bilt',
-        'instructor': 'Anna de Vries',
+        'date': '15 maart 2027',
+        'detail': '1-op-1 les bij Anna de Vries, De Bilt',
       },
       {
-        'date': DateTime.now().subtract(const Duration(days: 10)),
-        'location': 'Soestduinen',
-        'instructor': 'Jan Bakker',
+        'date': '8 maart 2027',
+        'detail': '1-op-1 les bij Jan Bakker, Soestduinen',
       },
       {
-        'date': DateTime.now().subtract(const Duration(days: 17)),
-        'location': 'De Bilt',
-        'instructor': 'Anna de Vries',
+        'date': '1 maart 2027',
+        'detail': '1-op-1 les bij Anna de Vries, De Bilt',
       },
     ];
 
-    return usageHistory.map((entry) {
-      final date = entry['date'] as DateTime;
-      return Container(
-        margin: const EdgeInsets.only(bottom: AppDimensions.sm),
-        padding: const EdgeInsets.all(AppDimensions.cardPadding),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow,
-              blurRadius: AppDimensions.shadowBlur,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-              ),
-              child: const Icon(
-                Icons.check_circle_outline,
-                color: AppColors.success,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry['location'] as String,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: List.generate(usageHistory.length, (index) {
+          final entry = usageHistory[index];
+          return Column(
+            children: [
+              if (index > 0)
+                const Divider(height: 1, color: Color(0xFFF0F0F0)),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            entry['date']!,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            entry['detail']!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${entry['instructor']}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
+                    const Text(
+                      '-1',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFE74C3C),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Text(
-              DateFormat('d MMM', 'nl').format(date),
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textLight,
-              ),
-            ),
-          ],
-        ),
-      );
-    }).toList();
+            ],
+          );
+        }),
+      ),
+    );
   }
 }

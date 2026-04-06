@@ -1,487 +1,314 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/constants/app_dimensions.dart';
-import '../../data/models/booking_model.dart';
-import 'reservation_detail_screen.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/route_names.dart';
+
+class _Reservation {
+  final String id;
+  final String date;
+  final String time;
+  final String location;
+  final String instructor;
+  final String type;
+  final Color color;
+  const _Reservation(this.id, this.date, this.time, this.location, this.instructor, this.type, this.color);
+}
+
+const _reservations = <_Reservation>[
+  _Reservation('1', 'Ma 28 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4)),
+  _Reservation('2', 'Wo 30 apr', '16:00–16:30', 'Bad Hulckesteijn', 'Maria Jansen', 'Extra', Color(0xFFFF5C00)),
+  _Reservation('3', 'Ma 5 mei', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4)),
+  _Reservation('4', 'Wo 7 mei', '10:00–10:30', 'Ampt v. Nijkerk', 'Pieter Bakker', 'Extra', Color(0xFFFF5C00)),
+];
 
 class MyReservationsScreen extends StatefulWidget {
   const MyReservationsScreen({super.key});
-
   @override
   State<MyReservationsScreen> createState() => _MyReservationsScreenState();
 }
 
-class _MyReservationsScreenState extends State<MyReservationsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _MyReservationsScreenState extends State<MyReservationsScreen> {
+  int _tab = 0; // 0=upcoming, 1=history
+  String _filter = 'all';
 
-  // Mock data - replace with provider/API call
-  final List<BookingModel> _upcomingBookings = [
-    BookingModel(
-      id: 'bk_001',
-      childId: 'child_001',
-      locationId: 'loc_001',
-      timeSlotId: 'ts_001',
-      lessonType: LessonType.vastTijdstip,
-      status: BookingStatus.bevestigd,
-      date: DateTime.now().add(const Duration(days: 3)),
-      startTime: '15:00',
-      endTime: '15:30',
-      instructorName: 'Anna de Vries',
-      locationName: 'De Bilt',
-    ),
-    BookingModel(
-      id: 'bk_002',
-      childId: 'child_001',
-      locationId: 'loc_002',
-      timeSlotId: 'ts_002',
-      lessonType: LessonType.extra1op1,
-      status: BookingStatus.bevestigd,
-      date: DateTime.now().add(const Duration(days: 7)),
-      startTime: '10:00',
-      endTime: '10:30',
-      instructorName: 'Jan Bakker',
-      locationName: 'Soestduinen',
-    ),
-    BookingModel(
-      id: 'bk_003',
-      childId: 'child_002',
-      locationId: 'loc_001',
-      timeSlotId: 'ts_003',
-      lessonType: LessonType.extra1op2,
-      status: BookingStatus.bevestigd,
-      date: DateTime.now().add(const Duration(days: 10)),
-      startTime: '14:00',
-      endTime: '14:30',
-      instructorName: 'Lisa Jansen',
-      locationName: 'Nijkerk',
-    ),
-  ];
-
-  final List<BookingModel> _historyBookings = [
-    BookingModel(
-      id: 'bk_010',
-      childId: 'child_001',
-      locationId: 'loc_001',
-      timeSlotId: 'ts_010',
-      lessonType: LessonType.vastTijdstip,
-      status: BookingStatus.aanwezig,
-      date: DateTime.now().subtract(const Duration(days: 3)),
-      startTime: '15:00',
-      endTime: '15:30',
-      instructorName: 'Anna de Vries',
-      locationName: 'De Bilt',
-    ),
-    BookingModel(
-      id: 'bk_011',
-      childId: 'child_001',
-      locationId: 'loc_002',
-      timeSlotId: 'ts_011',
-      lessonType: LessonType.extra1op1,
-      status: BookingStatus.geannuleerd,
-      date: DateTime.now().subtract(const Duration(days: 7)),
-      startTime: '10:00',
-      endTime: '10:30',
-      instructorName: 'Jan Bakker',
-      locationName: 'Soestduinen',
-    ),
-    BookingModel(
-      id: 'bk_012',
-      childId: 'child_002',
-      locationId: 'loc_001',
-      timeSlotId: 'ts_012',
-      lessonType: LessonType.vastTijdstip,
-      status: BookingStatus.aanwezig,
-      date: DateTime.now().subtract(const Duration(days: 10)),
-      startTime: '14:00',
-      endTime: '14:30',
-      instructorName: 'Lisa Jansen',
-      locationName: 'De Bilt',
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  List<_Reservation> get _filtered {
+    if (_filter == 'all') return _reservations;
+    final mapping = {'fixed': 'Vast', 'extra': 'Extra', 'holiday': 'Vakantie'};
+    return _reservations.where((r) => r.type == mapping[_filter]).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final items = _filtered;
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(AppStrings.myReservations),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primaryBlue,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primaryBlue,
-          indicatorWeight: 3,
-          tabs: const [
-            Tab(text: AppStrings.upcoming),
-            Tab(text: AppStrings.history),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildBookingList(_upcomingBookings, isUpcoming: true),
-          _buildBookingList(_historyBookings, isUpcoming: false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBookingList(List<BookingModel> bookings,
-      {required bool isUpcoming}) {
-    if (bookings.isEmpty) {
-      return _buildEmptyState(isUpcoming);
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppDimensions.screenPadding),
-      itemCount: bookings.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppDimensions.md),
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ReservationDetailScreen(
-                  booking: bookings[index],
-                ),
-              ),
-            );
-          },
-          child: _BookingCard(
-            booking: bookings[index],
-            isUpcoming: isUpcoming,
-            onCancel: isUpcoming
-                ? () => _showCancelDialog(bookings[index])
-                : null,
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildEmptyState(bool isUpcoming) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.xxl),
+      backgroundColor: const Color(0xFFF4F7FC),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 28),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              isUpcoming ? Icons.event_available : Icons.history,
-              size: 64,
-              color: AppColors.textLight,
-            ),
-            const SizedBox(height: AppDimensions.md),
-            Text(
-              isUpcoming
-                  ? 'Geen geplande reserveringen'
-                  : 'Geen geschiedenis beschikbaar',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.sm),
-            Text(
-              isUpcoming
-                  ? 'Boek een les om te beginnen!'
-                  : 'Uw voltooide lessen verschijnen hier.',
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textLight,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (isUpcoming) ...[
-              const SizedBox(height: AppDimensions.lg),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  foregroundColor: AppColors.textWhite,
-                  minimumSize:
-                      const Size(200, AppDimensions.buttonHeight),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusMd),
-                  ),
-                ),
-                child: const Text(
-                  AppStrings.bookLesson,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showCancelDialog(BookingModel booking) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        ),
-        title: const Text(
-          AppStrings.cancelReservation,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Text(
-          '${AppStrings.cancelConfirm}\n\n'
-          '${booking.lessonTypeLabel} - ${booking.locationName}\n'
-          '${DateFormat('EEEE d MMMM', 'nl').format(booking.date)} om ${booking.startTime}',
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              AppStrings.back,
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Call cancel booking API
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: AppColors.textWhite,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-              ),
-            ),
-            child: const Text(AppStrings.cancel),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BookingCard extends StatelessWidget {
-  final BookingModel booking;
-  final bool isUpcoming;
-  final VoidCallback? onCancel;
-
-  const _BookingCard({
-    required this.booking,
-    required this.isUpcoming,
-    this.onCancel,
-  });
-
-  Color get _lessonTypeColor {
-    switch (booking.lessonType) {
-      case LessonType.vastTijdstip:
-        return AppColors.lessonFixed;
-      case LessonType.extra1op1:
-        return AppColors.lessonExtra1on1;
-      case LessonType.extra1op2:
-        return AppColors.lessonExtra1on2;
-      case LessonType.vakantie:
-        return AppColors.lessonHoliday;
-    }
-  }
-
-  Color get _statusColor {
-    switch (booking.status) {
-      case BookingStatus.bevestigd:
-        return AppColors.success;
-      case BookingStatus.geannuleerd:
-        return AppColors.error;
-      case BookingStatus.aanwezig:
-        return AppColors.primaryBlue;
-      case BookingStatus.nietVerschenen:
-        return AppColors.warning;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: AppDimensions.shadowBlur,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Left color strip
-          Container(
-            width: 4,
-            height: 140,
-            decoration: BoxDecoration(
-              color: _lessonTypeColor,
+            // Header
+            ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(AppDimensions.radiusMd),
-                bottomLeft: Radius.circular(AppDimensions.radiusMd),
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(AppDimensions.cardPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Lesson type badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _lessonTypeColor.withValues(alpha: 0.1),
-                          borderRadius:
-                              BorderRadius.circular(AppDimensions.radiusFull),
-                        ),
-                        child: Text(
-                          booking.lessonTypeLabel,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _lessonTypeColor,
-                          ),
-                        ),
-                      ),
-                      // Status badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _statusColor.withValues(alpha: 0.1),
-                          borderRadius:
-                              BorderRadius.circular(AppDimensions.radiusFull),
-                        ),
-                        child: Text(
-                          booking.statusLabel,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _statusColor,
-                          ),
-                        ),
-                      ),
-                    ],
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 58, 20, 20),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    booking.locationName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today,
-                          size: 14, color: AppColors.textSecondary),
-                      const SizedBox(width: 6),
-                      Text(
-                        DateFormat('EEEE d MMMM yyyy', 'nl')
-                            .format(booking.date),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.access_time,
-                          size: 14, color: AppColors.textSecondary),
-                      const SizedBox(width: 6),
-                      Text(
-                        booking.displayTime,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Icon(Icons.person_outline,
-                          size: 14, color: AppColors.textSecondary),
-                      const SizedBox(width: 6),
-                      Text(
-                        booking.instructorName,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (isUpcoming && booking.canCancel) ...[
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: onCancel,
-                        child: const Text(
-                          AppStrings.cancelReservation,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.error,
-                          ),
-                        ),
-                      ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Mijn reserveringen',
+                            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+                        Text('${items.length} lessen',
+                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                      ],
                     ),
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+
+            // Tab switcher
+            Transform.translate(
+              offset: const Offset(0, -12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(child: _tabBtn(0, Icons.calendar_today, 'Aankomend')),
+                      Expanded(child: _tabBtn(1, Icons.access_time, 'Historie')),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Filter pills
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _filterPill('all', 'Alle'),
+                    const SizedBox(width: 8),
+                    _filterPill('fixed', 'Vast'),
+                    const SizedBox(width: 8),
+                    _filterPill('extra', 'Extra'),
+                    const SizedBox(width: 8),
+                    _filterPill('holiday', 'Vakantie'),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Cards
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: items.map((r) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GestureDetector(
+                    onTap: () => context.pushNamed(RouteNames.reservationDetail, pathParameters: {'id': r.id}),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                      ),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(width: 4, decoration: BoxDecoration(color: r.color, borderRadius: BorderRadius.circular(2))),
+                            const SizedBox(width: 12),
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: r.color.withOpacity(0.06),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(r.date.split(' ')[0],
+                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: r.color)),
+                                  Text(r.date.split(' ')[1],
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: r.color)),
+                                  Text(r.date.split(' ')[2],
+                                      style: TextStyle(fontSize: 10, color: r.color)),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.access_time, size: 13, color: Color(0xFF8E9BB3)),
+                                          const SizedBox(width: 6),
+                                          Text(r.time,
+                                              style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+                                        ],
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: r.color.withOpacity(0.07),
+                                          borderRadius: BorderRadius.circular(999),
+                                        ),
+                                        child: Text(r.type,
+                                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: r.color)),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.location_on_outlined, size: 13, color: Color(0xFF8E9BB3)),
+                                      const SizedBox(width: 6),
+                                      Text(r.location, style: const TextStyle(color: Color(0xFF6B7B94), fontSize: 12)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.person_outline, size: 13, color: Color(0xFF8E9BB3)),
+                                      const SizedBox(width: 6),
+                                      Text(r.instructor, style: const TextStyle(color: Color(0xFF6B7B94), fontSize: 12)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Icon(Icons.chevron_right, color: Color(0xFFC4CDD9), size: 16),
+                                GestureDetector(
+                                  onTap: () => context.pushNamed(RouteNames.cancellationConfirm, pathParameters: {'id': r.id}),
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.close, color: Color(0xFFE74C3C), size: 12),
+                                      SizedBox(width: 2),
+                                      Text('Annuleer',
+                                          style: TextStyle(color: Color(0xFFE74C3C), fontSize: 11, fontWeight: FontWeight.w600)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tabBtn(int i, IconData icon, String label) {
+    final sel = _tab == i;
+    return GestureDetector(
+      onTap: () => setState(() => _tab = i),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: sel
+              ? const LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF00C1FF)])
+              : null,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: sel ? [BoxShadow(color: const Color(0x330365C4), blurRadius: 12, offset: const Offset(0, 4))] : null,
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 14, color: sel ? Colors.white : const Color(0xFF8E9BB3)),
+            const SizedBox(width: 6),
+            Text(label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                  color: sel ? Colors.white : const Color(0xFF8E9BB3),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _filterPill(String key, String label) {
+    final sel = _filter == key;
+    return GestureDetector(
+      onTap: () => setState(() => _filter = key),
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: sel ? null : Colors.white,
+          gradient: sel ? const LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF00C1FF)]) : null,
+          borderRadius: BorderRadius.circular(999),
+          boxShadow: [
+            BoxShadow(
+              color: sel ? const Color(0x330365C4) : Colors.black.withOpacity(0.04),
+              blurRadius: sel ? 12 : 3,
+              offset: Offset(0, sel ? 4 : 1),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Text(label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+              color: sel ? Colors.white : const Color(0xFF6B7B94),
+            )),
       ),
     );
   }

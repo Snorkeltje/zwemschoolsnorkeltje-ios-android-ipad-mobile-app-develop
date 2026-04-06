@@ -1,285 +1,371 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/router/route_names.dart';
 
-enum PaymentMethodType { creditCard, punchCard, ideal }
-
-class _PaymentMethodOption {
+class _Card {
   final String id;
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final PaymentMethodType type;
-  final bool isDefault;
-
-  const _PaymentMethodOption({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.type,
-    this.isDefault = false,
-  });
+  final String name;
+  final int remaining;
+  final int total;
+  final String validUntil;
+  final bool matchesType;
+  const _Card(this.id, this.name, this.remaining, this.total, this.validUntil, this.matchesType);
 }
+
+const _cards = <_Card>[
+  _Card('22976', '10× 1-op-1 zwemles', 8, 10, '24 mrt 2027', true),
+  _Card('22980', '5× 1-op-2 zwemles', 3, 5, '15 jun 2027', false),
+];
+
+const _providers = [
+  ('iDEAL', 'Direct betalen via je bank', '🏦', true),
+  ('Creditcard', 'Visa, Mastercard, Amex', '💳', false),
+  ('Bancontact', 'Belgische betaalmethode', '🇧🇪', false),
+];
 
 class PaymentMethodScreen extends StatefulWidget {
   const PaymentMethodScreen({super.key});
-
   @override
   State<PaymentMethodScreen> createState() => _PaymentMethodScreenState();
 }
 
 class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
-  String _selectedMethodId = 'pm_001';
-
-  final List<_PaymentMethodOption> _savedMethods = const [
-    _PaymentMethodOption(
-      id: 'pm_001',
-      title: 'Visa ****4242',
-      subtitle: 'Vervalt 12/2027',
-      icon: Icons.credit_card,
-      type: PaymentMethodType.creditCard,
-      isDefault: true,
-    ),
-    _PaymentMethodOption(
-      id: 'pm_002',
-      title: 'Mastercard ****8888',
-      subtitle: 'Vervalt 06/2026',
-      icon: Icons.credit_card,
-      type: PaymentMethodType.creditCard,
-    ),
-  ];
-
-  final List<_PaymentMethodOption> _otherMethods = const [
-    _PaymentMethodOption(
-      id: 'pm_punch',
-      title: 'Knipkaart',
-      subtitle: '8 lessen resterend',
-      icon: Icons.confirmation_number_outlined,
-      type: PaymentMethodType.punchCard,
-    ),
-    _PaymentMethodOption(
-      id: 'pm_ideal',
-      title: 'iDEAL',
-      subtitle: 'Betaal via uw bank',
-      icon: Icons.account_balance_outlined,
-      type: PaymentMethodType.ideal,
-    ),
-  ];
+  String _method = 'punch';
+  String _selectedCard = '22976';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Betaalmethode'),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: AppDimensions.md),
-
-            // Saved payment methods
-            const Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppDimensions.screenPadding,
-              ),
-              child: Text(
-                'Opgeslagen methoden',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
+      backgroundColor: const Color(0xFFF4F7FC),
+      body: Column(
+        children: [
+          // Header
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
             ),
-            const SizedBox(height: AppDimensions.sm),
-            ..._savedMethods.map((method) => _buildMethodTile(method)),
-
-            const SizedBox(height: AppDimensions.lg),
-
-            // Other methods
-            const Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppDimensions.screenPadding,
-              ),
-              child: Text(
-                'Andere methoden',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppDimensions.sm),
-            ..._otherMethods.map((method) => _buildMethodTile(method)),
-
-            const SizedBox(height: AppDimensions.lg),
-
-            // Add new card button
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.screenPadding,
-              ),
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  context.pushNamed(RouteNames.stripePayment);
-                },
-                icon: const Icon(Icons.add, size: 20),
-                label: const Text('Nieuwe kaart toevoegen'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primaryBlue,
-                  side: const BorderSide(color: AppColors.primaryBlue),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  minimumSize: const Size(double.infinity, AppDimensions.buttonHeight),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+            padding: const EdgeInsets.fromLTRB(16, 56, 16, 12),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => context.pop(),
+                  child: Container(
+                    width: 40, height: 40,
+                    decoration: const BoxDecoration(color: Color(0xFFF4F7FC), shape: BoxShape.circle),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.chevron_left, color: Color(0xFF1A1A2E), size: 20),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: AppDimensions.xl),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(
-          AppDimensions.screenPadding,
-          AppDimensions.md,
-          AppDimensions.screenPadding,
-          MediaQuery.of(context).padding.bottom + AppDimensions.md,
-        ),
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow,
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          width: double.infinity,
-          height: AppDimensions.buttonHeight,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context, _selectedMethodId);
-            },
-            child: const Text(
-              'Doorgaan met betalen',
-              style: TextStyle(fontSize: 16),
+                const SizedBox(width: 12),
+                const Text('Betaalmethode',
+                    style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 18, fontWeight: FontWeight.w700)),
+              ],
             ),
           ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Price summary
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft, end: Alignment.bottomRight,
+                        colors: [Color(0xFF1A6FBF), Color(0xFF0D4F8C)],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        Text('Te betalen',
+                            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
+                        const SizedBox(height: 4),
+                        const Text('€38,00',
+                            style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 4),
+                        Text('1-op-1 extra zwemles — De Bilt',
+                            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Method tabs
+                  Row(
+                    children: [
+                      Expanded(child: _tabBtn('punch', Icons.confirmation_number_outlined, 'Knipkaart')),
+                      const SizedBox(width: 8),
+                      Expanded(child: _tabBtn('card', Icons.credit_card, 'Betaalkaart')),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  if (_method == 'punch') ..._buildPunchCardSection(),
+                  if (_method == 'card') ..._buildCardSection(),
+
+                  // Security
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.shield, color: Color(0xFF27AE60), size: 14),
+                        SizedBox(width: 8),
+                        Text('Beveiligde betaling — SSL versleuteld',
+                            style: TextStyle(color: Color(0xFF8E8EA0), fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  if (_method == 'punch')
+                    GestureDetector(
+                      onTap: () => context.pushNamed(RouteNames.bookingSuccess),
+                      child: Container(
+                        width: double.infinity,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A6FBF),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [BoxShadow(color: const Color(0xFF1A6FBF).withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))],
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.confirmation_number_outlined, color: Colors.white, size: 18),
+                            SizedBox(width: 8),
+                            Text('Betalen met knipkaart',
+                                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tabBtn(String key, IconData icon, String label) {
+    final sel = _method == key;
+    return GestureDetector(
+      onTap: () => setState(() => _method = key),
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: sel ? const Color(0xFF1A6FBF) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: sel ? null : Border.all(color: const Color(0xFFE5E7EB)),
+          boxShadow: [
+            BoxShadow(
+              color: sel ? const Color(0xFF1A6FBF).withOpacity(0.3) : Colors.black.withOpacity(0.04),
+              blurRadius: sel ? 4 : 8,
+              offset: Offset(0, sel ? 2 : 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: sel ? Colors.white : const Color(0xFF4A4A6A)),
+            const SizedBox(width: 8),
+            Text(label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: sel ? Colors.white : const Color(0xFF4A4A6A),
+                )),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildMethodTile(_PaymentMethodOption method) {
-    final isSelected = _selectedMethodId == method.id;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedMethodId = method.id),
-      child: Container(
-        margin: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.screenPadding,
-          vertical: 4,
-        ),
-        padding: const EdgeInsets.all(AppDimensions.cardPadding),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : AppColors.border,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow,
-              blurRadius: AppDimensions.shadowBlur,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
+  List<Widget> _buildPunchCardSection() {
+    final remaining = _cards.firstWhere((c) => c.id == _selectedCard).remaining - 1;
+    return [
+      const Text('Selecteer knipkaart',
+          style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+      const SizedBox(height: 12),
+      ..._cards.map((c) {
+        final isSel = _selectedCard == c.id;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: GestureDetector(
+            onTap: () => setState(() => _selectedCard = c.id),
+            child: Container(
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                color: isSel ? const Color(0xFFE8F4FD) : Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isSel ? const Color(0xFF1A6FBF) : const Color(0xFFE5E7EB),
+                  width: isSel ? 2 : 1,
+                ),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
               ),
-              child: Icon(method.icon, color: AppColors.primaryBlue, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        method.title,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(c.name,
+                                style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+                            if (c.matchesType) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE8F8F0),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: const Text('MATCH',
+                                    style: TextStyle(color: Color(0xFF27AE60), fontSize: 9, fontWeight: FontWeight.w700)),
+                              ),
+                            ],
+                          ],
                         ),
-                      ),
-                      if (method.isDefault) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'Standaard',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.success,
+                        const SizedBox(height: 2),
+                        Text('Kaart #${c.id}',
+                            style: const TextStyle(color: Color(0xFF4A4A6A), fontSize: 12)),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(999),
+                                child: Container(
+                                  height: 6,
+                                  color: const Color(0xFFE5E7EB),
+                                  child: FractionallySizedBox(
+                                    alignment: Alignment.centerLeft,
+                                    widthFactor: c.remaining / c.total,
+                                    child: Container(color: const Color(0xFF1A6FBF)),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            Text('${c.remaining}/${c.total}',
+                                style: const TextStyle(color: Color(0xFF1A6FBF), fontSize: 12, fontWeight: FontWeight.w700)),
+                          ],
                         ),
+                        const SizedBox(height: 4),
+                        Text('Geldig tot ${c.validUntil}',
+                            style: const TextStyle(color: Color(0xFF8E8EA0), fontSize: 11)),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    method.subtitle,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
                     ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: isSel ? const Color(0xFF1A6FBF) : Colors.transparent,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSel ? const Color(0xFF1A6FBF) : const Color(0xFFBDC3C7),
+                        width: 2,
+                      ),
+                    ),
+                    child: isSel ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
                   ),
                 ],
               ),
             ),
-            Radio<String>(
-              value: method.id,
-              groupValue: _selectedMethodId,
-              activeColor: AppColors.primaryBlue,
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedMethodId = val);
-              },
+          ),
+        );
+      }),
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F4FD),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.confirmation_number_outlined, color: Color(0xFF1A6FBF), size: 14),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text('Na betaling: $remaining credits resterend op kaart #$_selectedCard',
+                  style: const TextStyle(color: Color(0xFF1A6FBF), fontSize: 12)),
             ),
           ],
         ),
       ),
-    );
+    ];
+  }
+
+  List<Widget> _buildCardSection() {
+    return [
+      const Text('Betaal met kaart',
+          style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+      const SizedBox(height: 12),
+      ..._providers.map((p) => Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: GestureDetector(
+          onTap: () => context.pushNamed(RouteNames.stripePayment),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48, height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF4F7FC),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(p.$3, style: const TextStyle(fontSize: 24)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(p.$1,
+                              style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w600)),
+                          if (p.$4) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF3DC),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: const Text('POPULAIR',
+                                  style: TextStyle(color: Color(0xFFF39C12), fontSize: 9, fontWeight: FontWeight.w700)),
+                            ),
+                          ],
+                        ],
+                      ),
+                      Text(p.$2, style: const TextStyle(color: Color(0xFF8E8EA0), fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Color(0xFFBDC3C7), size: 18),
+              ],
+            ),
+          ),
+        ),
+      )),
+    ];
   }
 }

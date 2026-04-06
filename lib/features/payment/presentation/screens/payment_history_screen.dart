@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 
@@ -108,10 +109,22 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Betalingsgeschiedenis'),
         backgroundColor: AppColors.white,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => context.pop(),
+        ),
+        centerTitle: true,
+        title: const Text(
+          'Betalingsgeschiedenis',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -124,7 +137,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               padding: const EdgeInsets.all(AppDimensions.cardPadding),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [AppColors.primaryBlue, Color(0xFF0480E8)],
+                  colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -196,26 +209,32 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 final isSelected = filter == _selectedFilter;
                 return GestureDetector(
                   onTap: () => setState(() => _selectedFilter = filter),
-                  child: Chip(
-                    label: Text(
-                      filter,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.textWhite
-                            : AppColors.textSecondary,
+                            ? const Color(0xFF0365C4)
+                            : AppColors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFF0365C4)
+                              : const Color(0xFFE5E7EB),
+                        ),
+                      ),
+                      child: Text(
+                        filter,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFF818EA6),
+                        ),
                       ),
                     ),
-                    backgroundColor: isSelected
-                        ? AppColors.primaryBlue
-                        : AppColors.background,
-                    side: BorderSide(
-                      color: isSelected
-                          ? AppColors.primaryBlue
-                          : AppColors.border,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
                   ),
                 );
               },
@@ -393,7 +412,7 @@ class _PaymentTile extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  // TODO: Navigate to invoice/receipt
+                  context.push('/invoice/${payment.id}');
                 },
                 child: const Text(
                   'Bekijk factuur',

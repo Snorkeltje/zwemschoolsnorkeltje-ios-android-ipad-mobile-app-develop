@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_dimensions.dart';
 
 class ConfirmOrderScreen extends StatefulWidget {
   final String? lessonType;
@@ -19,293 +19,151 @@ class ConfirmOrderScreen extends StatefulWidget {
 }
 
 class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
-  int _selectedPaymentMethod = 0;
-  bool _acceptedTerms = false;
-  bool _isProcessing = false;
+  final _formKey = GlobalKey<FormState>();
 
-  // Fallback mock data
-  String get _lessonType => widget.lessonType ?? '1-op-1';
-  int get _lessons => widget.lessons ?? 10;
-  double get _price => widget.price ?? 305;
-  double get _pricePerLesson => _price / _lessons;
+  // Controllers for all 11 fields
+  final _voornaamKindController = TextEditingController();
+  final _achternaamKindController = TextEditingController();
+  final _geboortedatumKindController = TextEditingController();
+  final _naamOuderController = TextEditingController();
+  final _mobielController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _woonplaatsController = TextEditingController();
+  final _locatieController = TextEditingController();
+  final _typeZwemlesController = TextEditingController();
+  final _dagController = TextEditingController();
+  final _tijdstipController = TextEditingController();
+
+  bool _autoConversion = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill lesson type if provided
+    _typeZwemlesController.text = widget.lessonType ?? '1-op-1';
+  }
+
+  @override
+  void dispose() {
+    _voornaamKindController.dispose();
+    _achternaamKindController.dispose();
+    _geboortedatumKindController.dispose();
+    _naamOuderController.dispose();
+    _mobielController.dispose();
+    _emailController.dispose();
+    _woonplaatsController.dispose();
+    _locatieController.dispose();
+    _typeZwemlesController.dispose();
+    _dagController.dispose();
+    _tijdstipController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Bestelling bevestigen'),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppDimensions.screenPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Order summary card
-                  _buildOrderSummary(),
-                  const SizedBox(height: AppDimensions.sectionSpacing),
-
-                  // Payment method
-                  const Text(
-                    'Betaalmethode',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.md),
-                  _buildPaymentMethod(
-                    index: 0,
-                    icon: Icons.credit_card,
-                    title: 'iDEAL',
-                    subtitle: 'Betaal via uw bank',
-                    iconColor: AppColors.primaryBlue,
-                  ),
-                  const SizedBox(height: AppDimensions.sm),
-                  _buildPaymentMethod(
-                    index: 1,
-                    icon: Icons.account_balance,
-                    title: 'Bancontact',
-                    subtitle: 'Belgische betaalmethode',
-                    iconColor: AppColors.primaryOrange,
-                  ),
-                  const SizedBox(height: AppDimensions.sm),
-                  _buildPaymentMethod(
-                    index: 2,
-                    icon: Icons.payment,
-                    title: 'Creditcard',
-                    subtitle: 'Visa, Mastercard, Amex',
-                    iconColor: AppColors.teal,
-                  ),
-
-                  const SizedBox(height: AppDimensions.sectionSpacing),
-
-                  // Price breakdown
-                  _buildPriceBreakdown(),
-                  const SizedBox(height: AppDimensions.sectionSpacing),
-
-                  // Terms
-                  GestureDetector(
-                    onTap: () =>
-                        setState(() => _acceptedTerms = !_acceptedTerms),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: Checkbox(
-                            value: _acceptedTerms,
-                            onChanged: (v) =>
-                                setState(() => _acceptedTerms = v ?? false),
-                            activeColor: AppColors.primaryBlue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Expanded(
-                          child: Text(
-                            'Ik ga akkoord met de algemene voorwaarden en het '
-                            'annuleringsbeleid van Zwemschool Snorkeltje.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Bottom action bar
-          _buildBottomBar(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOrderSummary() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.cardPadding + 4),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primaryBlue, Color(0xFF0480E8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryBlue.withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Uw bestelling',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  _lessonType,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '$_lessons',
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'zwemlessen',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '\u20AC${_pricePerLesson.toStringAsFixed(2)} per les',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white70,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Geldig voor 12 maanden na aankoop',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.white.withValues(alpha: 0.5),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethod({
-    required int index,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color iconColor,
-  }) {
-    final isSelected = _selectedPaymentMethod == index;
-
-    return GestureDetector(
-      onTap: () => setState(() => _selectedPaymentMethod = index),
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.cardPadding),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : AppColors.border,
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-              ),
-              child: Icon(icon, color: iconColor, size: 22),
-            ),
-            const SizedBox(width: 12),
+            // Logo header bar
+            _buildLogoHeader(),
+
+            // Content
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Breadcrumb
+                    _buildBreadcrumb(),
+
+                    // BEVESTIG banner
+                    _buildBevestigBanner(),
+
+                    // Form fields
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildFormField(
+                              'Voornaam kind',
+                              _voornaamKindController,
+                            ),
+                            _buildFormField(
+                              'Achternaam kind',
+                              _achternaamKindController,
+                            ),
+                            _buildFormField(
+                              'Geboortedatum kind',
+                              _geboortedatumKindController,
+                              hintText: 'dd-mm-jjjj',
+                            ),
+                            _buildFormField(
+                              'Voor+achternaam ouder',
+                              _naamOuderController,
+                            ),
+                            _buildFormField(
+                              'Mobiel',
+                              _mobielController,
+                              keyboardType: TextInputType.phone,
+                            ),
+                            _buildFormField(
+                              'E-mail',
+                              _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            _buildFormField(
+                              'Woonplaats',
+                              _woonplaatsController,
+                            ),
+                            _buildFormField(
+                              'Locatie',
+                              _locatieController,
+                            ),
+                            _buildFormField(
+                              'Type zwemles',
+                              _typeZwemlesController,
+                            ),
+                            _buildFormField(
+                              'Dag',
+                              _dagController,
+                            ),
+                            _buildFormField(
+                              'Tijdstip zwemles',
+                              _tijdstipController,
+                              hintText: 'bijv. 14:00',
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Auto-conversion section
+                            _buildAutoConversionSection(),
+
+                            const SizedBox(height: 20),
+
+                            // Knipkaart info text
+                            _buildKnipkaartInfoText(),
+
+                            const SizedBox(height: 28),
+
+                            // Buttons row
+                            _buildButtons(),
+
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Icon(
-              isSelected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_off,
-              color: isSelected ? AppColors.primaryBlue : AppColors.textLight,
-              size: 22,
             ),
           ],
         ),
@@ -313,61 +171,174 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
     );
   }
 
-  Widget _buildPriceBreakdown() {
+  Widget _buildLogoHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.cardPadding),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: AppDimensions.shadowBlur,
-            offset: const Offset(0, 2),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
+          // Snorkeltje logo placeholder
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0365C4),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.pool,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 10),
           const Text(
-            'Prijsoverzicht',
+            'Zwemschool Snorkeltje',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
-          _buildPriceRow(
-            '$_lessons x $_lessonType zwemlessen',
-            '\u20AC${_price.toStringAsFixed(2)}',
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBreadcrumb() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      color: const Color(0xFFF3F4F6),
+      child: const Text(
+        '\u{1F3E0} / Gegevens',
+        style: TextStyle(
+          fontSize: 13,
+          color: AppColors.textSecondary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBevestigBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      color: const Color(0xFFC7D1D1),
+      alignment: Alignment.center,
+      child: const Text(
+        'BEVESTIG',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+          letterSpacing: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormField(
+    String label,
+    TextEditingController controller, {
+    String? hintText,
+    TextInputType? keyboardType,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 155,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
-          const Divider(height: 24, color: AppColors.divider),
-          _buildPriceRow('Servicekosten', '\u20AC0,00'),
-          const Divider(height: 24, color: AppColors.divider),
-          _buildPriceRow('BTW (0%)', '\u20AC0,00'),
-          const Divider(height: 24, color: AppColors.divider),
+          Expanded(
+            child: SizedBox(
+              height: 36,
+              child: TextFormField(
+                controller: controller,
+                keyboardType: keyboardType,
+                style: const TextStyle(fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textLight,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  isDense: true,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Color(0xFFDBE6F0)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color(0xFF5492B5),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAutoConversionSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Automatische omzetting',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Wilt u dat uw knipkaart automatisch wordt omgezet naar een '
+            'vaste lesplaats wanneer er een plek vrijkomt?',
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Totaal',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                '\u20AC${_price.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryBlue,
-                ),
-              ),
+              _buildRadioOption('Ja', true),
+              const SizedBox(width: 20),
+              _buildRadioOption('Nee', false),
             ],
           ),
         ],
@@ -375,206 +346,197 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
     );
   }
 
-  Widget _buildPriceRow(String label, String value) {
+  Widget _buildRadioOption(String label, bool value) {
+    final isSelected = _autoConversion == value;
+    return GestureDetector(
+      onTap: () => setState(() => _autoConversion = value),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF5492B5)
+                    : const Color(0xFFD1D5DB),
+                width: 2,
+              ),
+            ),
+            child: isSelected
+                ? Center(
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF5492B5),
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKnipkaartInfoText() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F7FF),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFDBE6F0)),
+      ),
+      child: const Text(
+        'Een knipkaart is 365 dagen geldig na aankoop. U kunt lessen flexibel '
+        'inplannen via de app of telefonisch. Annuleren kan kosteloos tot 24 '
+        'uur voor aanvang van de les.',
+        style: TextStyle(
+          fontSize: 13,
+          color: AppColors.textSecondary,
+          height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButtons() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
+        // Terug button (outlined)
+        Expanded(
+          child: SizedBox(
+            height: 46,
+            child: OutlinedButton(
+              onPressed: () => context.pop(),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF5492B5),
+                side: const BorderSide(color: Color(0xFF5492B5)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                '\u2190 Terug',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+        const SizedBox(width: 14),
+
+        // Bevestig button (filled)
+        Expanded(
+          child: SizedBox(
+            height: 46,
+            child: ElevatedButton(
+              onPressed: _handleConfirm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF5492B5),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                '\u2713 Bevestig',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildBottomBar(BuildContext context) {
-    final canProceed = _acceptedTerms && !_isProcessing;
-
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.screenPadding),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Totaal',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                Text(
-                  '\u20AC${_price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: AppDimensions.buttonHeight,
-              child: ElevatedButton(
-                onPressed: canProceed
-                    ? () => _processPayment(context)
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  foregroundColor: AppColors.textWhite,
-                  disabledBackgroundColor: AppColors.border,
-                  disabledForegroundColor: AppColors.textLight,
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusMd),
-                  ),
-                  elevation: canProceed ? 2 : 0,
-                ),
-                child: _isProcessing
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : Text(
-                        'Betaal \u20AC${_price.toStringAsFixed(0)} via Stripe',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _processPayment(BuildContext context) {
-    setState(() => _isProcessing = true);
-
-    // Simulate payment processing
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      setState(() => _isProcessing = false);
-      _showSuccessDialog(context);
-    });
-  }
-
-  void _showSuccessDialog(BuildContext context) {
+  void _handleConfirm() {
+    // Show success dialog
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+          borderRadius: BorderRadius.circular(16),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: AppDimensions.md),
+            const SizedBox(height: 12),
             Container(
-              width: 72,
-              height: 72,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.1),
+                color: const Color(0xFF18BB68).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.check_circle,
-                color: AppColors.success,
-                size: 48,
+                color: Color(0xFF18BB68),
+                size: 40,
               ),
             ),
-            const SizedBox(height: AppDimensions.lg),
+            const SizedBox(height: 16),
             const Text(
-              'Betaling geslaagd!',
+              'Bestelling bevestigd!',
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: AppDimensions.sm),
-            Text(
-              'Uw knipkaart van $_lessons x $_lessonType zwemlessen '
-              'is nu actief.',
+            const SizedBox(height: 8),
+            const Text(
+              'Uw gegevens zijn succesvol verzonden. '
+              'U ontvangt een bevestiging per e-mail.',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: AppDimensions.lg),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-              height: AppDimensions.buttonHeight,
+              height: 44,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  // TODO: Navigate to MyPunchCardsScreen
-                  Navigator.pop(context);
+                  context.pop();
+                  context.pop();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  foregroundColor: AppColors.textWhite,
+                  backgroundColor: const Color(0xFF5492B5),
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusMd),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: const Text(
-                  'Bekijk mijn knipkaarten',
+                  'Sluiten',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppDimensions.sm),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                // TODO: Navigate to booking
-              },
-              child: const Text(
-                'Direct een les boeken',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primaryBlue,
                 ),
               ),
             ),

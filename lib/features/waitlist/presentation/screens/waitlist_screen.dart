@@ -1,454 +1,212 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_dimensions.dart';
+import 'package:go_router/go_router.dart';
+
+const _days = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+const _locations = ['De Bilt', 'Bad Hulckesteijn', 'Garderen', 'Wolfheze'];
 
 class WaitlistScreen extends StatefulWidget {
   const WaitlistScreen({super.key});
-
   @override
   State<WaitlistScreen> createState() => _WaitlistScreenState();
 }
 
 class _WaitlistScreenState extends State<WaitlistScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _childNameController = TextEditingController();
-  final _childAgeController = TextEditingController();
-  final _parentNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _notesController = TextEditingController();
-  String _selectedLocation = 'De Bilt';
-  String _selectedLessonType = '1-op-1';
-  String _selectedDay = 'Maandag';
-  bool _isSubmitting = false;
-
-  final List<String> _locations = [
-    'De Bilt',
-    'Soestduinen',
-    'Nijkerk',
-    'Garderen',
-    'Wolfheze',
-    'Dordrecht',
-  ];
-
-  final List<String> _lessonTypes = ['1-op-1', '1-op-2', 'Vakantie'];
-  final List<String> _days = [
-    'Maandag',
-    'Dinsdag',
-    'Woensdag',
-    'Donderdag',
-    'Vrijdag',
-    'Zaterdag',
-  ];
-
-  @override
-  void dispose() {
-    _childNameController.dispose();
-    _childAgeController.dispose();
-    _parentNameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _notesController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submitWaitlist() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (mounted) {
-      setState(() => _isSubmitting = false);
-      _showSuccessDialog();
-    }
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                color: AppColors.success,
-                size: 40,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Aanmelding ontvangen!',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'U bent succesvol op de wachtlijst geplaatst. We nemen contact met u op zodra er een plek beschikbaar is.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-                height: 1.4,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-              child: const Text('Begrepen'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  final Set<String> _selectedDays = {'Ma', 'Wo', 'Vr'};
+  final Set<String> _selectedLocs = {'De Bilt', 'Bad Hulckesteijn'};
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Wachtlijst'),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-      ),
-      body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // Header info
-              Container(
-                width: double.infinity,
-                color: AppColors.white,
-                padding: const EdgeInsets.all(AppDimensions.screenPadding),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.hourglass_top,
-                        size: 28,
-                        color: AppColors.primaryBlue,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Aanmelden voor de wachtlijst',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Vul het formulier in om uw kind aan te melden voor zwemlessen.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
+      backgroundColor: const Color(0xFFF4F7FC),
+      body: Column(
+        children: [
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(20, 56, 20, 12),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => context.pop(),
+                  child: const Icon(Icons.chevron_left, color: Color(0xFF131827), size: 24),
                 ),
-              ),
-              const SizedBox(height: AppDimensions.md),
-
-              // Child info
-              Container(
-                width: double.infinity,
-                color: AppColors.white,
-                padding: const EdgeInsets.all(AppDimensions.screenPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Gegevens kind',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Naam kind'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _childNameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Volledige naam van het kind',
-                        prefixIcon: Icon(Icons.child_care_outlined),
-                      ),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Verplicht veld' : null,
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Leeftijd kind'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _childAgeController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        hintText: 'Leeftijd in jaren',
-                        prefixIcon: Icon(Icons.cake_outlined),
-                      ),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Verplicht veld' : null,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppDimensions.md),
-
-              // Parent info
-              Container(
-                width: double.infinity,
-                color: AppColors.white,
-                padding: const EdgeInsets.all(AppDimensions.screenPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Gegevens ouder/verzorger',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Naam'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _parentNameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Uw volledige naam',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Verplicht veld' : null,
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('E-mailadres'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        hintText: 'naam@voorbeeld.nl',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Verplicht veld';
-                        if (!v.contains('@')) return 'Ongeldig e-mailadres';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Telefoonnummer'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        hintText: '+31 6 12345678',
-                        prefixIcon: Icon(Icons.phone_outlined),
-                      ),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Verplicht veld' : null,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppDimensions.md),
-
-              // Preferences
-              Container(
-                width: double.infinity,
-                color: AppColors.white,
-                padding: const EdgeInsets.all(AppDimensions.screenPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Voorkeuren',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Voorkeur locatie'),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _selectedLocation,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.location_on_outlined),
-                      ),
-                      items: _locations
-                          .map((l) => DropdownMenuItem(value: l, child: Text(l)))
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _selectedLocation = val);
-                      },
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Type les'),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: _lessonTypes
-                          .map(
-                            (type) => Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                  right: type != _lessonTypes.last ? 8 : 0,
-                                ),
-                                child: GestureDetector(
-                                  onTap: () => setState(
-                                      () => _selectedLessonType = type),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: _selectedLessonType == type
-                                          ? AppColors.primaryBlue
-                                          : AppColors.background,
-                                      borderRadius: BorderRadius.circular(
-                                          AppDimensions.radiusSm),
-                                      border: Border.all(
-                                        color: _selectedLessonType == type
-                                            ? AppColors.primaryBlue
-                                            : AppColors.border,
-                                      ),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      type,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: _selectedLessonType == type
-                                            ? Colors.white
-                                            : AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Voorkeur dag'),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _selectedDay,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.calendar_today_outlined),
-                      ),
-                      items: _days
-                          .map((d) => DropdownMenuItem(value: d, child: Text(d)))
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _selectedDay = val);
-                      },
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Opmerkingen (optioneel)'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _notesController,
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                        hintText: 'Eventuele opmerkingen of bijzonderheden...',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppDimensions.sectionSpacing),
-
-              // Submit button
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.screenPadding,
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: AppDimensions.buttonHeight,
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitWaitlist,
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.white,
-                            ),
-                          )
-                        : const Text(
-                            'Aanmelden',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppDimensions.xl),
-            ],
+                const SizedBox(width: 12),
+                const Text('Wachtlijst',
+                    style: TextStyle(color: Color(0xFF131827), fontSize: 18, fontWeight: FontWeight.w700)),
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: Text('Wij melden u automatisch als er een plek vrijkomt.',
+                        style: TextStyle(color: Color(0xFF44516B), fontSize: 14)),
+                  ),
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: AppColors.textPrimary,
+                  // Lesson type
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Text('Lestype',
+                        style: TextStyle(color: Color(0xFF818EA6), fontSize: 12, fontWeight: FontWeight.w500)),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFDCE4F0), width: 1.5),
+                    ),
+                    child: const Text('1-op-1 Zwemles  ▼',
+                        style: TextStyle(color: Color(0xFF131827), fontSize: 14)),
+                  ),
+
+                  const SizedBox(height: 16),
+                  // Preferred locations
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: Text('Voorkeursloc.',
+                        style: TextStyle(color: Color(0xFF818EA6), fontSize: 12, fontWeight: FontWeight.w500)),
+                  ),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 5.5,
+                    children: _locations.map((loc) {
+                      final sel = _selectedLocs.contains(loc);
+                      return GestureDetector(
+                        onTap: () => setState(() {
+                          if (sel) {
+                            _selectedLocs.remove(loc);
+                          } else {
+                            _selectedLocs.add(loc);
+                          }
+                        }),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: sel ? const Color(0xFFF0F4FC) : Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: sel ? const Color(0xFF0365C4) : const Color(0xFFDCE4F0),
+                              width: sel ? 2 : 1,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text('${sel ? "✓ " : ""}$loc',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: sel ? FontWeight.w700 : FontWeight.normal,
+                                color: sel ? const Color(0xFF0365C4) : const Color(0xFF818EA6),
+                              )),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 16),
+                  // Days
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: Text('Voorkeursdagen',
+                        style: TextStyle(color: Color(0xFF818EA6), fontSize: 12, fontWeight: FontWeight.w500)),
+                  ),
+                  Row(
+                    children: _days.map((day) {
+                      final sel = _selectedDays.contains(day);
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: GestureDetector(
+                          onTap: () => setState(() {
+                            if (sel) {
+                              _selectedDays.remove(day);
+                            } else {
+                              _selectedDays.add(day);
+                            }
+                          }),
+                          child: Container(
+                            width: 44, height: 44,
+                            decoration: BoxDecoration(
+                              color: sel ? const Color(0xFF0365C4) : Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(day,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: sel ? FontWeight.w700 : FontWeight.normal,
+                                  color: sel ? Colors.white : const Color(0xFF818EA6),
+                                )),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 16),
+                  // Time preference
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: Text('Tijdvoorkeur',
+                        style: TextStyle(color: Color(0xFF818EA6), fontSize: 12, fontWeight: FontWeight.w500)),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                          child: const Text('Van: 14:00',
+                              style: TextStyle(color: Color(0xFF131827), fontSize: 14)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                          child: const Text('Tot: 18:00',
+                              style: TextStyle(color: Color(0xFF131827), fontSize: 14)),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+                  // Info banner
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF3DB),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text('ℹ️  Bij een vrije plek krijgt u direct bericht',
+                        style: TextStyle(color: Color(0xFFFCAA00), fontSize: 13, fontWeight: FontWeight.w500)),
+                  ),
+
+                  const SizedBox(height: 16),
+                  // Submit
+                  Container(
+                    width: double.infinity,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0365C4),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('Aanmelden voor wachtlijst',
+                        style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,394 +1,264 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_dimensions.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/route_names.dart';
 
 class AddEditChildScreen extends StatefulWidget {
-  final String? childId;
-  final bool isEditing;
-
-  const AddEditChildScreen({
-    super.key,
-    this.childId,
-    this.isEditing = false,
-  });
-
+  const AddEditChildScreen({super.key});
   @override
   State<AddEditChildScreen> createState() => _AddEditChildScreenState();
 }
 
 class _AddEditChildScreenState extends State<AddEditChildScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _notesController = TextEditingController();
-  DateTime? _dateOfBirth;
-  String _selectedGender = 'Jongen';
-  String _selectedLevel = 'Starter';
-  bool _isSaving = false;
-
-  final List<String> _genders = ['Jongen', 'Meisje', 'Anders'];
-  final List<String> _levels = [
-    'Starter',
-    'Beginner',
-    'Beginner 2',
-    'Gevorderd',
-    'Diplomazwemmer',
-  ];
+  final _firstName = TextEditingController();
+  final _lastName = TextEditingController();
+  final _dob = TextEditingController();
+  final _notes = TextEditingController();
+  bool _saved = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.isEditing) {
-      // Mock data for editing
-      _firstNameController.text = 'Emma';
-      _lastNameController.text = 'Murtaza';
-      _dateOfBirth = DateTime(2020, 5, 15);
-      _selectedGender = 'Meisje';
-      _selectedLevel = 'Beginner';
-      _notesController.text = 'Heeft een lichte angst voor diep water.';
-    }
+    _firstName.addListener(() => setState(() {}));
+    _lastName.addListener(() => setState(() {}));
+    _dob.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _notesController.dispose();
+    _firstName.dispose();
+    _lastName.dispose();
+    _dob.dispose();
+    _notes.dispose();
     super.dispose();
   }
 
-  Future<void> _pickDateOfBirth() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _dateOfBirth ?? DateTime(2018, 1, 1),
-      firstDate: DateTime(2010),
-      lastDate: DateTime.now(),
-      locale: const Locale('nl'),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primaryBlue,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() => _dateOfBirth = picked);
-    }
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSaving = true);
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      setState(() => _isSaving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(widget.isEditing
-              ? 'Kindgegevens bijgewerkt'
-              : 'Kind toegevoegd'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-          ),
-        ),
-      );
-      Navigator.pop(context);
-    }
-  }
+  bool get _isValid =>
+      _firstName.text.trim().isNotEmpty &&
+      _lastName.text.trim().isNotEmpty &&
+      _dob.text.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
+    if (_saved) return _buildSuccess();
+
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(widget.isEditing ? 'Kind bewerken' : 'Kind toevoegen'),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-        actions: widget.isEditing
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: AppColors.error),
-                  onPressed: () => _showDeleteDialog(),
-                ),
-              ]
-            : null,
-      ),
-      body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              const SizedBox(height: AppDimensions.md),
-
-              // Basic info
-              Container(
-                width: double.infinity,
-                color: AppColors.white,
-                padding: const EdgeInsets.all(AppDimensions.screenPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Basisgegevens',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Voornaam'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _firstNameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Voornaam van het kind',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Verplicht veld' : null,
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Achternaam'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _lastNameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Achternaam van het kind',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: (v) =>
-                          v == null || v.isEmpty ? 'Verplicht veld' : null,
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    // Date of birth
-                    _buildLabel('Geboortedatum'),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: _pickDateOfBirth,
-                      child: AbsorbPointer(
-                        child: TextFormField(
-                          decoration: InputDecoration(
-                            hintText: 'Selecteer geboortedatum',
-                            prefixIcon: const Icon(Icons.cake_outlined),
-                            suffixIcon: const Icon(Icons.calendar_today,
-                                size: 18, color: AppColors.textLight),
-                          ),
-                          controller: TextEditingController(
-                            text: _dateOfBirth != null
-                                ? '${_dateOfBirth!.day}-${_dateOfBirth!.month}-${_dateOfBirth!.year}'
-                                : '',
-                          ),
-                          validator: (v) => _dateOfBirth == null
-                              ? 'Selecteer een geboortedatum'
-                              : null,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    // Gender
-                    _buildLabel('Geslacht'),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: _genders
-                          .map(
-                            (g) => Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                  right: g != _genders.last ? 8 : 0,
-                                ),
-                                child: GestureDetector(
-                                  onTap: () =>
-                                      setState(() => _selectedGender = g),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: _selectedGender == g
-                                          ? AppColors.primaryBlue
-                                          : AppColors.background,
-                                      borderRadius: BorderRadius.circular(
-                                          AppDimensions.radiusSm),
-                                      border: Border.all(
-                                        color: _selectedGender == g
-                                            ? AppColors.primaryBlue
-                                            : AppColors.border,
-                                      ),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      g,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: _selectedGender == g
-                                            ? Colors.white
-                                            : AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppDimensions.md),
-
-              // Swimming info
-              Container(
-                width: double.infinity,
-                color: AppColors.white,
-                padding: const EdgeInsets.all(AppDimensions.screenPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Zweminformatie',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Huidig niveau'),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _selectedLevel,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.pool_outlined),
-                      ),
-                      items: _levels
-                          .map((l) => DropdownMenuItem(
-                                value: l,
-                                child: Text(l),
-                              ))
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _selectedLevel = val);
-                      },
-                    ),
-                    const SizedBox(height: AppDimensions.md),
-
-                    _buildLabel('Opmerkingen (optioneel)'),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _notesController,
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                        hintText:
-                            'Eventuele bijzonderheden, allergieën, of aandachtspunten...',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppDimensions.sectionSpacing),
-
-              // Save button
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.screenPadding,
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: AppDimensions.buttonHeight,
-                  child: ElevatedButton(
-                    onPressed: _isSaving ? null : _save,
-                    child: _isSaving
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.white,
-                            ),
-                          )
-                        : Text(
-                            widget.isEditing ? 'Wijzigingen opslaan' : 'Kind toevoegen',
-                            style: const TextStyle(fontSize: 16),
-                          ),
+      backgroundColor: const Color(0xFFF4F7FC),
+      body: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 56, 16, 12),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => context.pop(),
+                  child: Container(
+                    width: 40, height: 40,
+                    decoration: const BoxDecoration(color: Color(0xFFF4F7FC), shape: BoxShape.circle),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.chevron_left, color: Color(0xFF1A1A2E), size: 20),
                   ),
                 ),
+                const SizedBox(width: 12),
+                const Text('Kind toevoegen',
+                    style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 18, fontWeight: FontWeight.w700)),
+              ],
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Avatar
+                  Center(
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 96, height: 96,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft, end: Alignment.bottomRight,
+                              colors: [Color(0xFF1A6FBF), Color(0xFF0D4F8C)],
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: _firstName.text.isNotEmpty
+                              ? Text(_firstName.text.substring(0, 1).toUpperCase(),
+                                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w700))
+                              : Icon(Icons.person, color: Colors.white.withOpacity(0.6), size: 36),
+                        ),
+                        Positioned(
+                          bottom: 0, right: 0,
+                          child: Container(
+                            width: 32, height: 32,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5A623),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Center(
+                    child: Text('Tik om foto toe te voegen',
+                        style: TextStyle(color: Color(0xFF8E8EA0), fontSize: 12)),
+                  ),
+                  const SizedBox(height: 24),
+
+                  _formField(Icons.person_outline, 'Voornaam kind *', _firstName, 'Voornaam'),
+                  const SizedBox(height: 16),
+                  _formField(Icons.person_outline, 'Achternaam kind *', _lastName, 'Achternaam'),
+                  const SizedBox(height: 16),
+                  _formField(Icons.calendar_today, 'Geboortedatum *', _dob, 'DD-MM-YYYY'),
+                  const SizedBox(height: 16),
+                  _formField(Icons.description_outlined, 'Opmerkingen (optioneel)', _notes,
+                      'Bijv. allergieën, angst voor water, etc.', maxLines: 3),
+
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F4FD),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('ℹ️', style: TextStyle(fontSize: 20)),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Zwemniveau',
+                                  style: TextStyle(color: Color(0xFF1A6FBF), fontSize: 13, fontWeight: FontWeight.w600)),
+                              SizedBox(height: 4),
+                              Text('Het zwemniveau wordt automatisch ingesteld op "Beginner" en bijgewerkt door de instructeur na elke les.',
+                                  style: TextStyle(color: Color(0xFF1A6FBF), fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  GestureDetector(
+                    onTap: _isValid ? () => setState(() => _saved = true) : null,
+                    child: Container(
+                      width: double.infinity,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: _isValid ? const Color(0xFF1A6FBF) : const Color(0xFFBDC3C7),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: _isValid
+                            ? [BoxShadow(color: const Color(0xFF1A6FBF).withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))]
+                            : null,
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text('Kind opslaan',
+                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: AppDimensions.xl),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _formField(IconData icon, String label, TextEditingController ctrl, String placeholder, {int maxLines = 1}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            children: [
+              Icon(icon, size: 14, color: const Color(0xFF4A4A6A)),
+              const SizedBox(width: 6),
+              Text(label,
+                  style: const TextStyle(color: Color(0xFF4A4A6A), fontSize: 12, fontWeight: FontWeight.w500)),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: AppColors.textPrimary,
-      ),
-    );
-  }
-
-  void _showDeleteDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        ),
-        title: const Text(
-          'Kind verwijderen',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: maxLines > 1 ? 12 : 0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
           ),
-        ),
-        content: const Text(
-          'Weet u zeker dat u dit kind wilt verwijderen? Dit kan niet ongedaan worden gemaakt.',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Annuleren',
-              style: TextStyle(color: AppColors.textSecondary),
+          child: TextField(
+            controller: ctrl,
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              hintText: placeholder,
+              hintStyle: const TextStyle(color: Color(0xFF8E8EA0), fontSize: 14),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(vertical: maxLines == 1 ? 16 : 0),
             ),
+            style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: AppColors.textWhite,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSuccess() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F7FC),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 96, height: 96,
+                decoration: const BoxDecoration(color: Color(0xFFE8F8F0), shape: BoxShape.circle),
+                child: const Icon(Icons.check_circle, color: Color(0xFF27AE60), size: 48),
               ),
-            ),
-            child: const Text('Verwijderen'),
+              const SizedBox(height: 24),
+              const Text('Kind toegevoegd!',
+                  style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 24, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              Text('${_firstName.text} ${_lastName.text} is succesvol toegevoegd aan je profiel.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Color(0xFF4A4A6A), fontSize: 14)),
+              const SizedBox(height: 32),
+              GestureDetector(
+                onTap: () => context.goNamed(RouteNames.profile),
+                child: Container(
+                  width: double.infinity,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A6FBF),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [BoxShadow(color: const Color(0xFF1A6FBF).withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))],
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text('Naar profiel',
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

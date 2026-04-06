@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 
@@ -10,23 +11,39 @@ class InvoiceReceiptScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF4F7FC),
       appBar: AppBar(
-        title: const Text('Factuur'),
         backgroundColor: AppColors.white,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => context.pop(),
+        ),
+        centerTitle: true,
+        title: const Text(
+          'Factuur',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.share_outlined, color: AppColors.textSecondary),
+            icon: const Icon(Icons.share_outlined,
+                color: AppColors.textSecondary),
             onPressed: () {
-              // TODO: Share invoice
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Factuur delen...')));
             },
           ),
           IconButton(
-            icon: const Icon(Icons.download_outlined, color: AppColors.textSecondary),
+            icon: const Icon(Icons.download_outlined,
+                color: AppColors.textSecondary),
             onPressed: () {
-              // TODO: Download invoice PDF
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('PDF wordt gedownload...')));
             },
           ),
         ],
@@ -38,15 +55,15 @@ class InvoiceReceiptScreen extends StatelessWidget {
             // Invoice card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(AppDimensions.sectionSpacing),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: AppColors.white,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow,
-                    blurRadius: AppDimensions.shadowBlur,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -57,13 +74,13 @@ class InvoiceReceiptScreen extends StatelessWidget {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                      color: const Color(0xFF0365C4).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
                       Icons.pool,
                       size: 28,
-                      color: AppColors.primaryBlue,
+                      color: Color(0xFF0365C4),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -83,7 +100,7 @@ class InvoiceReceiptScreen extends StatelessWidget {
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: AppDimensions.sectionSpacing),
+                  const SizedBox(height: 20),
 
                   // Status badge
                   Container(
@@ -92,30 +109,31 @@ class InvoiceReceiptScreen extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.1),
+                      color: const Color(0xFF27AE60).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle, color: AppColors.success, size: 16),
+                        Icon(Icons.check_circle,
+                            color: Color(0xFF27AE60), size: 16),
                         SizedBox(width: 6),
                         Text(
                           'Betaald',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.success,
+                            color: Color(0xFF27AE60),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppDimensions.sectionSpacing),
+                  const SizedBox(height: 20),
 
                   // Invoice details
-                  const Divider(color: AppColors.divider),
-                  const SizedBox(height: AppDimensions.md),
+                  const Divider(color: Color(0xFFE5E7EB)),
+                  const SizedBox(height: 16),
 
                   _buildDetailRow('Datum', '28 maart 2026'),
                   const SizedBox(height: 12),
@@ -129,23 +147,23 @@ class InvoiceReceiptScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildDetailRow('Betaalmethode', 'Visa ****4242'),
 
-                  const SizedBox(height: AppDimensions.md),
-                  const Divider(color: AppColors.divider),
-                  const SizedBox(height: AppDimensions.md),
+                  const SizedBox(height: 16),
+                  const Divider(color: Color(0xFFE5E7EB)),
+                  const SizedBox(height: 16),
 
                   // Price breakdown
                   _buildPriceRow('Subtotaal', '\u20AC 25,21'),
                   const SizedBox(height: 8),
                   _buildPriceRow('BTW (21%)', '\u20AC 5,29'),
                   const SizedBox(height: 12),
-                  const Divider(color: AppColors.divider),
+                  const Divider(color: Color(0xFFE5E7EB)),
                   const SizedBox(height: 12),
                   _buildPriceRow('Totaal', '\u20AC 30,50', isBold: true),
                 ],
               ),
             ),
 
-            const SizedBox(height: AppDimensions.sectionSpacing),
+            const SizedBox(height: 24),
 
             // Download button
             SizedBox(
@@ -153,17 +171,26 @@ class InvoiceReceiptScreen extends StatelessWidget {
               height: AppDimensions.buttonHeight,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // TODO: Download PDF
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('PDF wordt gedownload...')));
                 },
                 icon: const Icon(Icons.download, size: 20),
                 label: const Text(
                   'Download PDF',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0365C4),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
                 ),
               ),
             ),
 
-            const SizedBox(height: AppDimensions.md),
+            const SizedBox(height: 12),
 
             // Send by email button
             SizedBox(
@@ -171,18 +198,19 @@ class InvoiceReceiptScreen extends StatelessWidget {
               height: AppDimensions.buttonHeight,
               child: OutlinedButton.icon(
                 onPressed: () {
-                  // TODO: Send by email
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Factuur wordt per e-mail verstuurd...')));
                 },
                 icon: const Icon(Icons.email_outlined, size: 20),
                 label: const Text(
                   'Verstuur per e-mail',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primaryBlue,
-                  side: const BorderSide(color: AppColors.primaryBlue),
+                  foregroundColor: const Color(0xFF0365C4),
+                  side: const BorderSide(color: Color(0xFF0365C4)),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -204,12 +232,15 @@ class InvoiceReceiptScreen extends StatelessWidget {
             color: AppColors.textSecondary,
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+        Flexible(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+            textAlign: TextAlign.right,
           ),
         ),
       ],
@@ -233,7 +264,7 @@ class InvoiceReceiptScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: isBold ? 18 : 14,
             fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: isBold ? const Color(0xFF0365C4) : AppColors.textPrimary,
           ),
         ),
       ],

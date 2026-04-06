@@ -1,333 +1,315 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/constants/app_dimensions.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/route_names.dart';
 
-class _SkillData {
+class _Skill {
   final String name;
-  final int completedSteps;
-  final int totalSteps;
-  final List<String> steps;
-
-  const _SkillData({
-    required this.name,
-    required this.completedSteps,
-    required this.totalSteps,
-    required this.steps,
-  });
-
-  double get progress => totalSteps > 0 ? completedSteps / totalSteps : 0;
-
-  Color get statusColor {
-    if (completedSteps == totalSteps) return AppColors.success;
-    if (completedSteps > 0) return AppColors.primaryBlue;
-    return AppColors.textLight;
-  }
-
-  String get statusLabel {
-    if (completedSteps == totalSteps) return 'Voltooid';
-    if (completedSteps > 0) return 'Bezig';
-    return 'Niet gestart';
-  }
+  final String level;
+  final int pct;
+  final Color color;
+  final List<Color> gradient;
+  final String steps;
+  const _Skill(this.name, this.level, this.pct, this.color, this.gradient, this.steps);
 }
 
-class ChildProgressScreen extends StatefulWidget {
+const _skills = <_Skill>[
+  _Skill('Vrije slag armen', 'Goed', 75, Color(0xFF0365C4), [Color(0xFF0365C4), Color(0xFF00C1FF)], '3/4 stappen'),
+  _Skill('Ademhaling', 'Bezig', 50, Color(0xFFFF5C00), [Color(0xFFFF5C00), Color(0xFFF5A623)], '2/4 stappen'),
+  _Skill('Rugslag basis', 'Start', 25, Color(0xFF27AE60), [Color(0xFF27AE60), Color(0xFF2ECC71)], '1/4 stappen'),
+  _Skill('Keerbocht', 'Nieuw', 10, Color(0xFF8E44AD), [Color(0xFF8E44AD), Color(0xFF9B59B6)], '0/3 stappen'),
+];
+
+class ChildProgressScreen extends StatelessWidget {
   const ChildProgressScreen({super.key});
 
   @override
-  State<ChildProgressScreen> createState() => _ChildProgressScreenState();
-}
-
-class _ChildProgressScreenState extends State<ChildProgressScreen> {
-  int _selectedChildIndex = 0;
-
-  final List<Map<String, String>> _children = [
-    {'name': 'Emma Murtaza', 'level': 'Beginner', 'initials': 'EM'},
-    {'name': 'Noah Murtaza', 'level': 'Starter', 'initials': 'NM'},
-  ];
-
-  // Mock skills data per child
-  final List<List<_SkillData>> _skillsByChild = [
-    // Emma's skills
-    [
-      _SkillData(
-        name: 'Watergewenning',
-        completedSteps: 5,
-        totalSteps: 5,
-        steps: [
-          'Gezicht in het water',
-          'Blazen onder water',
-          'Ogen open onder water',
-          'Onderdompelen',
-          'Springen in het water',
-        ],
-      ),
-      _SkillData(
-        name: 'Drijven',
-        completedSteps: 3,
-        totalSteps: 5,
-        steps: [
-          'Drijven op de buik met steun',
-          'Drijven op de rug met steun',
-          'Drijven op de buik zonder steun',
-          'Drijven op de rug zonder steun',
-          'Ster drijven',
-        ],
-      ),
-      _SkillData(
-        name: 'Borstcrawl armen',
-        completedSteps: 2,
-        totalSteps: 4,
-        steps: [
-          'Armslag met plank',
-          'Armslag zonder plank',
-          'Armslag met ademhaling',
-          'Volledige borstcrawl armen',
-        ],
-      ),
-      _SkillData(
-        name: 'Rugcrawl',
-        completedSteps: 0,
-        totalSteps: 4,
-        steps: [
-          'Rugligging met steun',
-          'Beenslag op de rug',
-          'Armslag op de rug',
-          'Volledige rugcrawl',
-        ],
-      ),
-      _SkillData(
-        name: 'Ademhaling',
-        completedSteps: 1,
-        totalSteps: 3,
-        steps: [
-          'Uitblazen onder water',
-          'Ritmisch ademhalen',
-          'Bilateraal ademhalen',
-        ],
-      ),
-    ],
-    // Noah's skills
-    [
-      _SkillData(
-        name: 'Watergewenning',
-        completedSteps: 2,
-        totalSteps: 5,
-        steps: [
-          'Gezicht in het water',
-          'Blazen onder water',
-          'Ogen open onder water',
-          'Onderdompelen',
-          'Springen in het water',
-        ],
-      ),
-      _SkillData(
-        name: 'Drijven',
-        completedSteps: 0,
-        totalSteps: 5,
-        steps: [
-          'Drijven op de buik met steun',
-          'Drijven op de rug met steun',
-          'Drijven op de buik zonder steun',
-          'Drijven op de rug zonder steun',
-          'Ster drijven',
-        ],
-      ),
-    ],
-  ];
-
-  int get _totalCompleted {
-    final skills = _skillsByChild[_selectedChildIndex];
-    return skills.fold(0, (sum, s) => sum + s.completedSteps);
-  }
-
-  int get _totalSteps {
-    final skills = _skillsByChild[_selectedChildIndex];
-    return skills.fold(0, (sum, s) => sum + s.totalSteps);
-  }
-
-  double get _overallProgress =>
-      _totalSteps > 0 ? _totalCompleted / _totalSteps : 0;
-
-  @override
   Widget build(BuildContext context) {
-    final child = _children[_selectedChildIndex];
-    final skills = _skillsByChild[_selectedChildIndex];
-
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(AppStrings.childProgress),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-      ),
+      backgroundColor: const Color(0xFFF4F7FC),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppDimensions.screenPadding),
+        padding: const EdgeInsets.only(bottom: 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Child selector
-            SizedBox(
-              height: 80,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: _children.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final isSelected = index == _selectedChildIndex;
-                  final c = _children[index];
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedChildIndex = index),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primaryBlue.withValues(alpha: 0.1)
-                            : AppColors.white,
-                        borderRadius:
-                            BorderRadius.circular(AppDimensions.radiusMd),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.primaryBlue
-                              : AppColors.border,
-                          width: isSelected ? 2 : 1,
+            // Header
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 58, 20, 32),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF0365C4), Color(0xFF034DA9)],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => context.pop(),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
+                          ),
                         ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: isSelected
-                                ? AppColors.primaryBlue
-                                : AppColors.textLight,
-                            child: Text(
-                              c['initials']!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            c['name']!.split(' ').first,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: isSelected
-                                  ? AppColors.primaryBlue
-                                  : AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
+                        const SizedBox(width: 12),
+                        const Text("Sami's Voortgang",
+                            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+                      ],
                     ),
-                  );
-                },
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.2),
+                            border: Border.all(color: Colors.white.withOpacity(0.2), width: 3),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text('S',
+                              style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700)),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.emoji_events, color: Color(0xFFF5A623), size: 16),
+                                  SizedBox(width: 8),
+                                  Text('Gevorderd Beginner',
+                                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text('Totale voortgang',
+                                  style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(999),
+                                      child: Container(
+                                        height: 8,
+                                        color: Colors.white.withOpacity(0.15),
+                                        child: FractionallySizedBox(
+                                          alignment: Alignment.centerLeft,
+                                          widthFactor: 0.65,
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                              gradient: LinearGradient(colors: [Color(0xFF00C1FF), Colors.white]),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text('65%',
+                                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: AppDimensions.sectionSpacing),
 
-            // Current level card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppDimensions.cardPadding),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primaryBlue, Color(0xFF0480E8)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
+            // Stats
+            Transform.translate(
+              offset: const Offset(0, -16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
                   ),
-                ],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _stat(Icons.star, '24', 'Lessen', const Color(0xFFF5A623)),
+                      _stat(Icons.trending_up, '4', 'Skills', const Color(0xFF0365C4)),
+                      _stat(Icons.emoji_events, '2', 'Badges', const Color(0xFF27AE60)),
+                    ],
+                  ),
+                ),
               ),
+            ),
+
+            // Active skills
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Huidig niveau',
-                        style: TextStyle(fontSize: 13, color: Colors.white70),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          child['level']!,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  const Text('Actieve Vaardigheden',
+                      style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 16, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
-                  Text(
-                    '${(_overallProgress * 100).toInt()}%',
-                    style: const TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                  ..._skills.map((s) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: GestureDetector(
+                      onTap: () => context.pushNamed(RouteNames.skillDetail),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(width: 8, height: 8, decoration: BoxDecoration(color: s.color, shape: BoxShape.circle)),
+                                    const SizedBox(width: 8),
+                                    Text(s.name,
+                                        style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: s.color.withOpacity(0.07),
+                                        borderRadius: BorderRadius.circular(999),
+                                      ),
+                                      child: Text(s.level,
+                                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: s.color)),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(Icons.chevron_right, color: Color(0xFFC4CDD9), size: 16),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(999),
+                                    child: Container(
+                                      height: 6,
+                                      color: const Color(0xFFF0F4FA),
+                                      child: FractionallySizedBox(
+                                        alignment: Alignment.centerLeft,
+                                        widthFactor: s.pct / 100,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(colors: s.gradient),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text('${s.pct}%',
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: s.color)),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(s.steps,
+                                style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )),
+
+                  // Practice at home banner
+                  GestureDetector(
+                    onTap: () => context.pushNamed(RouteNames.practiceAtHome),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFFE8F8F0), Color(0xFFD4F5E0)],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFB8E8CB), width: 1.5),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(colors: [Color(0xFF27AE60), Color(0xFF2ECC71)]),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: const Icon(Icons.menu_book, color: Colors.white, size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Oefeningen voor thuis',
+                                    style: TextStyle(color: Color(0xFF27AE60), fontSize: 14, fontWeight: FontWeight.w700)),
+                                Text('3 nieuwe oefeningen beschikbaar',
+                                    style: TextStyle(color: Color(0xFF5BB17A), fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right, color: Color(0xFF27AE60), size: 18),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$_totalCompleted van $_totalSteps stappen voltooid',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
-                  ),
+
                   const SizedBox(height: 16),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: _overallProgress,
-                      minHeight: 8,
-                      backgroundColor: Colors.white.withValues(alpha: 0.2),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.white),
+
+                  // Last lesson info
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 1))],
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Laatste les: 22 maart',
+                            style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
+                        Text('Instructeur: Jan de Vries',
+                            style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
+                      ],
                     ),
                   ),
                 ],
-              ),
-            ),
-            const SizedBox(height: AppDimensions.sectionSpacing),
-
-            // Skills section
-            const Text(
-              AppStrings.skills,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.md),
-            ...skills.map(
-              (skill) => Padding(
-                padding: const EdgeInsets.only(bottom: AppDimensions.sm),
-                child: _SkillCard(skill: skill),
               ),
             ),
           ],
@@ -335,184 +317,15 @@ class _ChildProgressScreenState extends State<ChildProgressScreen> {
       ),
     );
   }
-}
 
-class _SkillCard extends StatefulWidget {
-  final _SkillData skill;
-
-  const _SkillCard({required this.skill});
-
-  @override
-  State<_SkillCard> createState() => _SkillCardState();
-}
-
-class _SkillCardState extends State<_SkillCard> {
-  bool _isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final skill = widget.skill;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: AppDimensions.shadowBlur,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header (tappable)
-          GestureDetector(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            child: Container(
-              padding: const EdgeInsets.all(AppDimensions.cardPadding),
-              child: Row(
-                children: [
-                  // Status icon
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: skill.statusColor.withValues(alpha: 0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusSm),
-                    ),
-                    child: Icon(
-                      skill.completedSteps == skill.totalSteps
-                          ? Icons.check_circle
-                          : skill.completedSteps > 0
-                              ? Icons.timelapse
-                              : Icons.radio_button_unchecked,
-                      color: skill.statusColor,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          skill.name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(3),
-                                child: LinearProgressIndicator(
-                                  value: skill.progress,
-                                  minHeight: 6,
-                                  backgroundColor: AppColors.border,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    skill.statusColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${skill.completedSteps}/${skill.totalSteps}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Status badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: skill.statusColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      skill.statusLabel,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: skill.statusColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    _isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: AppColors.textLight,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Expandable steps
-          if (_isExpanded)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                children: [
-                  const Divider(color: AppColors.divider),
-                  const SizedBox(height: 8),
-                  ...List.generate(skill.steps.length, (i) {
-                    final isCompleted = i < skill.completedSteps;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isCompleted
-                                ? Icons.check_circle
-                                : Icons.circle_outlined,
-                            size: 18,
-                            color: isCompleted
-                                ? AppColors.success
-                                : AppColors.textLight,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              skill.steps[i],
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: isCompleted
-                                    ? AppColors.textPrimary
-                                    : AppColors.textSecondary,
-                                decoration: isCompleted
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-        ],
-      ),
+  Widget _stat(IconData icon, String value, String label, Color color) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 20, fontWeight: FontWeight.w700)),
+        Text(label, style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 10)),
+      ],
     );
   }
 }

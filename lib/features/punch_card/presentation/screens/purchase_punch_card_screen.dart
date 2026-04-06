@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/router/route_names.dart';
 
 class _PunchCardOption {
   final String lessonType;
@@ -152,7 +154,7 @@ class _PurchasePunchCardScreenState extends State<PurchasePunchCardScreen> {
               child: ElevatedButton(
                 onPressed: _selectedOption != null
                     ? () {
-                        // TODO: Navigate to Stripe payment
+                        context.pushNamed(RouteNames.stripePayment);
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
