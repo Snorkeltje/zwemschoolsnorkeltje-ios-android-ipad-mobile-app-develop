@@ -10,14 +10,13 @@ import '../../features/auth/presentation/screens/registration_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/terms_conditions_screen.dart';
-// Instructor
-import '../../features/instructor/presentation/screens/instructor_home_screen.dart';
 // Home
 import '../../features/home/presentation/screens/home_screen.dart';
 // Booking
 import '../../features/booking/presentation/screens/booking_type_screen.dart';
 import '../../features/booking/presentation/screens/book_lesson_screen.dart';
 import '../../features/booking/presentation/screens/fixed_slot_calendar_screen.dart';
+import '../../features/booking/presentation/screens/location_selection_screen.dart';
 import '../../features/booking/presentation/screens/booking_summary_screen.dart';
 import '../../features/booking/presentation/screens/booking_success_screen.dart';
 import '../../features/booking/presentation/screens/my_reservations_screen.dart';
@@ -28,8 +27,12 @@ import '../../features/punch_card/presentation/screens/punch_card_detail_screen.
 import '../../features/punch_card/presentation/screens/punch_card_order_screen.dart';
 import '../../features/punch_card/presentation/screens/all_punch_card_prices_screen.dart';
 import '../../features/punch_card/presentation/screens/confirm_order_screen.dart';
-// Progress
+import '../../features/punch_card/presentation/screens/purchase_punch_card_screen.dart';
+// Student Progress
 import '../../features/student_progress/presentation/screens/child_progress_screen.dart';
+import '../../features/student_progress/presentation/screens/skill_detail_screen.dart';
+import '../../features/student_progress/presentation/screens/practice_at_home_screen.dart';
+import '../../features/student_progress/presentation/screens/zwemdiplom_screen.dart';
 // Profile
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
@@ -48,7 +51,21 @@ import '../../features/faq/presentation/screens/faq_screen.dart';
 import '../../features/faq/presentation/screens/faq_detail_screen.dart';
 // Notifications
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/notifications/presentation/screens/notification_screen.dart';
 import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
+// Waitlist
+import '../../features/waitlist/presentation/screens/waitlist_screen.dart';
+import '../../features/waitlist/presentation/screens/waitlist_status_screen.dart';
+import '../../features/waitlist/presentation/screens/waitlist_invitation_screen.dart';
+// Instructor
+import '../../features/instructor/presentation/screens/instructor_home_screen.dart';
+import '../../features/instructor/presentation/screens/instructor_schedule_screen.dart';
+import '../../features/instructor/presentation/screens/instructor_students_screen.dart';
+import '../../features/instructor/presentation/screens/instructor_chat_list_screen.dart';
+import '../../features/instructor/presentation/screens/instructor_chat_screen.dart';
+import '../../features/instructor/presentation/screens/instructor_profile_screen.dart';
+import '../../features/instructor/presentation/screens/progress_update_screen.dart';
+import '../../features/instructor/presentation/screens/monthly_report_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -126,20 +143,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const BookLessonScreen(),
       ),
       GoRoute(
+        path: '/booking/location',
+        name: RouteNames.locationSelection,
+        builder: (context, state) => const LocationSelectionScreen(),
+      ),
+      GoRoute(
         path: '/booking/fixed-slot',
+        name: RouteNames.fixedSlotCalendar,
         builder: (context, state) => const FixedSlotCalendarScreen(),
       ),
       GoRoute(
         path: '/booking/extra-lesson',
-        builder: (context, state) => const FixedSlotCalendarScreen(), // reuses calendar
-      ),
-      GoRoute(
-        path: '/booking/location',
-        builder: (context, state) => const BookLessonScreen(), // placeholder
+        name: RouteNames.extraLessonCalendar,
+        builder: (context, state) => const FixedSlotCalendarScreen(),
       ),
       GoRoute(
         path: '/booking/holiday',
-        builder: (context, state) => const BookLessonScreen(), // placeholder
+        name: RouteNames.holidayLessons,
+        builder: (context, state) => const FixedSlotCalendarScreen(),
       ),
       GoRoute(
         path: '/booking/summary',
@@ -176,19 +197,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const PunchCardOrderScreen(),
       ),
       GoRoute(
+        path: '/purchase-punch-card',
+        builder: (context, state) => const PurchasePunchCardScreen(),
+      ),
+      GoRoute(
         path: '/all-punch-card-prices',
+        name: RouteNames.allPunchCardPrices,
         builder: (context, state) => const AllPunchCardPricesScreen(),
       ),
       GoRoute(
         path: '/confirm-order',
+        name: RouteNames.confirmOrder,
         builder: (context, state) => const ConfirmOrderScreen(),
       ),
 
-      // === CHILD PROGRESS ===
+      // === STUDENT PROGRESS ===
       GoRoute(
         path: '/child-progress',
         name: RouteNames.childProgress,
         builder: (context, state) => const ChildProgressScreen(),
+      ),
+      GoRoute(
+        path: '/skill-detail',
+        name: RouteNames.skillDetail,
+        builder: (context, state) => const SkillDetailScreen(),
+      ),
+      GoRoute(
+        path: '/practice-at-home',
+        name: RouteNames.practiceAtHome,
+        builder: (context, state) => const PracticeAtHomeScreen(),
+      ),
+      GoRoute(
+        path: '/zwemdiplom',
+        name: RouteNames.zwemdiplom,
+        builder: (context, state) => const ZwemdiplomScreen(),
       ),
 
       // === PAYMENT ===
@@ -209,6 +251,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/invoice/:id',
+        name: RouteNames.invoiceReceipt,
         builder: (context, state) => const InvoiceReceiptScreen(),
       ),
 
@@ -247,16 +290,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
+        path: '/notification/:id',
+        builder: (context, state) => const NotificationScreen(),
+      ),
+      GoRoute(
         path: '/notification-settings',
         name: RouteNames.notificationSettings,
         builder: (context, state) => const NotificationSettingsScreen(),
       ),
 
-      // === INSTRUCTOR ===
+      // === WAITLIST ===
       GoRoute(
-        path: '/instructor/home',
-        name: RouteNames.instructorHome,
-        builder: (context, state) => const InstructorHomeScreen(),
+        path: '/waitlist',
+        name: RouteNames.joinWaitlist,
+        builder: (context, state) => const WaitlistScreen(),
+      ),
+      GoRoute(
+        path: '/waitlist-status',
+        name: RouteNames.waitlistStatus,
+        builder: (context, state) => const WaitlistStatusScreen(),
+      ),
+      GoRoute(
+        path: '/waitlist-invitation',
+        name: RouteNames.waitlistInvitation,
+        builder: (context, state) => const WaitlistInvitationScreen(),
       ),
 
       // === PROFILE DETAILS ===
@@ -267,11 +324,58 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/add-child',
+        name: RouteNames.addEditChild,
         builder: (context, state) => const AddEditChildScreen(),
       ),
       GoRoute(
         path: '/emergency-contacts',
+        name: RouteNames.emergencyContacts,
         builder: (context, state) => const EmergencyContactScreen(),
+      ),
+
+      // === INSTRUCTOR ===
+      GoRoute(
+        path: '/instructor/home',
+        name: RouteNames.instructorHome,
+        builder: (context, state) => const InstructorHomeScreen(),
+      ),
+      GoRoute(
+        path: '/instructor/schedule',
+        name: RouteNames.instructorSchedule,
+        builder: (context, state) => const InstructorScheduleScreen(),
+      ),
+      GoRoute(
+        path: '/instructor/students',
+        name: RouteNames.instructorStudents,
+        builder: (context, state) => const InstructorStudentsScreen(),
+      ),
+      GoRoute(
+        path: '/instructor/chat-list',
+        name: RouteNames.instructorChatList,
+        builder: (context, state) => const InstructorChatListScreen(),
+      ),
+      GoRoute(
+        path: '/instructor/chat/:id',
+        name: RouteNames.instructorChat,
+        builder: (context, state) => InstructorChatScreen(
+          chatId: state.pathParameters['id'] ?? '1',
+        ),
+      ),
+      GoRoute(
+        path: '/instructor/profile',
+        name: RouteNames.instructorProfile,
+        builder: (context, state) => const InstructorProfileScreen(),
+      ),
+      GoRoute(
+        path: '/instructor/progress-update/:studentInitial',
+        name: RouteNames.progressUpdate,
+        builder: (context, state) => ProgressUpdateScreen(
+          studentInitial: state.pathParameters['studentInitial'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/instructor/monthly-report',
+        builder: (context, state) => const MonthlyReportScreen(),
       ),
     ],
   );
