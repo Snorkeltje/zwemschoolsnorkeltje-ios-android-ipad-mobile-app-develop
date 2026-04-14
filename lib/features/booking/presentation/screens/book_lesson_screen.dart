@@ -105,7 +105,7 @@ class BookLessonScreen extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
+                          color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         alignment: Alignment.center,
@@ -119,7 +119,7 @@ class BookLessonScreen extends StatelessWidget {
                         const Text('Les boeken',
                             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
                         Text('Kies uw lestype',
-                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                       ],
                     ),
                   ],
@@ -137,7 +137,7 @@ class BookLessonScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4))],
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

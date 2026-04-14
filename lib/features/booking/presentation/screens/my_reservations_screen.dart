@@ -69,7 +69,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
+                          color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         alignment: Alignment.center,
@@ -83,7 +83,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                         const Text('Mijn reserveringen',
                             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
                         Text('${items.length} lessen',
-                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                       ],
                     ),
                   ],
@@ -102,7 +102,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4))],
                   ),
                   child: Row(
                     children: [
@@ -148,7 +148,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                       ),
                       child: IntrinsicHeight(
                         child: Row(
@@ -160,7 +160,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                               width: 52,
                               height: 52,
                               decoration: BoxDecoration(
-                                color: r.color.withOpacity(0.06),
+                                color: r.color.withValues(alpha: 0.06),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Column(
@@ -194,7 +194,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                                         decoration: BoxDecoration(
-                                          color: r.color.withOpacity(0.07),
+                                          color: r.color.withValues(alpha: 0.07),
                                           borderRadius: BorderRadius.circular(999),
                                         ),
                                         child: Text(r.type,
@@ -296,7 +296,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
           borderRadius: BorderRadius.circular(999),
           boxShadow: [
             BoxShadow(
-              color: sel ? const Color(0x330365C4) : Colors.black.withOpacity(0.04),
+              color: sel ? const Color(0x330365C4) : Colors.black.withValues(alpha: 0.04),
               blurRadius: sel ? 12 : 3,
               offset: Offset(0, sel ? 4 : 1),
             ),
