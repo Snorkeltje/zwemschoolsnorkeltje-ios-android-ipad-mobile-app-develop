@@ -44,4 +44,19 @@ class AppDimensions {
   // === CARD SHADOWS ===
   static const double shadowBlur = 10.0;
   static const double shadowOffset = 4.0;
+
+  // === HEADER ===
+  static const double headerTopPadding = 58.0;
+  static const double headerBottomPadding = 20.0;
+  static const double headerBottomRadius = 24.0;
+  static const double heroHeaderBottomRadius = 32.0;
+
+  // === INPUT ===
+  static const double inputHeight = 52.0;
+  static const double inputRadius = 14.0;
+  static const double inputBorderWidth = 2.0;
+
+  // === PROGRESS BAR ===
+  static const double progressBarHeight = 6.0;
+  static const double progressBarHeightThick = 8.0;
 }
