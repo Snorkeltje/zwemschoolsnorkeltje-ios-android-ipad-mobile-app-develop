@@ -1,0 +1,492 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+class ReviewsScreen extends StatefulWidget {
+  const ReviewsScreen({super.key});
+
+  @override
+  State<ReviewsScreen> createState() => _ReviewsScreenState();
+}
+
+class _ReviewsScreenState extends State<ReviewsScreen> {
+  static const _orange = Color(0xFFFF5C00);
+  static const _amber = Color(0xFFF5A623);
+  static const _blue = Color(0xFF0365C4);
+  static const _lightBlue = Color(0xFF00C1FF);
+  static const _green = Color(0xFF27AE60);
+  static const _bg = Color(0xFFF4F7FC);
+  static const _textPrimary = Color(0xFF1A1A2E);
+  static const _textSecondary = Color(0xFF8E9BB3);
+  static const _textBody = Color(0xFF4A5568);
+  static const _divider = Color(0xFFF0F4FA);
+
+  String _filter = 'Alle';
+
+  final List<_Review> _reviews = const [
+    _Review(
+      id: 1,
+      name: 'Familie De Vries',
+      rating: 10,
+      date: '2 weken geleden',
+      text:
+          'Fantastische zwemschool! Onze dochter Lisa heeft in recordtijd haar A-diploma gehaald. Walter en zijn team zijn geweldig met kinderen.',
+      helpful: 24,
+      location: 'De Bilt',
+    ),
+    _Review(
+      id: 2,
+      name: 'M. Jansen',
+      rating: 9,
+      date: '1 maand geleden',
+      text:
+          'Heel persoonlijke aanpak. De 1-op-1 lessen maken echt het verschil. Ons zoontje gaat met plezier naar zwemles!',
+      helpful: 18,
+      location: 'Nijkerk',
+    ),
+    _Review(
+      id: 3,
+      name: 'Familie Bakker',
+      rating: 10,
+      date: '1 maand geleden',
+      text:
+          'Beste zwemschool van Nederland! De instructeurs zijn geduldig en deskundig. Beide kinderen hebben hier hun diploma behaald.',
+      helpful: 31,
+      location: 'Garderen',
+    ),
+    _Review(
+      id: 4,
+      name: 'A. van Dijk',
+      rating: 9,
+      date: '2 maanden geleden',
+      text:
+          'Snorkeltje is echt top! De app is ook heel handig om lessen te boeken en voortgang te volgen. Aanrader!',
+      helpful: 15,
+      location: 'Mierlo',
+    ),
+    _Review(
+      id: 5,
+      name: 'Familie Smit',
+      rating: 10,
+      date: '2 maanden geleden',
+      text:
+          'Al onze 3 kinderen zwemmen bij Snorkeltje. De kwaliteit is constant hoog en het team is super vriendelijk.',
+      helpful: 27,
+      location: 'Wolfheze',
+    ),
+    _Review(
+      id: 6,
+      name: 'R. Peters',
+      rating: 8,
+      date: '3 maanden geleden',
+      text:
+          'Goede ervaring. Soms lastig om een tijdslot te vinden maar de kwaliteit van de lessen is uitstekend.',
+      helpful: 9,
+      location: 'Dordrecht',
+    ),
+    _Review(
+      id: 7,
+      name: 'Familie Visser',
+      rating: 10,
+      date: '3 maanden geleden',
+      text:
+          'Wij zijn enorm tevreden! De voortgangsrapportages zijn heel duidelijk en je ziet echt de groei van je kind.',
+      helpful: 22,
+      location: 'Soest',
+    ),
+    _Review(
+      id: 8,
+      name: 'K. de Groot',
+      rating: 9,
+      date: '4 maanden geleden',
+      text:
+          'Professioneel en kindvriendelijk. De knipkaartsysteem werkt heel goed. Duidelijke communicatie via de app.',
+      helpful: 14,
+      location: 'De Bilt',
+    ),
+  ];
+
+  List<_Review> get _filtered {
+    if (_filter == 'Alle') return _reviews;
+    final score = int.parse(_filter);
+    return _reviews.where((r) => r.rating == score).toList();
+  }
+
+  double get _avg =>
+      _reviews.fold<int>(0, (a, r) => a + r.rating) / _reviews.length;
+
+  int _countByRating(int rating) =>
+      _reviews.where((r) => r.rating == rating).length;
+
+  @override
+  Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      backgroundColor: _bg,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context, topPadding),
+            _buildStatsCard(),
+            const SizedBox(height: 20),
+            _buildFilters(),
+            const SizedBox(height: 12),
+            _buildReviewsList(),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, double topPadding) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: topPadding + 12,
+        left: 20,
+        right: 20,
+        bottom: 32,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_orange, _amber],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.arrow_back_ios_new,
+                  color: Colors.white, size: 18),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Reviews',
+            style: TextStyle(
+                fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Wat ouders zeggen',
+            style: TextStyle(
+                fontSize: 13, color: Colors.white.withValues(alpha: 0.7)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsCard() {
+    return Transform.translate(
+      offset: const Offset(0, -16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Column(
+                children: [
+                  Text(
+                    _avg.toStringAsFixed(1),
+                    style: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w700,
+                        color: _textPrimary),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(
+                      5,
+                      (i) => const Icon(Icons.star,
+                          color: Color(0xFFFFD700), size: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('${_reviews.length} reviews',
+                      style: const TextStyle(
+                          fontSize: 11, color: _textSecondary)),
+                ],
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  children: [
+                    _ratingBar(10, _countByRating(10)),
+                    const SizedBox(height: 6),
+                    _ratingBar(9, _countByRating(9)),
+                    const SizedBox(height: 6),
+                    _ratingBar(8, _countByRating(8)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _ratingBar(int score, int count) {
+    final pct = count / _reviews.length;
+    return Row(
+      children: [
+        SizedBox(
+          width: 18,
+          child: Text(
+            '$score',
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w600, color: _textSecondary),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Container(
+            height: 6,
+            decoration: BoxDecoration(
+              color: _divider,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: pct,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  gradient: const LinearGradient(colors: [_orange, _amber]),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 18,
+          child: Text('$count',
+              style: const TextStyle(fontSize: 11, color: _textSecondary)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilters() {
+    final filters = ['Alle', '10', '9', '8'];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          const Icon(Icons.filter_list, color: _textSecondary, size: 16),
+          const SizedBox(width: 8),
+          ...filters.map((f) {
+            final isSelected = _filter == f;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GestureDetector(
+                onTap: () => setState(() => _filter = f),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: isSelected
+                        ? const LinearGradient(colors: [_blue, _lightBlue])
+                        : null,
+                    color: isSelected ? null : Colors.white,
+                    borderRadius: BorderRadius.circular(100),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isSelected
+                            ? _blue.withValues(alpha: 0.25)
+                            : Colors.black.withValues(alpha: 0.04),
+                        blurRadius: isSelected ? 12 : 4,
+                        offset: Offset(0, isSelected ? 4 : 1),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    f == 'Alle' ? 'Alle' : '$f/10',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? Colors.white : _textBody,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsList() {
+    final items = _filtered;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: items
+            .map((review) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildReviewCard(review),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildReviewCard(_Review review) {
+    final isHighRating = review.rating >= 9;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(colors: [_blue, _lightBlue]),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  review.name[0],
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(review.name,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: _textPrimary)),
+                    Row(
+                      children: [
+                        Text(review.location,
+                            style: const TextStyle(
+                                fontSize: 10, color: _textSecondary)),
+                        const Text('  ·  ',
+                            style: TextStyle(
+                                fontSize: 10, color: Color(0xFFC4CDD9))),
+                        Text(review.date,
+                            style: const TextStyle(
+                                fontSize: 10, color: _textSecondary)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isHighRating
+                      ? const Color(0xFFE8F8F0)
+                      : const Color(0xFFFEF0E7),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  '${review.rating}/10',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: isHighRating ? _green : _orange,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            review.text,
+            style: const TextStyle(
+                fontSize: 13, color: _textBody, height: 1.5),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.thumb_up_outlined,
+                  color: _textSecondary, size: 13),
+              const SizedBox(width: 6),
+              Text(
+                '${review.helpful} nuttig',
+                style: const TextStyle(fontSize: 11, color: _textSecondary),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Review {
+  final int id;
+  final String name;
+  final int rating;
+  final String date;
+  final String text;
+  final int helpful;
+  final String location;
+
+  const _Review({
+    required this.id,
+    required this.name,
+    required this.rating,
+    required this.date,
+    required this.text,
+    required this.helpful,
+    required this.location,
+  });
+}
