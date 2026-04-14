@@ -43,7 +43,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 2))],
             ),
             padding: const EdgeInsets.fromLTRB(16, 56, 16, 12),
             child: Row(
@@ -83,13 +83,13 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                     child: Column(
                       children: [
                         Text('Te betalen',
-                            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
                         const SizedBox(height: 4),
                         const Text('€38,00',
                             style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w700)),
                         const SizedBox(height: 4),
                         Text('1-op-1 extra zwemles — De Bilt',
-                            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
                       ],
                     ),
                   ),
@@ -128,7 +128,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                         decoration: BoxDecoration(
                           color: const Color(0xFF1A6FBF),
                           borderRadius: BorderRadius.circular(12),
-                          boxShadow: [BoxShadow(color: const Color(0xFF1A6FBF).withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))],
+                          boxShadow: [BoxShadow(color: const Color(0xFF1A6FBF).withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))],
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -162,7 +162,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           border: sel ? null : Border.all(color: const Color(0xFFE5E7EB)),
           boxShadow: [
             BoxShadow(
-              color: sel ? const Color(0xFF1A6FBF).withOpacity(0.3) : Colors.black.withOpacity(0.04),
+              color: sel ? const Color(0xFF1A6FBF).withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.04),
               blurRadius: sel ? 4 : 8,
               offset: Offset(0, sel ? 2 : 2),
             ),
@@ -206,7 +206,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   color: isSel ? const Color(0xFF1A6FBF) : const Color(0xFFE5E7EB),
                   width: isSel ? 2 : 1,
                 ),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 2))],
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +320,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: const Color(0xFFE5E7EB)),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
             ),
             child: Row(
               children: [
