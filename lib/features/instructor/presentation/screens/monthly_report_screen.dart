@@ -22,7 +22,7 @@ class MonthlyReportScreen extends StatelessWidget {
                   onTap: () => context.pop(),
                   child: Container(
                     width: 40, height: 40,
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.chevron_left, color: Color(0xFFE2E8F0), size: 20),
                   ),
                 ),
@@ -39,7 +39,7 @@ class MonthlyReportScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Row(
@@ -173,7 +173,7 @@ class _ReportStat extends StatelessWidget {
           children: [
             Container(
               width: 36, height: 36,
-              decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
               child: Icon(icon, size: 18, color: color),
             ),
             const SizedBox(height: 10),

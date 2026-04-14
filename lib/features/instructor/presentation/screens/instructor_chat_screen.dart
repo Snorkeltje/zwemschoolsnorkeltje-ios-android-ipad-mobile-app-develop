@@ -71,7 +71,7 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                 end: Alignment.bottomRight,
                 colors: [Color(0xFF1A1D27), Color(0xFF252836)],
               ),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 2))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 2))],
             ),
             child: Row(
               children: [
@@ -80,7 +80,7 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                   child: Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08),
+                      color: Colors.white.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.chevron_left, color: Color(0xFFE2E8F0), size: 20),
@@ -115,7 +115,7 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                 Container(
                   width: 38, height: 38,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.phone_outlined, color: Color(0xFFE2E8F0), size: 18),
@@ -124,7 +124,7 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                 Container(
                   width: 38, height: 38,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.more_vert, color: Color(0xFFE2E8F0), size: 18),
@@ -175,7 +175,7 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: isInstructor ? const Color(0xFFFF5C00).withOpacity(0.2) : Colors.black.withOpacity(0.2),
+                          color: isInstructor ? const Color(0xFFFF5C00).withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.2),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -194,7 +194,7 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                               msg['time'],
                               style: TextStyle(
                                 fontSize: 10,
-                                color: isInstructor ? Colors.white.withOpacity(0.6) : const Color(0xFF4A5568),
+                                color: isInstructor ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF4A5568),
                               ),
                             ),
                             if (isInstructor) ...[
@@ -202,7 +202,7 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                               Icon(
                                 Icons.done_all,
                                 size: 12,
-                                color: msg['read'] == true ? const Color(0xFF00C1FF) : Colors.white.withOpacity(0.4),
+                                color: msg['read'] == true ? const Color(0xFF00C1FF) : Colors.white.withValues(alpha: 0.4),
                               ),
                             ],
                           ],
@@ -229,9 +229,9 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.06),
+                        color: Colors.white.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: Colors.white.withOpacity(0.08)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                       ),
                       child: Text(reply, style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11, fontWeight: FontWeight.w500)),
                     ),
@@ -249,7 +249,7 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF1A1D27),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
               ),
               child: Row(
                 children: [
@@ -280,10 +280,10 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
                         gradient: _controller.text.trim().isNotEmpty
                             ? const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)])
                             : null,
-                        color: _controller.text.trim().isEmpty ? Colors.white.withOpacity(0.06) : null,
+                        color: _controller.text.trim().isEmpty ? Colors.white.withValues(alpha: 0.06) : null,
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: _controller.text.trim().isNotEmpty
-                            ? [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))]
+                            ? [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))]
                             : null,
                       ),
                       child: Icon(

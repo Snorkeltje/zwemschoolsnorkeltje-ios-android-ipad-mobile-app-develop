@@ -33,7 +33,7 @@ class InstructorProfileScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
-                          boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))],
+                          boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
                         ),
                         child: const Center(child: Text('JV', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w700))),
                       ),
@@ -84,7 +84,7 @@ class InstructorProfileScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFF1A1D27),
                         borderRadius: BorderRadius.circular(18),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 24, offset: const Offset(0, 8))],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 24, offset: const Offset(0, 8))],
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -142,9 +142,9 @@ class InstructorProfileScreen extends StatelessWidget {
                       child: Container(
                         height: 52,
                         decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFFE74C3C).withOpacity(0.3), width: 1.5),
+                          border: Border.all(color: const Color(0xFFE74C3C).withValues(alpha: 0.3), width: 1.5),
                           borderRadius: BorderRadius.circular(16),
-                          color: const Color(0xFFE74C3C).withOpacity(0.08),
+                          color: const Color(0xFFE74C3C).withValues(alpha: 0.08),
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -201,13 +201,13 @@ class _SettingsGroup extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1A1D27),
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         children: List.generate(items.length, (i) {
           return Column(
             children: [
-              if (i > 0) Divider(height: 1, color: Colors.white.withOpacity(0.04)),
+              if (i > 0) Divider(height: 1, color: Colors.white.withValues(alpha: 0.04)),
               items[i],
             ],
           );
@@ -238,7 +238,7 @@ class _SettingsItem extends StatelessWidget {
             Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.08),
+                color: color.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, size: 17, color: color),
@@ -249,7 +249,7 @@ class _SettingsItem extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
-                  color: (badgeColor ?? Colors.white.withOpacity(0.06)).withOpacity(badge == 'AAN' ? 0.15 : 0.06),
+                  color: (badgeColor ?? Colors.white.withValues(alpha: 0.06)).withValues(alpha: badge == 'AAN' ? 0.15 : 0.06),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(badge!, style: TextStyle(
