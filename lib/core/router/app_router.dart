@@ -38,6 +38,9 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/add_edit_child_screen.dart';
 import '../../features/profile/presentation/screens/emergency_contact_screen.dart';
+import '../../features/profile/presentation/screens/about_us_screen.dart';
+import '../../features/profile/presentation/screens/contact_screen.dart';
+import '../../features/profile/presentation/screens/reviews_screen.dart';
 // Payment
 import '../../features/payment/presentation/screens/payment_method_screen.dart';
 import '../../features/payment/presentation/screens/payment_history_screen.dart';
@@ -331,6 +334,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/emergency-contacts',
         name: RouteNames.emergencyContacts,
         builder: (context, state) => const EmergencyContactScreen(),
+      ),
+      GoRoute(
+        path: '/about-us',
+        name: RouteNames.aboutUs,
+        builder: (context, state) => const AboutUsScreen(),
+      ),
+      GoRoute(
+        path: '/contact-us',
+        name: RouteNames.contactScreen,
+        builder: (context, state) => const ContactScreen(),
+      ),
+      GoRoute(
+        path: '/reviews',
+        name: RouteNames.reviewsScreen,
+        builder: (context, state) => const ReviewsScreen(),
       ),
 
       // === INSTRUCTOR ===
