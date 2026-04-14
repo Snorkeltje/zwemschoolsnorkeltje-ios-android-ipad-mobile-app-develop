@@ -172,7 +172,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -196,7 +196,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
                 'Selecteer een datum',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -217,7 +217,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -280,7 +280,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: const Offset(0, 3),
             ),
@@ -411,7 +411,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0365C4).withOpacity(0.35),
+            color: const Color(0xFF0365C4).withValues(alpha: 0.35),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -514,7 +514,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: const Offset(0, 3),
             ),
@@ -577,7 +577,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 16, color: color),
@@ -611,7 +611,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0365C4).withOpacity(0.35),
+              color: const Color(0xFF0365C4).withValues(alpha: 0.35),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),

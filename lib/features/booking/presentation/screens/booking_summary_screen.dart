@@ -37,7 +37,7 @@ class BookingSummaryScreen extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
+                          color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         alignment: Alignment.center,
@@ -51,7 +51,7 @@ class BookingSummaryScreen extends StatelessWidget {
                         const Text('Overzicht',
                             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
                         Text('Controleer en bevestig',
-                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                       ],
                     ),
                   ],
@@ -72,7 +72,7 @@ class BookingSummaryScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4))],
                       ),
                       child: IntrinsicHeight(
                         child: Row(
@@ -137,7 +137,7 @@ class BookingSummaryScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(14),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                       ),
                       child: Row(
                         children: [
@@ -177,7 +177,7 @@ class BookingSummaryScreen extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: const Color(0xFF0365C4), width: 2),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                         ),
                         child: Row(
                           children: [
@@ -215,7 +215,7 @@ class BookingSummaryScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +259,7 @@ class BookingSummaryScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF0D7FE8)]),
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))],
+                          boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
                         ),
                         alignment: Alignment.center,
                         child: const Text('Bevestigen & Boeken ✓',
@@ -292,7 +292,7 @@ class BookingSummaryScreen extends StatelessWidget {
         Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(color: color.withOpacity(0.07), borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.07), borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, color: color, size: 15),
         ),
         const SizedBox(width: 12),

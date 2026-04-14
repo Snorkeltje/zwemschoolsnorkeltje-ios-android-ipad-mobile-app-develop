@@ -60,7 +60,7 @@ class BookingSuccessScreen extends StatelessWidget {
                         colors: [Color(0xFFE8F8F0), Color(0xFFD4F5E0)],
                       ),
                       shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withOpacity(0.15), blurRadius: 32, offset: const Offset(0, 12))],
+                      boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withValues(alpha: 0.15), blurRadius: 32, offset: const Offset(0, 12))],
                     ),
                     child: const Icon(Icons.check_circle_outline, color: Color(0xFF27AE60), size: 50),
                   ),
@@ -78,7 +78,7 @@ class BookingSuccessScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4))],
                     ),
                     child: IntrinsicHeight(
                       child: Row(
@@ -166,7 +166,7 @@ class BookingSuccessScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF0D7FE8)]),
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))],
+                        boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
                       ),
                       alignment: Alignment.center,
                       child: const Text('Mijn reserveringen',
@@ -203,7 +203,7 @@ class BookingSuccessScreen extends StatelessWidget {
         Container(
           width: 28,
           height: 28,
-          decoration: BoxDecoration(color: color.withOpacity(0.07), borderRadius: BorderRadius.circular(7)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.07), borderRadius: BorderRadius.circular(7)),
           child: Icon(icon, color: color, size: 14),
         ),
         const SizedBox(width: 12),
