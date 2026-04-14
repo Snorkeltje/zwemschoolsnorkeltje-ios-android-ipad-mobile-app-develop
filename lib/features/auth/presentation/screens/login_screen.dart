@@ -471,25 +471,49 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: TextField(
-                  controller: controller,
-                  obscureText: obscure,
-                  keyboardType: keyboardType,
-                  cursorColor: _blue,
-                  cursorHeight: 18,
-                  decoration: InputDecoration(
-                    hintText: hint,
-                    border: InputBorder.none,
-                    isCollapsed: true,
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: const TextStyle(
-                      color: _inactive,
-                      fontSize: 14,
+                // Reset the global InputDecorationTheme for this TextField
+                // so only our outer Container border is visible (app_theme.dart
+                // sets a default OutlineInputBorder that would otherwise show).
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    inputDecorationTheme: const InputDecorationTheme(
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      filled: false,
+                      isCollapsed: true,
+                      contentPadding: EdgeInsets.zero,
                     ),
                   ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: _darkText,
+                  child: TextField(
+                    controller: controller,
+                    obscureText: obscure,
+                    keyboardType: keyboardType,
+                    cursorColor: _blue,
+                    cursorHeight: 18,
+                    decoration: InputDecoration(
+                      hintText: hint,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      filled: false,
+                      isCollapsed: true,
+                      contentPadding: EdgeInsets.zero,
+                      hintStyle: const TextStyle(
+                        color: _inactive,
+                        fontSize: 14,
+                      ),
+                    ),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: _darkText,
+                    ),
                   ),
                 ),
               ),
