@@ -6,6 +6,8 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Initialize Dutch locale for date formatting (used by DateFormat('...', 'nl') and 'nl_NL')
+  await initializeDateFormatting('nl', null);
   await initializeDateFormatting('nl_NL', null);
 
   await SystemChrome.setPreferredOrientations([
