@@ -52,4 +52,43 @@ class AppColors {
 
   // === SHADOWS ===
   static const Color shadow = Color(0x1A000000);
+
+  // === BRAND GRADIENTS ===
+  /// Primary blue gradient used for headers, buttons and cards
+  static const List<Color> gradientBluePrimary = [
+    Color(0xFF0365C4),
+    Color(0xFF00C1FF),
+  ];
+
+  /// Rich blue hero gradient (3-stop) used for Home header
+  static const List<Color> gradientBlueHero = [
+    Color(0xFF0365C4),
+    Color(0xFF0D7FE8),
+    Color(0xFF00C1FF),
+  ];
+
+  /// Orange gradient used for instructor mode, next lesson card, etc.
+  static const List<Color> gradientOrange = [
+    Color(0xFFFF5C00),
+    Color(0xFFF5A623),
+  ];
+
+  /// Green gradient used for success, punch cards
+  static const List<Color> gradientGreen = [
+    Color(0xFF27AE60),
+    Color(0xFF2ECC71),
+  ];
+
+  /// Purple gradient used for progress and Survival cards
+  static const List<Color> gradientPurple = [
+    Color(0xFF8E44AD),
+    Color(0xFF9B59B6),
+  ];
+
+  // === FIGMA-MATCHED NEUTRAL PALETTE ===
+  static const Color figmaDarkText = Color(0xFF1A1A2E);
+  static const Color figmaBodyText = Color(0xFF4A5568);
+  static const Color figmaMutedText = Color(0xFF8E9BB3);
+  static const Color figmaBorder = Color(0xFFE8F0FE);
+  static const Color figmaDividerSoft = Color(0xFFF0F4FA);
 }
