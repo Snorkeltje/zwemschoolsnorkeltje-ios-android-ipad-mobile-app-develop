@@ -105,4 +105,38 @@ class AppStrings {
   static const String dordrecht = 'Dordrecht';
   static const String soestduinen = 'Soestduinen';
   static const String nijkerk = 'Nijkerk';
+  static const String mierlo = 'Mierlo';
+  static const String soest = 'Soest';
+
+  // === CHAT ===
+  static const String messages = 'Berichten';
+  static const String typeMessage = 'Typ een bericht...';
+  static const String yourInstructor = 'Uw instructeur';
+  static const String schoolAdmin = 'Schooladministratie';
+  static const String online = 'Online';
+  static const String offline = 'Offline';
+
+  // === NOTIFICATIONS ===
+  static const String notifications = 'Meldingen';
+  static const String markAllRead = 'Alles gelezen';
+  static const String today = 'Vandaag';
+  static const String yesterday = 'Gisteren';
+  static const String earlier = 'Eerder';
+
+  // === FAQ ===
+  static const String faqTitle = 'Veelgestelde vragen';
+  static const String faqSearch = 'Zoeken in vragen...';
+  static const String faqContact = 'Contact opnemen';
+
+  // === PROFILE SECTIONS ===
+  static const String myChildren = 'Mijn kinderen';
+  static const String addChild = 'Kind toevoegen';
+  static const String emergencyContacts = 'Noodcontacten';
+  static const String language = 'Taal';
+  static const String aboutSnorkeltje = 'Over Snorkeltje';
+  static const String helpSupport = 'Hulp & Support';
+  static const String termsConditions = 'Algemene voorwaarden';
+  static const String privacyPolicy = 'Privacybeleid';
+  static const String logout = 'Uitloggen';
+  static const String logoutConfirm = 'Weet u zeker dat u wilt uitloggen?';
 }
