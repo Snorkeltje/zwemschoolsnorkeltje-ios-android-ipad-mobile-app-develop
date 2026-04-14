@@ -113,7 +113,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
-                        colors: [slide.decorColor.withOpacity(0.03), Colors.transparent],
+                        colors: [slide.decorColor.withValues(alpha: 0.03), Colors.transparent],
                         stops: const [0.0, 0.7],
                       ),
                     ),
@@ -124,7 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: slide.decorColor.withOpacity(0.12),
+                        color: slide.decorColor.withValues(alpha: 0.12),
                         width: 2,
                         style: BorderStyle.solid,
                       ),
@@ -137,7 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: slide.iconBg),
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
-                        BoxShadow(color: slide.decorColor.withOpacity(0.3), blurRadius: 40, offset: const Offset(0, 20)),
+                        BoxShadow(color: slide.decorColor.withValues(alpha: 0.3), blurRadius: 40, offset: const Offset(0, 20)),
                       ],
                     ),
                     child: Icon(slide.icon, color: Colors.white, size: 56),
@@ -212,7 +212,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: slide.iconBg),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
-                                BoxShadow(color: slide.color.withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8)),
+                                BoxShadow(color: slide.color.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8)),
                               ],
                             ),
                             child: Text(
@@ -260,7 +260,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(999),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 4))],
             ),
             child: Text(
               '✓ ${slide.features[i]}',

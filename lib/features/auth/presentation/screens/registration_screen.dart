@@ -171,7 +171,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF0365C4).withOpacity(0.3),
+                                color: const Color(0xFF0365C4).withValues(alpha: 0.3),
                                 blurRadius: 24, offset: const Offset(0, 8),
                               ),
                             ],
@@ -362,7 +362,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   width: 2,
                 ),
                 boxShadow: isFocused
-                  ? [BoxShadow(color: const Color(0xFF0365C4).withOpacity(0.08), blurRadius: 8)]
+                  ? [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.08), blurRadius: 8)]
                   : null,
               ),
               child: Row(

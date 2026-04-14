@@ -89,7 +89,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         alignment: Alignment.center,
@@ -103,7 +103,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
                         const Text('Algemene Voorwaarden',
                             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
                         Text('Zwemschool Snorkeltje — 2026',
-                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                       ],
                     ),
                   ],
@@ -119,7 +119,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +152,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                   ),
                   child: Column(
                     children: [
@@ -167,7 +167,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  color: s.color.withOpacity(0.07),
+                                  color: s.color.withValues(alpha: 0.07),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Icon(s.icon, color: s.color, size: 17),

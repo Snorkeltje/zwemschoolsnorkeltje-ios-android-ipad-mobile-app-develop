@@ -73,7 +73,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         begin: Alignment.topLeft, end: Alignment.bottomRight,
                         colors: [Color(0xFF0365C4), Color(0xFF0D7FE8)],
                       ),
-                      boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))],
+                      boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
                     ),
                     alignment: Alignment.center,
                     child: const Text('Terug naar inloggen',
@@ -153,7 +153,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: isFocused ? const Color(0xFF0365C4) : const Color(0xFFE8ECF4), width: 2),
-                          boxShadow: isFocused ? [BoxShadow(color: const Color(0xFF0365C4).withOpacity(0.08), blurRadius: 8)] : null,
+                          boxShadow: isFocused ? [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.08), blurRadius: 8)] : null,
                         ),
                         child: Row(children: [
                           const SizedBox(width: 16),
@@ -186,7 +186,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             : null,
                           color: hasEmail ? null : const Color(0xFFBDC3C7),
                           boxShadow: hasEmail
-                            ? [BoxShadow(color: const Color(0xFF0365C4).withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))]
+                            ? [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))]
                             : null,
                         ),
                         alignment: Alignment.center,
