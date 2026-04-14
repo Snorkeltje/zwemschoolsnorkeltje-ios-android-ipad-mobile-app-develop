@@ -411,6 +411,12 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  /// Builds an input field that matches the Figma design:
+  /// - 52px tall container, 14px radius, 2px border (#E8ECF4 -> #0365C4 on focus)
+  /// - Icon absolutely positioned at left-4 (16px from left), vertically centered
+  /// - Input has 44px left padding to clear the icon (matches Figma pl-11)
+  /// - Right padding 16px (pr-4), 48px if suffix present (pr-12)
+  /// - Blue glow on focus (0 0 0 4px rgba(3,101,196,0.08))
   Widget _buildInputField({
     required TextEditingController controller,
     required String hint,
@@ -421,58 +427,81 @@ class _LoginScreenState extends State<LoginScreen> {
     Widget? suffix,
   }) {
     final isFocused = _focusedField == fieldKey;
+    final borderColor = isFocused ? _blue : _borderDefault;
     return Focus(
       onFocusChange: (hasFocus) =>
           setState(() => _focusedField = hasFocus ? fieldKey : ''),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
         height: 52,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isFocused ? _blue : _borderDefault,
-            width: 2,
-          ),
+          border: Border.all(color: borderColor, width: 2),
           boxShadow: isFocused
               ? [
-                  const BoxShadow(
-                    color: Color(0x140365C4),
-                    blurRadius: 8,
+                  BoxShadow(
+                    color: _blue.withValues(alpha: 0.08),
+                    blurRadius: 0,
+                    spreadRadius: 4,
                   ),
                 ]
               : null,
         ),
-        child: Row(
+        child: Stack(
           children: [
-            const SizedBox(width: 16),
-            Icon(
-              icon,
-              size: 18,
-              color: isFocused ? _blue : _inactive,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: controller,
-                obscureText: obscure,
-                keyboardType: keyboardType,
-                decoration: InputDecoration(
-                  hintText: hint,
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                  hintStyle: const TextStyle(
-                    color: _inactive,
-                    fontSize: 14,
-                  ),
-                ),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: _darkText,
+            // Absolutely positioned icon at left-4, vertically centered
+            Positioned(
+              left: 16,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Icon(
+                  icon,
+                  size: 18,
+                  color: isFocused ? _blue : _inactive,
                 ),
               ),
             ),
-            if (suffix != null) ...[suffix, const SizedBox(width: 12)],
+            // Input with pl-11 (44px) and pr-4/pr-12
+            Padding(
+              padding: EdgeInsets.only(
+                left: 44,
+                right: suffix != null ? 48 : 16,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextField(
+                  controller: controller,
+                  obscureText: obscure,
+                  keyboardType: keyboardType,
+                  cursorColor: _blue,
+                  cursorHeight: 18,
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    border: InputBorder.none,
+                    isCollapsed: true,
+                    contentPadding: EdgeInsets.zero,
+                    hintStyle: const TextStyle(
+                      color: _inactive,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: _darkText,
+                  ),
+                ),
+              ),
+            ),
+            // Suffix (eye icon) at right-4
+            if (suffix != null)
+              Positioned(
+                right: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(child: suffix),
+              ),
           ],
         ),
       ),
