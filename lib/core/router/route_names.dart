@@ -82,6 +82,15 @@ class RouteNames {
   static const String aboutUs = 'aboutUs';
   static const String offlineMode = 'offlineMode';
 
+  /// Path helpers — use when you need the raw path (e.g. for context.push)
+  /// rather than the named route.
+  static const String pathHome = '/home';
+  static const String pathBook = '/book';
+  static const String pathCards = '/cards';
+  static const String pathProfile = '/profile';
+  static const String pathLogin = '/login';
+  static const String pathInstructorHome = '/instructor/home';
+
   // Instructor
   static const String instructorHome = 'instructorHome';
   static const String instructorSchedule = 'instructorSchedule';
