@@ -215,14 +215,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 BoxShadow(color: slide.color.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8)),
                               ],
                             ),
-                            child: Text(
-                              _current == _slides.length - 1 ? 'Aan de slag! 🏊‍♂️' : 'Volgende →',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.3,
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _current == _slides.length - 1
+                                      ? 'Aan de slag!'
+                                      : 'Volgende',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  _current == _slides.length - 1
+                                      ? Icons.pool
+                                      : Icons.arrow_forward_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ],
                             ),
                           ),
                         ),
