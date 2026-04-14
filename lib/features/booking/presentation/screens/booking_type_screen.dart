@@ -14,18 +14,19 @@ class BookingTypeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF4F7FC),
       body: Column(
         children: [
-          // --- Gradient Header ---
+          // --- Gradient Header (matches Figma 135deg gradient) ---
           Container(
+            width: double.infinity,
             padding: EdgeInsets.only(
-              top: topPadding + 12,
+              top: topPadding + 18,
               left: AppDimensions.screenPadding,
               right: AppDimensions.screenPadding,
-              bottom: 28,
+              bottom: 24,
             ),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
               ),
               borderRadius: BorderRadius.only(
