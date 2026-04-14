@@ -125,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     borderRadius: BorderRadius.circular(999),
                     child: Container(
                       height: 3,
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       child: FractionallySizedBox(
                         alignment: Alignment.centerLeft,
                         widthFactor: _progress / 100,
