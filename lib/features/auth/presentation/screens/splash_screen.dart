@@ -97,8 +97,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 children: [
                   SvgPicture.asset(
                     'assets/images/snorkeltje_logo.svg',
-                    height: 100,
-                    width: 100,
+                    height: 110,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 24),
                   const Text(
