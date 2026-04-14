@@ -73,7 +73,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
+                                  color: Colors.white.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 alignment: Alignment.center,
@@ -87,7 +87,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                                 const Text('Bestel Knipkaart',
                                     style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
                                 Text('Kies uw ideale pakket',
-                                    style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                                    style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                               ],
                             ),
                           ],
@@ -97,7 +97,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                         Container(
                           padding: const EdgeInsets.all(3),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
+                            color: Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Row(
@@ -138,7 +138,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: isSel ? const Color(0xFF0365C4).withOpacity(0.25) : Colors.black.withOpacity(0.06),
+                                    color: isSel ? const Color(0xFF0365C4).withValues(alpha: 0.25) : Colors.black.withValues(alpha: 0.06),
                                     blurRadius: isSel ? 32 : 16,
                                     offset: Offset(0, isSel ? 12 : 4),
                                   ),
@@ -156,7 +156,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                                           gradient: isSel
                                               ? null
                                               : const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
-                                          color: isSel ? Colors.white.withOpacity(0.2) : null,
+                                          color: isSel ? Colors.white.withValues(alpha: 0.2) : null,
                                           borderRadius: const BorderRadius.only(
                                             bottomLeft: Radius.circular(14),
                                           ),
@@ -187,7 +187,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                                                         ? [const Color(0xFFE8F0FE), const Color(0xFFF0F6FF)]
                                                         : [const Color(0xFFFEF0E7), const Color(0xFFFFF8F0)],
                                                   ),
-                                            color: isSel ? Colors.white.withOpacity(0.15) : null,
+                                            color: isSel ? Colors.white.withValues(alpha: 0.15) : null,
                                             borderRadius: BorderRadius.circular(18),
                                           ),
                                           child: Column(
@@ -207,7 +207,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                                                   style: TextStyle(
                                                     fontSize: 11,
                                                     fontWeight: FontWeight.w600,
-                                                    color: isSel ? Colors.white.withOpacity(0.7) : const Color(0xFF8E9BB3),
+                                                    color: isSel ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF8E9BB3),
                                                   )),
                                             ],
                                           ),
@@ -254,7 +254,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                                               Text('€${opt.perLesson} per les · 365 dagen geldig',
                                                   style: TextStyle(
                                                     fontSize: 11,
-                                                    color: isSel ? Colors.white.withOpacity(0.6) : const Color(0xFF8E9BB3),
+                                                    color: isSel ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF8E9BB3),
                                                   )),
                                             ],
                                           ),
@@ -289,7 +289,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                     ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -316,7 +316,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(18),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                         ),
                         child: Column(
                           children: List.generate(included.length, (i) => Container(
@@ -356,7 +356,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 24, offset: const Offset(0, -4))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 24, offset: const Offset(0, -4))],
               ),
               child: Row(
                 children: [
@@ -381,7 +381,7 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.35), blurRadius: 24, offset: const Offset(0, 8))],
+                        boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 8))],
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -412,18 +412,18 @@ class _PunchCardOrderScreenState extends State<PunchCardOrderScreen> {
         decoration: BoxDecoration(
           color: sel ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(11),
-          boxShadow: sel ? [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 12, offset: const Offset(0, 4))] : null,
+          boxShadow: sel ? [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 12, offset: const Offset(0, 4))] : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.credit_card, size: 14, color: sel ? const Color(0xFF0365C4) : Colors.white.withOpacity(0.7)),
+            Icon(Icons.credit_card, size: 14, color: sel ? const Color(0xFF0365C4) : Colors.white.withValues(alpha: 0.7)),
             const SizedBox(width: 6),
             Text(type,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: sel ? const Color(0xFF0365C4) : Colors.white.withOpacity(0.7),
+                  color: sel ? const Color(0xFF0365C4) : Colors.white.withValues(alpha: 0.7),
                 )),
             if (showBadge) ...[
               const SizedBox(width: 6),

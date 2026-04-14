@@ -52,7 +52,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
+                          color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         alignment: Alignment.center,
@@ -66,7 +66,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                         const Text('Strippenkaarten',
                             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
                         Text('Saldo & bestellingen',
-                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                       ],
                     ),
                   ],
@@ -88,14 +88,14 @@ class MyPunchCardsScreen extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: [Color(0xFF0365C4), Color(0xFF034DA9)],
                     ),
-                    boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withOpacity(0.3), blurRadius: 32, offset: const Offset(0, 12))],
+                    boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.3), blurRadius: 32, offset: const Offset(0, 12))],
                   ),
                   child: Stack(
                     children: [
                       Positioned(
                         top: -5,
                         right: -10,
-                        child: Icon(Icons.waves, color: Colors.white.withOpacity(0.08), size: 80),
+                        child: Icon(Icons.waves, color: Colors.white.withValues(alpha: 0.08), size: 80),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,10 +108,10 @@ class MyPunchCardsScreen extends StatelessWidget {
                                   const Icon(Icons.credit_card, color: Color(0xFF00C1FF), size: 18),
                                   const SizedBox(width: 8),
                                   Text('1-op-1 Zwemlessen',
-                                      style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13, fontWeight: FontWeight.w600)),
+                                      style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13, fontWeight: FontWeight.w600)),
                                 ],
                               ),
-                              Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.4), size: 18),
+                              Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.4), size: 18),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -122,7 +122,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                                 const TextSpan(text: '8 '),
                                 TextSpan(
                                   text: '/ 10 credits',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white.withOpacity(0.7)),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white.withValues(alpha: 0.7)),
                                 ),
                               ],
                             ),
@@ -132,7 +132,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(999),
                             child: Container(
                               height: 8,
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               child: FractionallySizedBox(
                                 alignment: Alignment.centerLeft,
                                 widthFactor: 0.8,
@@ -149,9 +149,9 @@ class MyPunchCardsScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('Geldig tot: 24 mrt 2027',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11)),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11)),
                               Text('Kaart #22976',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11)),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11)),
                             ],
                           ),
                         ],
@@ -176,7 +176,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: [Color(0xFF27AE60), Color(0xFF1E8C4E)],
                     ),
-                    boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withOpacity(0.25), blurRadius: 24, offset: const Offset(0, 8))],
+                    boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withValues(alpha: 0.25), blurRadius: 24, offset: const Offset(0, 8))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,10 +189,10 @@ class MyPunchCardsScreen extends StatelessWidget {
                               const Icon(Icons.credit_card, color: Color(0xFFA0F0C0), size: 16),
                               const SizedBox(width: 8),
                               Text('1-op-2 Zwemlessen',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.w600)),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12, fontWeight: FontWeight.w600)),
                             ],
                           ),
-                          Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.4), size: 16),
+                          Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.4), size: 16),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -207,7 +207,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                                 const TextSpan(text: '5 '),
                                 TextSpan(
                                   text: '/ 5 credits',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white.withOpacity(0.7)),
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.7)),
                                 ),
                               ],
                             ),
@@ -215,7 +215,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text('Geldig tot: 15 jun 2027',
-                                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11)),
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11)),
                           ),
                         ],
                       ),
@@ -255,7 +255,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                       ),
                       child: Row(
                         children: [
@@ -285,7 +285,7 @@ class MyPunchCardsScreen extends StatelessWidget {
                             width: 32,
                             height: 32,
                             decoration: BoxDecoration(
-                              color: opt.color.withOpacity(0.07),
+                              color: opt.color.withValues(alpha: 0.07),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(Icons.shopping_cart_outlined, color: opt.color, size: 14),
