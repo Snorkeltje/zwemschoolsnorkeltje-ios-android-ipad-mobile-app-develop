@@ -57,7 +57,7 @@ class ChildProgressScreen extends StatelessWidget {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.18),
+                              color: Colors.white.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             alignment: Alignment.center,
@@ -77,8 +77,8 @@ class ChildProgressScreen extends StatelessWidget {
                           height: 64,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.2),
-                            border: Border.all(color: Colors.white.withOpacity(0.2), width: 3),
+                            color: Colors.white.withValues(alpha: 0.2),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 3),
                           ),
                           alignment: Alignment.center,
                           child: const Text('S',
@@ -99,7 +99,7 @@ class ChildProgressScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text('Totale voortgang',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                               const SizedBox(height: 6),
                               Row(
                                 children: [
@@ -108,7 +108,7 @@ class ChildProgressScreen extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(999),
                                       child: Container(
                                         height: 8,
-                                        color: Colors.white.withOpacity(0.15),
+                                        color: Colors.white.withValues(alpha: 0.15),
                                         child: FractionallySizedBox(
                                           alignment: Alignment.centerLeft,
                                           widthFactor: 0.65,
@@ -146,7 +146,7 @@ class ChildProgressScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(18),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4))],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -178,7 +178,7 @@ class ChildProgressScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,7 +199,7 @@ class ChildProgressScreen extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: s.color.withOpacity(0.07),
+                                        color: s.color.withValues(alpha: 0.07),
                                         borderRadius: BorderRadius.circular(999),
                                       ),
                                       child: Text(s.level,
@@ -297,7 +297,7 @@ class ChildProgressScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 1))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 4, offset: const Offset(0, 1))],
                     ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

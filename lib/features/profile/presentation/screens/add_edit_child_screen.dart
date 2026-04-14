@@ -48,7 +48,7 @@ class _AddEditChildScreenState extends State<AddEditChildScreen> {
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 2))],
             ),
             padding: const EdgeInsets.fromLTRB(16, 56, 16, 12),
             child: Row(
@@ -92,7 +92,7 @@ class _AddEditChildScreenState extends State<AddEditChildScreen> {
                           child: _firstName.text.isNotEmpty
                               ? Text(_firstName.text.substring(0, 1).toUpperCase(),
                                   style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w700))
-                              : Icon(Icons.person, color: Colors.white.withOpacity(0.6), size: 36),
+                              : Icon(Icons.person, color: Colors.white.withValues(alpha: 0.6), size: 36),
                         ),
                         Positioned(
                           bottom: 0, right: 0,
@@ -163,7 +163,7 @@ class _AddEditChildScreenState extends State<AddEditChildScreen> {
                         color: _isValid ? const Color(0xFF1A6FBF) : const Color(0xFFBDC3C7),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: _isValid
-                            ? [BoxShadow(color: const Color(0xFF1A6FBF).withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))]
+                            ? [BoxShadow(color: const Color(0xFF1A6FBF).withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))]
                             : null,
                       ),
                       alignment: Alignment.center,
@@ -249,7 +249,7 @@ class _AddEditChildScreenState extends State<AddEditChildScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF1A6FBF),
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [BoxShadow(color: const Color(0xFF1A6FBF).withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))],
+                    boxShadow: [BoxShadow(color: const Color(0xFF1A6FBF).withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))],
                   ),
                   alignment: Alignment.center,
                   child: const Text('Naar profiel',

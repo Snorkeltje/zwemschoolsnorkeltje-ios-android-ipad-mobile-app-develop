@@ -76,7 +76,7 @@ class _ZwemdiplomScreenState extends State<ZwemdiplomScreen> {
                   onTap: () => context.pop(),
                   child: Container(
                     width: 40, height: 40,
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
                   ),
                 ),
@@ -86,11 +86,11 @@ class _ZwemdiplomScreenState extends State<ZwemdiplomScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text("Zwemdiploma's", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
-                      Text('Sami Khilji — Voortgang', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                      Text('Sami Khilji — Voortgang', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                     ],
                   ),
                 ),
-                Icon(Icons.emoji_events_outlined, color: Colors.white.withOpacity(0.3), size: 24),
+                Icon(Icons.emoji_events_outlined, color: Colors.white.withValues(alpha: 0.3), size: 24),
               ],
             ),
           ),
@@ -109,7 +109,7 @@ class _ZwemdiplomScreenState extends State<ZwemdiplomScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(18),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4))],
                         ),
                         child: Row(
                           children: _diplomas.map((d) {
@@ -123,7 +123,7 @@ class _ZwemdiplomScreenState extends State<ZwemdiplomScreen> {
                                   duration: const Duration(milliseconds: 200),
                                   padding: const EdgeInsets.symmetric(vertical: 12),
                                   decoration: BoxDecoration(
-                                    gradient: isSelected ? LinearGradient(colors: [dColor, dColor.withOpacity(0.8)]) : null,
+                                    gradient: isSelected ? LinearGradient(colors: [dColor, dColor.withValues(alpha: 0.8)]) : null,
                                     borderRadius: BorderRadius.circular(14),
                                   ),
                                   child: Opacity(
@@ -187,7 +187,7 @@ class _ZwemdiplomScreenState extends State<ZwemdiplomScreen> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(14),
-                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))],
+                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))],
                             ),
                             child: Row(
                               children: [
