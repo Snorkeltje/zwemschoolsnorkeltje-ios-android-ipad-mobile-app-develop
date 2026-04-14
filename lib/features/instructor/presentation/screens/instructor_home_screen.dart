@@ -57,7 +57,7 @@ class InstructorHomeScreen extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
@@ -71,7 +71,7 @@ class InstructorHomeScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 6))],
+                      boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6))],
                     ),
                     alignment: Alignment.center,
                     child: const Text('J', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
@@ -108,13 +108,13 @@ class InstructorHomeScreen extends StatelessWidget {
                     colors: [Color(0xFFFF5C00), Color(0xFFF5A623)],
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.3), blurRadius: 32, offset: const Offset(0, 12))],
+                  boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.3), blurRadius: 32, offset: const Offset(0, 12))],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Vandaag — Maandag 28 april',
-                        style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12, fontWeight: FontWeight.w500)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12, fontWeight: FontWeight.w500)),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -157,7 +157,7 @@ class InstructorHomeScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A1D27),
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFFF5C00).withOpacity(0.2)),
+                      border: Border.all(color: const Color(0xFFFF5C00).withValues(alpha: 0.2)),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,13 +248,13 @@ class InstructorHomeScreen extends StatelessWidget {
                         color: item.current ? null : const Color(0xFF1A1D27),
                         gradient: item.current
                             ? LinearGradient(colors: [
-                                const Color(0xFFFF5C00).withOpacity(0.12),
-                                const Color(0xFFF5A623).withOpacity(0.06),
+                                const Color(0xFFFF5C00).withValues(alpha: 0.12),
+                                const Color(0xFFF5A623).withValues(alpha: 0.06),
                               ])
                             : null,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: item.current ? const Color(0xFFFF5C00).withOpacity(0.3) : Colors.transparent,
+                          color: item.current ? const Color(0xFFFF5C00).withValues(alpha: 0.3) : Colors.transparent,
                         ),
                       ),
                       child: Row(
@@ -296,7 +296,7 @@ class InstructorHomeScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(item.type,
@@ -316,7 +316,7 @@ class InstructorHomeScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF27AE60).withOpacity(0.15),
+                                color: const Color(0xFF27AE60).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: const Text('✓',
@@ -326,7 +326,7 @@ class InstructorHomeScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFF5C00).withOpacity(0.15),
+                                color: const Color(0xFFFF5C00).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: const Text('NU',
@@ -373,7 +373,7 @@ class InstructorHomeScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF27AE60).withOpacity(0.1),
+                  color: const Color(0xFF27AE60).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Row(
@@ -402,7 +402,7 @@ class InstructorHomeScreen extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(14),
             ),
             alignment: Alignment.center,
@@ -417,7 +417,7 @@ class InstructorHomeScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 6, offset: const Offset(0, 2))],
+                boxShadow: [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(0, 2))],
               ),
               alignment: Alignment.center,
               child: Text(count, style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700)),
@@ -434,7 +434,7 @@ class InstructorHomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(value, style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w700)),
-          Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+          Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
         ],
       ),
     );
@@ -443,7 +443,7 @@ class InstructorHomeScreen extends StatelessWidget {
   Widget _divider() => Container(
         width: 1,
         height: 40,
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         margin: const EdgeInsets.symmetric(horizontal: 16),
       );
 
@@ -471,7 +471,7 @@ class InstructorHomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF1A1D27),
           borderRadius: BorderRadius.circular(18),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 2))],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

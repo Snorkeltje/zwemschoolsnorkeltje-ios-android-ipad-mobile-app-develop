@@ -66,7 +66,7 @@ class _InstructorChatListScreenState extends State<InstructorChatListScreen> {
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                      boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
                     ),
                     child: Center(child: Text('$_totalUnread', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700))),
                   ),
@@ -84,8 +84,8 @@ class _InstructorChatListScreenState extends State<InstructorChatListScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A1D27),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.06)),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 16, offset: const Offset(0, 4))],
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 16, offset: const Offset(0, 4))],
                 ),
                 child: Row(
                   children: [
@@ -194,9 +194,9 @@ class _InstructorChatListScreenState extends State<InstructorChatListScreen> {
                     margin: const EdgeInsets.only(bottom: 6),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: hasUnread ? const Color(0xFFFF5C00).withOpacity(0.06) : const Color(0xFF1A1D27),
+                      color: hasUnread ? const Color(0xFFFF5C00).withValues(alpha: 0.06) : const Color(0xFF1A1D27),
                       borderRadius: BorderRadius.circular(16),
-                      border: hasUnread ? Border.all(color: const Color(0xFFFF5C00).withOpacity(0.15)) : null,
+                      border: hasUnread ? Border.all(color: const Color(0xFFFF5C00).withValues(alpha: 0.15)) : null,
                     ),
                     child: Row(
                       children: [
@@ -274,7 +274,7 @@ class _InstructorChatListScreenState extends State<InstructorChatListScreen> {
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
                                 shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))],
+                                boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))],
                               ),
                               child: Center(child: Text('${conv['unread']}', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700))),
                             ),

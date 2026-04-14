@@ -67,7 +67,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(colors: [Color(0xFF27AE60), Color(0xFF2ECC71)]),
-                  boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))],
+                  boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
                 ),
                 child: const Icon(Icons.check, color: Colors.white, size: 40),
               ),
@@ -97,7 +97,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                   onTap: () => context.pop(),
                   child: Container(
                     width: 40, height: 40,
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.chevron_left, color: Color(0xFFE2E8F0), size: 20),
                   ),
                 ),
@@ -119,13 +119,13 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
                       borderRadius: BorderRadius.circular(18),
-                      boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.25), blurRadius: 20, offset: const Offset(0, 6))],
+                      boxShadow: [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.25), blurRadius: 20, offset: const Offset(0, 6))],
                     ),
                     child: Row(
                       children: [
                         Container(
                           width: 48, height: 48,
-                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(14)),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(14)),
                           child: Center(child: Text(widget.studentInitial, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700))),
                         ),
                         const SizedBox(width: 12),
@@ -133,7 +133,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text('Sami Khilji · 7 jr', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-                            Text('Huidig: ${_levels[_selectedLevel]['nl']} · 28 apr', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
+                            Text('Huidig: ${_levels[_selectedLevel]['nl']} · 28 apr', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
                           ],
                         ),
                       ],
@@ -151,7 +151,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFF1A1D27),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.white.withOpacity(0.06)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -168,7 +168,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFF1A1D27),
                         borderRadius: BorderRadius.circular(14),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
                       ),
                       child: Column(
                         children: List.generate(_levels.length, (i) {
@@ -178,7 +178,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                border: i > 0 ? Border(top: BorderSide(color: Colors.white.withOpacity(0.04))) : null,
+                                border: i > 0 ? Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.04))) : null,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -206,9 +206,9 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
-                          color: checked ? const Color(0xFF0365C4).withOpacity(0.1) : const Color(0xFF1A1D27),
+                          color: checked ? const Color(0xFF0365C4).withValues(alpha: 0.1) : const Color(0xFF1A1D27),
                           borderRadius: BorderRadius.circular(12),
-                          border: checked ? Border.all(color: const Color(0xFF0365C4).withOpacity(0.3)) : null,
+                          border: checked ? Border.all(color: const Color(0xFF0365C4).withValues(alpha: 0.3)) : null,
                         ),
                         child: Row(
                           children: [
@@ -218,7 +218,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                                 gradient: checked ? const LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF00C1FF)]) : null,
                                 color: checked ? null : const Color(0xFF2D3748),
                                 borderRadius: BorderRadius.circular(6),
-                                boxShadow: checked ? [BoxShadow(color: const Color(0xFF0365C4).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))] : null,
+                                boxShadow: checked ? [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))] : null,
                               ),
                               child: checked ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
                             ),
@@ -243,9 +243,9 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
-                          color: done ? const Color(0xFF27AE60).withOpacity(0.1) : const Color(0xFF1A1D27),
+                          color: done ? const Color(0xFF27AE60).withValues(alpha: 0.1) : const Color(0xFF1A1D27),
                           borderRadius: BorderRadius.circular(12),
-                          border: done ? Border.all(color: const Color(0xFF27AE60).withOpacity(0.3)) : null,
+                          border: done ? Border.all(color: const Color(0xFF27AE60).withValues(alpha: 0.3)) : null,
                         ),
                         child: Row(
                           children: [
@@ -255,7 +255,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                                 gradient: done ? const LinearGradient(colors: [Color(0xFF27AE60), Color(0xFF2ECC71)]) : null,
                                 color: done ? null : const Color(0xFF2D3748),
                                 shape: BoxShape.circle,
-                                boxShadow: done ? [BoxShadow(color: const Color(0xFF27AE60).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))] : null,
+                                boxShadow: done ? [BoxShadow(color: const Color(0xFF27AE60).withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))] : null,
                               ),
                               child: done ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
                             ),
@@ -307,7 +307,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A1D27),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.white.withOpacity(0.06)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
                     ),
                     child: TextField(
                       onChanged: (v) => _notes = v,
@@ -331,7 +331,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(colors: [Color(0xFF27AE60), Color(0xFF2ECC71)]),
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))],
+                        boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,

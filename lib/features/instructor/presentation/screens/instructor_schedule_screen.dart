@@ -99,7 +99,7 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                         child: Container(
                           width: 40, height: 40,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.08),
+                            color: Colors.white.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(Icons.chevron_left, color: Color(0xFFE2E8F0), size: 20),
@@ -125,7 +125,7 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                       Container(
                         width: 32, height: 32,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.08),
+                          color: Colors.white.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(Icons.chevron_left, color: Color(0xFFE2E8F0), size: 16),
@@ -134,7 +134,7 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                       Container(
                         width: 32, height: 32,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.08),
+                          color: Colors.white.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(Icons.chevron_right, color: Color(0xFFE2E8F0), size: 16),
@@ -171,7 +171,7 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                         color: isSelected ? null : const Color(0xFF1A1D27),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: isSelected
-                            ? [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 6))]
+                            ? [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6))]
                             : null,
                       ),
                       child: Column(
@@ -182,7 +182,7 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: isSelected ? Colors.white.withOpacity(0.7) : const Color(0xFF8E9BB3),
+                              color: isSelected ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF8E9BB3),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -199,7 +199,7 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: isSelected ? Colors.white.withOpacity(0.2) : const Color(0xFFFF5C00).withOpacity(0.12),
+                                color: isSelected ? Colors.white.withValues(alpha: 0.2) : const Color(0xFFFF5C00).withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -322,7 +322,7 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                                                 Container(
                                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                                   decoration: BoxDecoration(
-                                                    color: accentColor.withOpacity(0.08),
+                                                    color: accentColor.withValues(alpha: 0.08),
                                                     borderRadius: BorderRadius.circular(10),
                                                   ),
                                                   child: Text(type, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: accentColor)),

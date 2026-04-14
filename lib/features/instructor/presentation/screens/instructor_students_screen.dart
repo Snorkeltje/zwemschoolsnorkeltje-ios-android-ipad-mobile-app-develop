@@ -89,8 +89,8 @@ class _InstructorStudentsScreenState extends State<InstructorStudentsScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A1D27),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.06)),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 16, offset: const Offset(0, 4))],
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 16, offset: const Offset(0, 4))],
                 ),
                 child: Row(
                   children: [
@@ -132,9 +132,9 @@ class _InstructorStudentsScreenState extends State<InstructorStudentsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
                         gradient: isActive ? const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]) : null,
-                        color: isActive ? null : Colors.white.withOpacity(0.06),
+                        color: isActive ? null : Colors.white.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: isActive ? [BoxShadow(color: const Color(0xFFFF5C00).withOpacity(0.25), blurRadius: 12, offset: const Offset(0, 4))] : null,
+                        boxShadow: isActive ? [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.25), blurRadius: 12, offset: const Offset(0, 4))] : null,
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -168,7 +168,7 @@ class _InstructorStudentsScreenState extends State<InstructorStudentsScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A1D27),
                       borderRadius: BorderRadius.circular(18),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 2))],
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))],
                     ),
                     child: Stack(
                       children: [
@@ -192,7 +192,7 @@ class _InstructorStudentsScreenState extends State<InstructorStudentsScreen> {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(colors: gradientColors),
                                   borderRadius: BorderRadius.circular(14),
-                                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 4))],
+                                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 12, offset: const Offset(0, 4))],
                                 ),
                                 child: Center(child: Text(student['initial'], style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700))),
                               ),
@@ -279,7 +279,7 @@ class _StatPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
