@@ -106,13 +106,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.language, size: 14, color: _blue),
-                            SizedBox(width: 4),
+                            SizedBox(width: 6),
                             Text(
-                              '🇳🇱 NL',
+                              'NL',
                               style: TextStyle(
                                 color: _blue,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ],
