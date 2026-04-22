@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String? token;
@@ -85,7 +86,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 const Text('Wachtwoord gewijzigd!',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E))),
                 const SizedBox(height: 8),
-                const Text('Je wachtwoord is succesvol gewijzigd. Je kunt nu inloggen met je nieuwe wachtwoord.',
+                const Text('Je wachtwoord is succesvol bijgewerkt. Je kunt nu inloggen met je nieuwe wachtwoord.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14, color: Color(0xFF4A4A6A), height: 1.5)),
                 const SizedBox(height: 32),
@@ -98,8 +99,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       color: const Color(0xFF1A6FBF),
                     ),
                     alignment: Alignment.center,
-                    child: const Text('Terug naar inloggen',
-                      style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                    child: const Text('Ga naar inloggen',
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                   ),
                 ),
               ],
@@ -122,7 +123,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Row(children: [
                   GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () => smartBack(context),
                     child: Container(
                       width: 40, height: 40,
                       decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle,
@@ -151,7 +152,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     const Text('Nieuw wachtwoord',
                       style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E))),
                     const SizedBox(height: 8),
-                    const Text('Kies een sterk en veilig wachtwoord.',
+                    const Text('Kies een sterk wachtwoord met minimaal 8 tekens, een hoofdletter en een cijfer.',
+                      textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 14, color: Color(0xFF4A4A6A))),
 
                     const SizedBox(height: 28),
@@ -206,28 +208,34 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           const Text('Vereisten:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF4A5568))),
                           const SizedBox(height: 8),
                           _buildReq('Minimaal 8 tekens', _hasMinLength),
-                          _buildReq('Minstens 1 hoofdletter', _hasUppercase),
-                          _buildReq('Minstens 1 cijfer', _hasNumber),
-                          _buildReq('Minstens 1 speciaal teken', _hasSpecial),
+                          _buildReq('Eén hoofdletter', _hasUppercase),
+                          _buildReq('Eén cijfer', _hasNumber),
+                          _buildReq('Eén speciaal teken', _hasSpecial),
                         ],
                       ),
                     ),
 
                     const SizedBox(height: 28),
                     // Submit button
-                    GestureDetector(
-                      onTap: (_passwordsMatch && _strength >= 2) ? () => setState(() => _success = true) : null,
-                      child: Container(
-                        width: double.infinity, height: 52,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          color: const Color(0xFF1A6FBF),
+                    Builder(builder: (ctx) {
+                      final isValid = _passwordsMatch && _hasMinLength;
+                      return GestureDetector(
+                        onTap: isValid ? () => setState(() => _success = true) : null,
+                        child: Container(
+                          width: double.infinity, height: 52,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color: isValid ? const Color(0xFF1A6FBF) : const Color(0xFFBDC3C7),
+                            boxShadow: isValid
+                              ? [BoxShadow(color: const Color(0xFF1A6FBF).withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))]
+                              : null,
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text('Wachtwoord wijzigen',
+                            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                         ),
-                        alignment: Alignment.center,
-                        child: const Text('Wachtwoord wijzigen',
-                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
-                      ),
-                    ),
+                      );
+                    }),
                     const SizedBox(height: 32),
                   ],
                 ),

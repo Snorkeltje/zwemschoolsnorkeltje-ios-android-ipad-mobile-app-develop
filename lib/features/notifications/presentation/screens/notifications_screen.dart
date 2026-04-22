@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class _Notif {
   final String emoji;
@@ -31,17 +33,31 @@ class NotificationsScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF4F7FC),
       body: Column(
         children: [
-          // Header
+          // Header with back button
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(20, 56, 20, 12),
+            padding: const EdgeInsets.fromLTRB(16, 56, 16, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                SizedBox(width: 80),
-                Text('Meldingen',
-                    style: TextStyle(color: Color(0xFF131827), fontSize: 18, fontWeight: FontWeight.w700)),
-                Text('Alles gelezen',
+              children: [
+                GestureDetector(
+                  onTap: () => context.canPop() ? context.pop() : null,
+                  child: Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4F7FC),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.chevron_left, color: Color(0xFF131827), size: 22),
+                  ),
+                ),
+                const Expanded(
+                  child: Center(
+                    child: Text('Meldingen',
+                        style: TextStyle(color: Color(0xFF131827), fontSize: 18, fontWeight: FontWeight.w700)),
+                  ),
+                ),
+                const Text('Alles gelezen',
                     style: TextStyle(color: Color(0xFF0365C4), fontSize: 13, fontWeight: FontWeight.w500)),
               ],
             ),

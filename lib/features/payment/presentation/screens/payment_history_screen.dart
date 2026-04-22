@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 enum PaymentStatus { completed, pending, failed, refunded }
 
@@ -114,7 +115,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
+          onPressed: () => smartBack(context),
         ),
         centerTitle: true,
         title: const Text(

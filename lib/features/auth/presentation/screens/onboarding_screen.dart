@@ -1,6 +1,40 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+
+class _DashedRingPainter extends CustomPainter {
+  final Color color;
+  _DashedRingPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 1;
+    const dashCount = 40;
+    const sweep = math.pi * 2 / dashCount;
+    const dashPortion = 0.55;
+    for (int i = 0; i < dashCount; i++) {
+      final start = i * sweep;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        start,
+        sweep * dashPortion,
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRingPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
 
 class _Slide {
   final IconData icon;
@@ -81,23 +115,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Skip
+            // Top bar: logo + skip
             Padding(
-              padding: const EdgeInsets.only(right: 24, top: 12),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () => context.goNamed(RouteNames.login),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4F7FC),
-                      borderRadius: BorderRadius.circular(999),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Snorkeltje logo — per Walter's feedback
+                  SvgPicture.asset('assets/images/snorkeltje_logo.svg', height: 32),
+                  GestureDetector(
+                    onTap: () => context.goNamed(RouteNames.login),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F7FC),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Text('Overslaan',
+                          style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 13, fontWeight: FontWeight.w500)),
                     ),
-                    child: const Text('Overslaan',
-                        style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 13, fontWeight: FontWeight.w500)),
                   ),
-                ),
+                ],
               ),
             ),
 
@@ -118,16 +156,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   ),
-                  Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: slide.decorColor.withValues(alpha: 0.12),
-                        width: 2,
-                        style: BorderStyle.solid,
-                      ),
+                  CustomPaint(
+                    size: const Size(220, 220),
+                    painter: _DashedRingPainter(
+                      color: slide.decorColor.withValues(alpha: 0.125),
                     ),
                   ),
                   Container(

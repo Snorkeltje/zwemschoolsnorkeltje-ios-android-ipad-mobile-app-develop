@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/swim_decoration.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class _FAQ {
   final String q;
@@ -53,7 +55,11 @@ class _FaqScreenState extends State<FaqScreen> {
     final list = _filtered;
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),
-      body: Column(
+      body: Stack(
+        children: [
+          // Swim theme decoration (Walter's feedback)
+          const SwimDecoration(size: 160, opacity: 0.08),
+          Column(
         children: [
           // Header
           Container(
@@ -62,7 +68,7 @@ class _FaqScreenState extends State<FaqScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: const Icon(Icons.chevron_left, color: Color(0xFF131827), size: 24),
                 ),
                 const SizedBox(width: 12),
@@ -194,6 +200,8 @@ class _FaqScreenState extends State<FaqScreen> {
               ),
             ),
           ),
+        ],
+      ),
         ],
       ),
     );

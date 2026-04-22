@@ -101,4 +101,5 @@ class RouteNames {
   static const String lessonDetail = 'lessonDetail';
   static const String progressUpdate = 'progressUpdate';
   static const String instructorAvailability = 'instructorAvailability';
+  static const String instructorNotifications = 'instructorNotifications';
 }

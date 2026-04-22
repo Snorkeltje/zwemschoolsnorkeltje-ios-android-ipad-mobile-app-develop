@@ -1,16 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/widgets/app_popup.dart';
+import '../providers/auth_provider.dart';
 
-class LoginScreen extends StatefulWidget {
+enum _SwimSide { left, right }
+
+class _SwimCharacter extends StatelessWidget {
+  final _SwimSide side;
+  final double size;
+  const _SwimCharacter({required this.side, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: SizedBox(
+        width: size,
+        height: size * 1.4,
+        child: OverflowBox(
+          alignment: side == _SwimSide.left
+              ? Alignment.centerLeft
+              : Alignment.centerRight,
+          maxWidth: size * 2,
+          maxHeight: size * 2 * (1350 / 1080),
+          child: SvgPicture.asset(
+            'assets/images/swim_characters.svg',
+            width: size * 2,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isParent = true;
   bool _showPass = false;
   String _focusedField = '';
@@ -71,9 +104,28 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [Color(0x1A00C1FF), Colors.transparent],
+                  colors: [Color(0x1400C1FF), Colors.transparent],
                 ),
               ),
+            ),
+          ),
+
+          // Swim characters - bottom-left
+          Positioned(
+            bottom: 100,
+            left: -20,
+            child: Opacity(
+              opacity: 0.15,
+              child: _SwimCharacter(side: _SwimSide.left, size: 100),
+            ),
+          ),
+          // Swim characters - bottom-right
+          Positioned(
+            bottom: 80,
+            right: -20,
+            child: Opacity(
+              opacity: 0.15,
+              child: _SwimCharacter(side: _SwimSide.right, size: 100),
             ),
           ),
 
@@ -342,11 +394,36 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _handleLogin() {
-    if (_isParent) {
-      context.goNamed(RouteNames.home);
+  Future<void> _handleLogin() async {
+    final email = _emailCtrl.text.trim();
+    final password = _passCtrl.text;
+    if (email.isEmpty || password.isEmpty) {
+      await AppPopup.show(
+        context,
+        type: AppPopupType.warning,
+        title: 'Vul alle velden in',
+        message: 'E-mail en wachtwoord zijn beide verplicht om in te loggen.',
+      );
+      return;
+    }
+    final ok = await ref.read(authProvider.notifier).login(email, password);
+    if (!mounted) return;
+    if (ok) {
+      final role = ref.read(authProvider).user?.role;
+      if (role?.name == 'instructor') {
+        context.goNamed(RouteNames.instructorHome);
+      } else {
+        context.goNamed(RouteNames.home);
+      }
     } else {
-      context.goNamed(RouteNames.instructorHome);
+      final err = ref.read(authProvider).errorMessage ?? 'Inloggen mislukt.';
+      await AppPopup.show(
+        context,
+        type: AppPopupType.error,
+        title: 'Inloggen mislukt',
+        message: err,
+        primaryButtonText: 'Opnieuw proberen',
+      );
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class SkillDetailScreen extends StatelessWidget {
   const SkillDetailScreen({super.key});
@@ -18,7 +19,7 @@ class SkillDetailScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Color(0xFF131827)), onPressed: () => context.pop()),
+        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Color(0xFF131827)), onPressed: () => smartBack(context)),
         title: const Text('Vrije slag armen', style: TextStyle(color: Color(0xFF131827), fontSize: 18, fontWeight: FontWeight.w700)),
         centerTitle: true,
       ),

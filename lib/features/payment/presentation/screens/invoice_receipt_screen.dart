@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class InvoiceReceiptScreen extends StatelessWidget {
   final String? paymentId;
@@ -18,7 +19,7 @@ class InvoiceReceiptScreen extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
+          onPressed: () => smartBack(context),
         ),
         centerTitle: true,
         title: const Text(

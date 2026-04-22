@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class BookingTypeScreen extends StatelessWidget {
   const BookingTypeScreen({super.key});
@@ -38,7 +39,7 @@ class BookingTypeScreen extends StatelessWidget {
               children: [
                 // Back button
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: Container(
                     width: 40,
                     height: 40,

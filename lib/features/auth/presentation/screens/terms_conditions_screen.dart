@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class _Section {
   final IconData icon;
@@ -19,8 +20,8 @@ const _sections = <_Section>[
   _Section(
     Icons.credit_card,
     Color(0xFFFF5C00),
-    'Artikel 2 — Knipkaarten & Betaling',
-    '• 1-op-1 knipkaart (10 lessen): €380,00\n• 1-op-2 knipkaart (10 lessen): €190,00 per kind\n• 1-op-3 knipkaart (10 lessen): €114,00 per kind\n\nBetaling geschiedt via iDEAL, creditcard of Bancontact via Mollie. Knipkaarten zijn niet restitueerbaar tenzij anders vermeld. Bij auto-conversie van 1-op-1 naar 1-op-2 wordt het verschil teruggestort.',
+    'Artikel 2 — Tegoed & Betaling',
+    '• Tegoed-voucher vanaf €100\n• €200: +1% bonus tegoed\n• €300: +1,5% bonus tegoed\n• €400: +2% bonus tegoed\n\nBetaling geschiedt via iDEAL of creditcard via Mollie. Binnen 10 minuten na reserveren moet betaald worden anders vervalt de reservering. Restitutie bij annulering wordt teruggeplaatst op het tegoed. Tegoed is altijd geldig.',
   ),
   _Section(
     Icons.access_time,
@@ -84,7 +85,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () => smartBack(context),
                       child: Container(
                         width: 40,
                         height: 40,

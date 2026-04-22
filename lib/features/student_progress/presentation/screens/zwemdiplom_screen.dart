@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class ZwemdiplomScreen extends StatefulWidget {
   const ZwemdiplomScreen({super.key});
@@ -73,7 +74,7 @@ class _ZwemdiplomScreenState extends State<ZwemdiplomScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: Container(
                     width: 40, height: 40,
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),

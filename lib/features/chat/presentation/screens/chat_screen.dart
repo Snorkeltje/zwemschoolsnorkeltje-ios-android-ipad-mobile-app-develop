@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class _Msg {
   final int id;
@@ -46,7 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: const Icon(Icons.arrow_back, color: Color(0xFF131827), size: 22),
                 ),
                 const SizedBox(width: 12),

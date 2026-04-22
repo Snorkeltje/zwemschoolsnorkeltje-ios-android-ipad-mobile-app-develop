@@ -123,37 +123,42 @@ class BookingSuccessScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  // QR code placeholder
+                  // Walk-in info card (no QR needed, open walk-in per Walter)
                   Container(
-                    width: 140,
-                    height: 140,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F7FC),
+                      color: const Color(0xFFE8F4FD),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFD0E4F7), width: 2, style: BorderStyle.solid),
+                      border: Border.all(color: const Color(0xFF0365C4).withValues(alpha: 0.15)),
                     ),
-                    child: GridView.count(
-                      crossAxisCount: 5,
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: 4,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: List.generate(25, (i) {
-                        const filled = [0, 1, 2, 5, 6, 7, 8, 10, 12, 14, 15, 17, 19, 20, 22, 24];
-                        return Container(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40, height: 40,
                           decoration: BoxDecoration(
-                            color: filled.contains(i) ? const Color(0xFF0365C4) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(3),
+                            color: const Color(0xFF0365C4).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      }),
+                          child: const Icon(Icons.pool, color: Color(0xFF0365C4), size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Loop gewoon door',
+                                  style: TextStyle(color: Color(0xFF0365C4), fontSize: 14, fontWeight: FontWeight.w700)),
+                              SizedBox(height: 2),
+                              Text('Geen incheck nodig — gewoon doorlopen naar het zwembad.',
+                                  style: TextStyle(color: Color(0xFF3282AE), fontSize: 12, height: 1.4)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const Text('Toon bij de ingang',
-                      style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
 
                   const Spacer(),
 

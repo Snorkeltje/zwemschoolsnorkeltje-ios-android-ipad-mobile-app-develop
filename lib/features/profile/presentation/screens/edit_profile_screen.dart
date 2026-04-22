@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -37,7 +38,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: const Icon(Icons.arrow_back, color: Color(0xFF131827), size: 22),
                 ),
                 const Expanded(
@@ -125,7 +126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             )),
                         const SizedBox(height: 20),
                         GestureDetector(
-                          onTap: () => context.pop(),
+                          onTap: () => smartBack(context),
                           child: Container(
                             width: double.infinity,
                             height: 52,

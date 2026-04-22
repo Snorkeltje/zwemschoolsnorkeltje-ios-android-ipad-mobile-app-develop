@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/swim_decoration.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class _LessonType {
   final IconData icon;
@@ -77,7 +79,10 @@ class BookLessonScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),
-      body: SingleChildScrollView(
+      body: Stack(
+        children: [
+          const SwimDecoration(size: 140, opacity: 0.06, alignment: Alignment.bottomRight),
+          SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +105,7 @@ class BookLessonScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () => smartBack(context),
                       child: Container(
                         width: 40,
                         height: 40,
@@ -244,6 +249,8 @@ class BookLessonScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+        ],
       ),
     );
   }

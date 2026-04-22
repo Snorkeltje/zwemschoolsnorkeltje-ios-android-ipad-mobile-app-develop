@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
 
@@ -69,14 +70,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeader() {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(28),
-            bottomRight: Radius.circular(28),
-          ),
-          child: Container(
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(28),
+        bottomRight: Radius.circular(28),
+      ),
+      child: Stack(
+        children: [
+          Container(
             padding: const EdgeInsets.fromLTRB(20, 58, 20, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -150,8 +151,28 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-        ),
-      ],
+          // Decorative wave at bottom of header
+          Positioned(
+            left: 0, right: 0, bottom: 0,
+            child: IgnorePointer(
+              child: CustomPaint(
+                size: const Size(double.infinity, 40),
+                painter: _HeaderWavePainter(),
+              ),
+            ),
+          ),
+          // Logo watermark top-right
+          Positioned(
+            top: 12, right: 12,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.1,
+                child: SvgPicture.asset('assets/images/snorkeltje_logo.svg', height: 28),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -376,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final items = [
       (Icons.calendar_today, 'Les boeken', [const Color(0xFF0365C4), const Color(0xFF00C1FF)], const Color(0x330365C4), RouteNames.bookLesson),
       (Icons.list_alt, 'Reserveringen', [const Color(0xFFFF5C00), const Color(0xFFF5A623)], const Color(0x33FF5C00), RouteNames.myReservations),
-      (Icons.credit_card, 'Strippenkaarten', [const Color(0xFF27AE60), const Color(0xFF2ECC71)], const Color(0x3327AE60), RouteNames.myPunchCards),
+      (Icons.account_balance_wallet, 'Tegoed', [const Color(0xFF27AE60), const Color(0xFF2ECC71)], const Color(0x3327AE60), RouteNames.myPunchCards),
       (Icons.bar_chart, 'Voortgang', [const Color(0xFF9B59B6), const Color(0xFF8E44AD)], const Color(0x339B59B6), RouteNames.childProgress),
     ];
     return Padding(
@@ -537,7 +558,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final items = [
       (Icons.calendar_today, 'Les herinnering', 'Morgen 15:00 — De Bilt', 'nu', const Color(0xFF0365C4), const Color(0xFFE8F4FD)),
       (Icons.bar_chart, 'Voortgang bijgewerkt', '${child.name.split(' ').first}: Ademhaling voltooid ✓', '2u', const Color(0xFF27AE60), const Color(0xFFE8F8F0)),
-      (Icons.credit_card, 'Strippenkaart', 'Nog 8 lessen over', '1d', const Color(0xFFFF5C00), const Color(0xFFFEF0E7)),
+      (Icons.account_balance_wallet, 'Tegoed', 'Nog €164,50 beschikbaar', '1d', const Color(0xFFFF5C00), const Color(0xFFFEF0E7)),
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -627,9 +648,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Strippenkaart bestellen',
+                    Text('Tegoed opwaarderen',
                         style: TextStyle(color: Color(0xFF0365C4), fontSize: 14, fontWeight: FontWeight.w700)),
-                    Text('Vanaf €60', style: TextStyle(color: Color(0xFF6B99C7), fontSize: 12)),
+                    Text('Vanaf €100, tot 2% bonus', style: TextStyle(color: Color(0xFF6B99C7), fontSize: 12)),
                   ],
                 ),
               ),
@@ -658,16 +679,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF00C1FF)]),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(Icons.pool, color: Colors.white, size: 28),
-            ),
-            const SizedBox(width: 16),
+            _SwimCharSide(size: 65, left: true),
+            const SizedBox(width: 12),
             const Flexible(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -682,16 +695,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)]),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(Icons.waves, color: Colors.white, size: 28),
-            ),
+            const SizedBox(width: 12),
+            _SwimCharSide(size: 65, left: false),
           ],
         ),
       ),
@@ -743,6 +748,50 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const Icon(Icons.chevron_right, color: Color(0xFFFF5C00), size: 18),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderWavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.15);
+    final path = Path()
+      ..moveTo(0, size.height * 0.5)
+      ..quadraticBezierTo(size.width * 0.25, 0, size.width * 0.5, size.height * 0.5)
+      ..quadraticBezierTo(size.width * 0.75, size.height, size.width, size.height * 0.5)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _SwimCharSide extends StatelessWidget {
+  final double size;
+  final bool left;
+  const _SwimCharSide({required this.size, required this.left});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: SizedBox(
+        width: size,
+        height: size * 1.25,
+        child: OverflowBox(
+          alignment: left ? Alignment.centerLeft : Alignment.centerRight,
+          maxWidth: size * 2,
+          maxHeight: size * 2 * (1350 / 1080),
+          child: SvgPicture.asset(
+            'assets/images/swim_characters.svg',
+            width: size * 2,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

@@ -16,11 +16,16 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/booking/presentation/screens/booking_type_screen.dart';
 import '../../features/booking/presentation/screens/book_lesson_screen.dart';
 import '../../features/booking/presentation/screens/fixed_slot_calendar_screen.dart';
+import '../../features/booking/presentation/screens/extra_lesson_calendar_screen.dart';
+import '../../features/booking/presentation/screens/holiday_lessons_screen.dart';
 import '../../features/booking/presentation/screens/location_selection_screen.dart';
 import '../../features/booking/presentation/screens/booking_summary_screen.dart';
 import '../../features/booking/presentation/screens/booking_success_screen.dart';
 import '../../features/booking/presentation/screens/my_reservations_screen.dart';
 import '../../features/booking/presentation/screens/reservation_detail_screen.dart';
+import '../../features/booking/presentation/screens/cancellation_confirm_screen.dart';
+import '../../features/booking/presentation/screens/auto_conversion_screen.dart';
+import '../../features/booking/presentation/screens/reservations_planned_screen.dart';
 // Punch Cards
 import '../../features/punch_card/presentation/screens/my_punch_cards_screen.dart';
 import '../../features/punch_card/presentation/screens/punch_card_detail_screen.dart';
@@ -28,6 +33,7 @@ import '../../features/punch_card/presentation/screens/punch_card_order_screen.d
 import '../../features/punch_card/presentation/screens/all_punch_card_prices_screen.dart';
 import '../../features/punch_card/presentation/screens/confirm_order_screen.dart';
 import '../../features/punch_card/presentation/screens/purchase_punch_card_screen.dart';
+import '../../features/punch_card/presentation/screens/special_punch_cards_screen.dart';
 // Student Progress
 import '../../features/student_progress/presentation/screens/child_progress_screen.dart';
 import '../../features/student_progress/presentation/screens/skill_detail_screen.dart';
@@ -69,6 +75,10 @@ import '../../features/instructor/presentation/screens/instructor_chat_screen.da
 import '../../features/instructor/presentation/screens/instructor_profile_screen.dart';
 import '../../features/instructor/presentation/screens/progress_update_screen.dart';
 import '../../features/instructor/presentation/screens/monthly_report_screen.dart';
+import '../../features/instructor/presentation/screens/offline_mode_screen.dart';
+import '../../features/instructor/presentation/screens/availability_request_screen.dart';
+import '../../features/instructor/presentation/screens/instructor_notifications_screen.dart';
+import '../../features/instructor/presentation/widgets/instructor_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -158,12 +168,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/booking/extra-lesson',
         name: RouteNames.extraLessonCalendar,
-        builder: (context, state) => const FixedSlotCalendarScreen(),
+        builder: (context, state) => const ExtraLessonCalendarScreen(),
       ),
       GoRoute(
         path: '/booking/holiday',
         name: RouteNames.holidayLessons,
-        builder: (context, state) => const FixedSlotCalendarScreen(),
+        builder: (context, state) => const HolidayLessonsScreen(),
       ),
       GoRoute(
         path: '/booking/summary',
@@ -186,6 +196,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/reservation/:id',
         name: RouteNames.reservationDetail,
         builder: (context, state) => const ReservationDetailScreen(),
+      ),
+      GoRoute(
+        path: '/reservations-planned',
+        name: RouteNames.reservationsPlanned,
+        builder: (context, state) => const ReservationsPlannedScreen(),
+      ),
+      GoRoute(
+        path: '/cancellation-confirm',
+        name: RouteNames.cancellationConfirm,
+        builder: (context, state) => const CancellationConfirmScreen(),
+      ),
+      GoRoute(
+        path: '/auto-conversion',
+        name: RouteNames.autoConversion,
+        builder: (context, state) => const AutoConversionScreen(),
       ),
 
       // === PUNCH CARDS ===
@@ -212,6 +237,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/confirm-order',
         name: RouteNames.confirmOrder,
         builder: (context, state) => const ConfirmOrderScreen(),
+      ),
+      GoRoute(
+        path: '/special-punch-cards',
+        name: RouteNames.specialPunchCards,
+        builder: (context, state) => const SpecialPunchCardsScreen(),
       ),
 
       // === STUDENT PROGRESS ===
@@ -351,38 +381,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ReviewsScreen(),
       ),
 
-      // === INSTRUCTOR ===
-      GoRoute(
-        path: '/instructor/home',
-        name: RouteNames.instructorHome,
-        builder: (context, state) => const InstructorHomeScreen(),
+      // === INSTRUCTOR (shell — bottom nav) ===
+      ShellRoute(
+        builder: (context, state, child) => InstructorShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/instructor/home',
+            name: RouteNames.instructorHome,
+            builder: (context, state) => const InstructorHomeScreen(),
+          ),
+          GoRoute(
+            path: '/instructor/schedule',
+            name: RouteNames.instructorSchedule,
+            builder: (context, state) => const InstructorScheduleScreen(),
+          ),
+          GoRoute(
+            path: '/instructor/students',
+            name: RouteNames.instructorStudents,
+            builder: (context, state) => const InstructorStudentsScreen(),
+          ),
+          GoRoute(
+            path: '/instructor/chat-list',
+            name: RouteNames.instructorChatList,
+            builder: (context, state) => const InstructorChatListScreen(),
+          ),
+          GoRoute(
+            path: '/instructor/profile',
+            name: RouteNames.instructorProfile,
+            builder: (context, state) => const InstructorProfileScreen(),
+          ),
+        ],
       ),
-      GoRoute(
-        path: '/instructor/schedule',
-        name: RouteNames.instructorSchedule,
-        builder: (context, state) => const InstructorScheduleScreen(),
-      ),
-      GoRoute(
-        path: '/instructor/students',
-        name: RouteNames.instructorStudents,
-        builder: (context, state) => const InstructorStudentsScreen(),
-      ),
-      GoRoute(
-        path: '/instructor/chat-list',
-        name: RouteNames.instructorChatList,
-        builder: (context, state) => const InstructorChatListScreen(),
-      ),
+      // === INSTRUCTOR (non-shell — full-screen detail routes) ===
       GoRoute(
         path: '/instructor/chat/:id',
         name: RouteNames.instructorChat,
         builder: (context, state) => InstructorChatScreen(
           chatId: state.pathParameters['id'] ?? '1',
         ),
-      ),
-      GoRoute(
-        path: '/instructor/profile',
-        name: RouteNames.instructorProfile,
-        builder: (context, state) => const InstructorProfileScreen(),
       ),
       GoRoute(
         path: '/instructor/progress-update/:studentInitial',
@@ -394,6 +430,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/instructor/monthly-report',
         builder: (context, state) => const MonthlyReportScreen(),
+      ),
+      GoRoute(
+        path: '/instructor/availability',
+        name: RouteNames.instructorAvailability,
+        builder: (context, state) => const AvailabilityRequestScreen(),
+      ),
+      GoRoute(
+        path: '/instructor/notifications',
+        name: RouteNames.instructorNotifications,
+        builder: (context, state) => const InstructorNotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/offline-mode',
+        name: RouteNames.offlineMode,
+        builder: (context, state) => const OfflineModeScreen(),
+      ),
+      GoRoute(
+        path: '/availability-request',
+        name: RouteNames.availabilityRequest,
+        builder: (context, state) => const AvailabilityRequestScreen(),
       ),
     ],
   );

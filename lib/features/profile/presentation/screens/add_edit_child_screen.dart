@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../children/presentation/providers/children_provider.dart';
+import '../../../../shared/utils/smart_back.dart';
 
-class AddEditChildScreen extends StatefulWidget {
+class AddEditChildScreen extends ConsumerStatefulWidget {
   const AddEditChildScreen({super.key});
   @override
-  State<AddEditChildScreen> createState() => _AddEditChildScreenState();
+  ConsumerState<AddEditChildScreen> createState() => _AddEditChildScreenState();
 }
 
-class _AddEditChildScreenState extends State<AddEditChildScreen> {
+class _AddEditChildScreenState extends ConsumerState<AddEditChildScreen> {
   final _firstName = TextEditingController();
   final _lastName = TextEditingController();
   final _dob = TextEditingController();
   final _notes = TextEditingController();
   bool _saved = false;
+  bool _saving = false;
 
   @override
   void initState() {
@@ -37,6 +41,51 @@ class _AddEditChildScreenState extends State<AddEditChildScreen> {
       _lastName.text.trim().isNotEmpty &&
       _dob.text.isNotEmpty;
 
+  DateTime? _parseDob(String raw) {
+    // Accepts DD-MM-YYYY, DD/MM/YYYY, or ISO YYYY-MM-DD
+    final cleaned = raw.trim().replaceAll('/', '-');
+    final parts = cleaned.split('-');
+    if (parts.length != 3) return null;
+    if (parts[0].length == 4) {
+      return DateTime.tryParse(cleaned);
+    }
+    final d = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    final y = int.tryParse(parts[2]);
+    if (d == null || m == null || y == null) return null;
+    return DateTime(y, m, d);
+  }
+
+  Future<void> _handleSave() async {
+    final dob = _parseDob(_dob.text);
+    if (dob == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ongeldige geboortedatum (DD-MM-JJJJ)')),
+      );
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await ref.read(myChildrenProvider.notifier).addChild(
+            firstName: _firstName.text.trim(),
+            lastName: _lastName.text.trim(),
+            dob: dob,
+            notes: _notes.text.trim(),
+          );
+      if (!mounted) return;
+      setState(() => _saved = true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Opslaan mislukt: $e'),
+          backgroundColor: const Color(0xFFE74C3C),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_saved) return _buildSuccess();
@@ -54,7 +103,7 @@ class _AddEditChildScreenState extends State<AddEditChildScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: Container(
                     width: 40, height: 40,
                     decoration: const BoxDecoration(color: Color(0xFFF4F7FC), shape: BoxShape.circle),
@@ -155,7 +204,7 @@ class _AddEditChildScreenState extends State<AddEditChildScreen> {
 
                   const SizedBox(height: 24),
                   GestureDetector(
-                    onTap: _isValid ? () => setState(() => _saved = true) : null,
+                    onTap: (_isValid && !_saving) ? _handleSave : null,
                     child: Container(
                       width: double.infinity,
                       height: 52,
@@ -167,8 +216,16 @@ class _AddEditChildScreenState extends State<AddEditChildScreen> {
                             : null,
                       ),
                       alignment: Alignment.center,
-                      child: const Text('Kind opslaan',
-                          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                      child: _saving
+                          ? const SizedBox(
+                              width: 22, height: 22,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : const Text('Kind opslaan',
+                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../children/presentation/providers/children_provider.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _lang = 'NL';
 
   @override
@@ -28,6 +32,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildSocial(),
             _buildLegal(),
             _buildLogout(),
+            const SizedBox(height: 24),
+            Opacity(
+              opacity: 0.4,
+              child: SvgPicture.asset('assets/images/snorkeltje_logo.svg', height: 28),
+            ),
             const SizedBox(height: 16),
           ],
         ),
@@ -41,18 +50,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         bottomLeft: Radius.circular(32),
         bottomRight: Radius.circular(32),
       ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(20, 58, 20, 32),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            stops: [0.0, 0.6, 1.0],
-            colors: [Color(0xFF0365C4), Color(0xFF0D7FE8), Color(0xFF00C1FF)],
-          ),
-        ),
-        child: Column(
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 58, 20, 32),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                stops: [0.0, 0.6, 1.0],
+                colors: [Color(0xFF0365C4), Color(0xFF0D7FE8), Color(0xFF00C1FF)],
+              ),
+            ),
+            child: Column(
           children: [
             const Text('Profiel',
                 style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
@@ -93,12 +104,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            const Text('Ahmed Khilji',
-                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
-            Text('ahmed@snorkeltje.nl',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
+            Builder(builder: (_) {
+              final user = ref.watch(currentUserProvider);
+              final name = user?.fullName ?? 'Ouder';
+              final email = user?.email ?? '';
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(name,
+                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(email,
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
+                ],
+              );
+            }),
           ],
-        ),
+            ),
+          ),
+          Positioned(
+            left: 0, right: 0, bottom: 0,
+            child: IgnorePointer(
+              child: CustomPaint(
+                size: const Size(double.infinity, 30),
+                painter: _ProfileHeaderWavePainter(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -139,6 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildChildren() {
+    final asyncChildren = ref.watch(myChildrenProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Column(
@@ -150,7 +183,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Text('Mijn kinderen',
                   style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
               GestureDetector(
-                onTap: () => context.pushNamed(RouteNames.addEditChild),
+                onTap: () async {
+                  await context.pushNamed(RouteNames.addEditChild);
+                  ref.read(myChildrenProvider.notifier).load();
+                },
                 child: const Row(
                   children: [
                     Icon(Icons.person_add_alt_1, color: Color(0xFF0365C4), size: 14),
@@ -163,49 +199,120 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () => context.pushNamed(RouteNames.childProgress),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+          asyncChildren.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(
+                child: SizedBox(
+                  width: 24, height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0365C4)),
+                ),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF00C1FF)]),
+            ),
+            error: (e, _) => Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEE4E4),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text('Kon kinderen niet laden: $e',
+                  style: const TextStyle(color: Color(0xFFE74C3C), fontSize: 12)),
+            ),
+            data: (children) {
+              if (children.isEmpty) {
+                return GestureDetector(
+                  onTap: () async {
+                    await context.pushNamed(RouteNames.addEditChild);
+                    ref.read(myChildrenProvider.notifier).load();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F6FF),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF0365C4).withValues(alpha: 0.2)),
                     ),
-                    alignment: Alignment.center,
-                    child: const Text('S',
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text('Sami Khilji',
-                            style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
-                        Text('Gev. Beginner · 7 jaar',
-                            style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+                        Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0365C4).withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.person_add_alt_1, color: Color(0xFF0365C4), size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Nog geen kind toegevoegd',
+                                  style: TextStyle(color: Color(0xFF0365C4), fontSize: 14, fontWeight: FontWeight.w700)),
+                              Text('Tik om een kind toe te voegen',
+                                  style: TextStyle(color: Color(0xFF6B99C7), fontSize: 11)),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, color: Color(0xFF0365C4), size: 18),
                       ],
                     ),
                   ),
-                  Container(width: 6, height: 6, decoration: const BoxDecoration(color: Color(0xFF27AE60), shape: BoxShape.circle)),
-                  const SizedBox(width: 4),
-                  const Text('Actief',
-                      style: TextStyle(color: Color(0xFF27AE60), fontSize: 11, fontWeight: FontWeight.w600)),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right, color: Color(0xFFC4CDD9), size: 16),
-                ],
-              ),
-            ),
+                );
+              }
+              return Column(
+                children: children.map((c) {
+                  final initial = c.name.isNotEmpty ? c.name[0].toUpperCase() : '?';
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: GestureDetector(
+                      onTap: () => context.pushNamed(RouteNames.childProgress),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44, height: 44,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF00C1FF)]),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(initial,
+                                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(c.name,
+                                      style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+                                  Text('${c.currentLevel} · ${c.age} jaar',
+                                      style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                            Container(width: 6, height: 6, decoration: const BoxDecoration(color: Color(0xFF27AE60), shape: BoxShape.circle)),
+                            const SizedBox(width: 4),
+                            const Text('Actief',
+                                style: TextStyle(color: Color(0xFF27AE60), fontSize: 11, fontWeight: FontWeight.w600)),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.chevron_right, color: Color(0xFFC4CDD9), size: 16),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
           ),
         ],
       ),
@@ -286,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSupport() {
     return _buildMenuGroup([
       _MenuItem(Icons.emoji_events, 'Diploma\'s', const Color(0xFF0365C4), () => context.pushNamed(RouteNames.zwemdiplom)),
-      _MenuItem(Icons.receipt_long, 'Facturen', const Color(0xFFFF5C00), () => context.pushNamed(RouteNames.paymentHistory)),
+      _MenuItem(Icons.history, 'Betaalgeschiedenis', const Color(0xFFFF5C00), () => context.pushNamed(RouteNames.paymentHistory)),
       _MenuItem(Icons.warning_amber, 'Noodcontacten', const Color(0xFFE74C3C), () => context.pushNamed(RouteNames.emergencyContacts)),
     ]);
   }
@@ -490,4 +597,22 @@ class _MenuItem {
   final Color? badgeColor;
   final Color? badgeBg;
   _MenuItem(this.icon, this.label, this.color, this.onTap, {this.badge, this.badgeColor, this.badgeBg});
+}
+
+class _ProfileHeaderWavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.1);
+    final path = Path()
+      ..moveTo(0, size.height * 0.5)
+      ..quadraticBezierTo(size.width * 0.25, 0, size.width * 0.5, size.height * 0.5)
+      ..quadraticBezierTo(size.width * 0.75, size.height, size.width, size.height * 0.5)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

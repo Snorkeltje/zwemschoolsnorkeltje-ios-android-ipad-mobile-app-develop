@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_names.dart';
 import '../../data/models/punch_card_model.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class PunchCardDetailScreen extends StatelessWidget {
   final PunchCardModel? punchCard;
@@ -39,7 +40,7 @@ class PunchCardDetailScreen extends StatelessWidget {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: () => context.pop(),
+                    onPressed: () => smartBack(context),
                     icon: const Icon(Icons.arrow_back, size: 24),
                     color: AppColors.textPrimary,
                   ),
