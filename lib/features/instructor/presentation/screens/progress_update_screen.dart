@@ -1,20 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../providers/instructor_providers.dart';
+import '../../../../shared/utils/smart_back.dart';
+import '../theme/instructor_theme.dart';
 
-class ProgressUpdateScreen extends StatefulWidget {
+class ProgressUpdateScreen extends ConsumerStatefulWidget {
   final String studentInitial;
   const ProgressUpdateScreen({super.key, required this.studentInitial});
 
   @override
-  State<ProgressUpdateScreen> createState() => _ProgressUpdateScreenState();
+  ConsumerState<ProgressUpdateScreen> createState() => _ProgressUpdateScreenState();
 }
 
-class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
+class _ProgressUpdateScreenState extends ConsumerState<ProgressUpdateScreen> {
   int _selectedLevel = 1;
   bool _showLevelPicker = false;
-  String _notes = '';
+  final TextEditingController _parentNotesCtrl = TextEditingController();
+  final TextEditingController _colleagueNotesCtrl = TextEditingController();
   int? _mood;
   bool _saved = false;
+  bool _saving = false;
+  bool _notifyParent = false; // Walter: only notify on improvement
+
+  @override
+  void dispose() {
+    _parentNotesCtrl.dispose();
+    _colleagueNotesCtrl.dispose();
+    super.dispose();
+  }
 
   final List<Map<String, String>> _levels = [
     {'nl': 'Beginner'},
@@ -46,8 +61,28 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
     {'emoji': '😢', 'label': 'Verdrietig'},
   ];
 
-  void _handleSave() {
-    setState(() => _saved = true);
+  Future<void> _handleSave() async {
+    if (_saving) return;
+    HapticFeedback.mediumImpact();
+    setState(() => _saving = true);
+    // Simulate brief backend save so the spinner is visible.
+    await Future.delayed(const Duration(milliseconds: 600));
+    final student = ref.read(studentsProvider.notifier).getByInitial(widget.studentInitial);
+    if (student != null) {
+      final skillsCompleted = _skills.where((s) => s['checked'] == true).length;
+      final stepsCompleted = _steps.where((s) => s['done'] == true).length;
+      final newProgress = ((skillsCompleted * 10) + (stepsCompleted * 5)).clamp(0, 100);
+      final newLevel = _levels[_selectedLevel]['nl']!;
+      ref.read(studentsProvider.notifier).updateStudent(
+        student.id,
+        progress: newProgress > student.progress ? newProgress : student.progress,
+        lessonsTotal: student.lessonsTotal + 1,
+        level: newLevel,
+      );
+    }
+    if (!mounted) return;
+    HapticFeedback.lightImpact();
+    setState(() { _saving = false; _saved = true; });
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) context.pop();
     });
@@ -55,6 +90,9 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final student = ref.read(studentsProvider.notifier).getByInitial(widget.studentInitial);
+    final studentName = student?.name ?? 'Sami Khilji';
+    final studentAge = student?.age ?? 7;
     if (_saved) {
       return Scaffold(
         backgroundColor: const Color(0xFF0F1117),
@@ -74,7 +112,13 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
               const SizedBox(height: 20),
               const Text('Voortgang opgeslagen!', style: TextStyle(color: Color(0xFFE2E8F0), fontSize: 22, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
-              const Text('Ouder is automatisch op de hoogte gebracht.', style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 14), textAlign: TextAlign.center),
+              Text(
+                _notifyParent
+                    ? 'Ouder is automatisch op de hoogte gebracht.'
+                    : 'Opgeslagen als privé (geen ouder melding).',
+                style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -94,7 +138,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: Container(
                     width: 40, height: 40,
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
@@ -132,7 +176,7 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Sami Khilji · 7 jr', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                            Text('$studentName · $studentAge jr', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
                             Text('Huidig: ${_levels[_selectedLevel]['nl']} · 28 apr', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12)),
                           ],
                         ),
@@ -300,51 +344,155 @@ class _ProgressUpdateScreenState extends State<ProgressUpdateScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Notes
-                  const Text('Notities (optioneel)', style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12, fontWeight: FontWeight.w600)),
+                  // Parent-visible notes (Walter: what to share with parents)
+                  Row(
+                    children: const [
+                      Icon(Icons.visibility, size: 12, color: Color(0xFF0365C4)),
+                      SizedBox(width: 6),
+                      Text('Voor ouder zichtbaar',
+                          style: TextStyle(color: Color(0xFF0365C4), fontSize: 12, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Text('Deze notitie wordt gedeeld met de ouder',
+                      style: TextStyle(color: Color(0xFF4A5568), fontSize: 10)),
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A1D27),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                      border: Border.all(color: const Color(0xFF0365C4).withValues(alpha: 0.3)),
                     ),
                     child: TextField(
-                      onChanged: (v) => _notes = v,
+                      controller: _parentNotesCtrl,
                       maxLines: 3,
                       style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 13),
                       decoration: const InputDecoration(
-                        hintText: 'Geweldige sessie vandaag, Sami is echt verbeterd in...',
+                        hintText: 'Bijv: Geweldige sessie vandaag! Sami is echt verbeterd in ademhaling 🏊',
                         hintStyle: TextStyle(color: Color(0xFF4A5568), fontSize: 13),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.all(16),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+
+                  // Colleague-only notes (Walter: private notes for colleagues)
+                  Row(
+                    children: const [
+                      Icon(Icons.lock_outline, size: 12, color: Color(0xFFF5A623)),
+                      SizedBox(width: 6),
+                      Text('Privé — alleen collega\'s',
+                          style: TextStyle(color: Color(0xFFF5A623), fontSize: 12, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Text('Intern gebruik, niet zichtbaar voor ouder',
+                      style: TextStyle(color: Color(0xFF4A5568), fontSize: 10)),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1D27),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFF5A623).withValues(alpha: 0.3)),
+                    ),
+                    child: TextField(
+                      controller: _colleagueNotesCtrl,
+                      maxLines: 3,
+                      style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 13),
+                      decoration: const InputDecoration(
+                        hintText: 'Bijv: Kind is verlegen in water, extra aandacht nodig. Volgende week schoolslag starten.',
+                        hintStyle: TextStyle(color: Color(0xFF4A5568), fontSize: 13),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.all(16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Notify parent toggle (Walter: only on improvement)
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1D27),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36, height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF27AE60).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.notifications_active_outlined, color: Color(0xFF27AE60), size: 18),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Ouder notificeren',
+                                  style: TextStyle(color: Color(0xFFE2E8F0), fontSize: 13, fontWeight: FontWeight.w600)),
+                              SizedBox(height: 2),
+                              Text('Stuur melding alleen bij verbetering',
+                                  style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: _notifyParent,
+                          onChanged: (v) => setState(() => _notifyParent = v),
+                          activeTrackColor: const Color(0xFF27AE60),
+                          activeColor: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 24),
 
                   // Save button
                   GestureDetector(
-                    onTap: _handleSave,
-                    child: Container(
+                    onTap: _saving ? null : _handleSave,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
                       height: 52,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFF27AE60), Color(0xFF2ECC71)]),
+                        gradient: LinearGradient(colors: _saving
+                            ? [ITheme.green.withValues(alpha: 0.5), ITheme.greenAlt.withValues(alpha: 0.5)]
+                            : const [ITheme.green, ITheme.greenAlt]),
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: const Color(0xFF27AE60).withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
+                        boxShadow: [BoxShadow(color: ITheme.green.withValues(alpha: 0.3), blurRadius: 24, offset: const Offset(0, 8))],
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.send, color: Colors.white, size: 18),
-                          SizedBox(width: 8),
-                          Text('Opslaan & Ouder Melden', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                          if (_saving)
+                            const SizedBox(
+                              width: 18, height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          else
+                            Icon(_notifyParent ? Icons.send : Icons.save, color: Colors.white, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            _saving
+                                ? 'Opslaan...'
+                                : (_notifyParent ? 'Opslaan & Ouder Melden' : 'Opslaan (Privé)'),
+                            style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+                          ),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Center(child: Text('Ouder krijgt automatisch melding', style: TextStyle(color: Color(0xFF4A5568), fontSize: 11))),
+                  Center(
+                    child: Text(
+                      _notifyParent ? 'Ouder krijgt automatisch melding' : 'Geen melding naar ouder',
+                      style: const TextStyle(color: ITheme.textMid, fontSize: 11),
+                    ),
+                  ),
                   const SizedBox(height: 32),
                 ],
               ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_colors.dart';
+import 'package:flutter/services.dart';
+import '../theme/instructor_theme.dart';
 
 class InstructorScheduleScreen extends StatefulWidget {
   const InstructorScheduleScreen({super.key});
@@ -11,6 +11,7 @@ class InstructorScheduleScreen extends StatefulWidget {
 
 class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
   int _selectedDayIndex = 0;
+  int _weekNumber = 18;
 
   final List<Map<String, dynamic>> _days = [
     {'day': 'Ma', 'date': 28},
@@ -72,46 +73,87 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
     return _currentSchedule.fold(0, (sum, item) => sum + (item['students'] as int));
   }
 
+  List<String> _uniqueLocations() {
+    final locs = <String>{};
+    for (final item in _currentSchedule) {
+      locs.add(item['location'] as String);
+    }
+    return locs.toList();
+  }
+
+  /// Build combined schedule including EMPTY slots per Walter's feedback.
+  /// Shows all 30-min slots between 09:00 and 18:00.
+  /// Empty slots allow instructor to offer earlier times to waitlist.
+  List<Map<String, dynamic>> _scheduleWithEmptySlots() {
+    final booked = _currentSchedule;
+    if (booked.isEmpty) return [];
+
+    final bookedTimes = <String>{};
+    for (final item in booked) {
+      bookedTimes.add(item['time'] as String);
+    }
+
+    final all = <Map<String, dynamic>>[];
+    // Generate 30-min slots from 09:00 to 18:00
+    for (int h = 9; h < 18; h++) {
+      for (final m in [0, 30]) {
+        final time = '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+        final endH = m == 30 ? h + 1 : h;
+        final endM = m == 30 ? 0 : 30;
+        final end = '${endH.toString().padLeft(2, '0')}:${endM.toString().padLeft(2, '0')}';
+
+        if (bookedTimes.contains(time)) {
+          final bookedItem = booked.firstWhere((i) => i['time'] == time);
+          all.add(bookedItem);
+        } else {
+          all.add({
+            'time': time,
+            'end': end,
+            'location': '',
+            'students': 0,
+            'type': 'EMPTY',
+            'names': <String>[],
+            'isEmpty': true,
+          });
+        }
+      }
+    }
+    return all;
+  }
+
+  Future<void> _onRefresh() async {
+    HapticFeedback.selectionClick();
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hPad = ITheme.hPad(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1117),
-      body: SafeArea(
-        top: false,
-        child: Column(
+      backgroundColor: ITheme.bg,
+      body: Column(
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+              padding: EdgeInsets.fromLTRB(hPad, 60, hPad, 20),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF1A1D27), Color(0xFF252836)],
+                  colors: [ITheme.headerGradStart, ITheme.headerGradEnd],
                 ),
               ),
               child: Column(
                 children: [
-                  Row(
+                  const Row(
                     children: [
-                      GestureDetector(
-                        onTap: () => context.pop(),
-                        child: Container(
-                          width: 40, height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(Icons.chevron_left, color: Color(0xFFE2E8F0), size: 20),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Mijn Rooster', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
-                            Text('April — Mei 2026', style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
+                            Text('April — Mei 2026', style: TextStyle(color: ITheme.textMid, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -122,22 +164,35 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        width: 32, height: 32,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(10),
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _weekNumber = (_weekNumber > 1) ? _weekNumber - 1 : 52);
+                        },
+                        child: Container(
+                          width: 32, height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.chevron_left, color: ITheme.textHi, size: 16),
                         ),
-                        child: const Icon(Icons.chevron_left, color: Color(0xFFE2E8F0), size: 16),
                       ),
-                      const Text('Week 18', style: TextStyle(color: Color(0xFFE2E8F0), fontSize: 13, fontWeight: FontWeight.w600)),
-                      Container(
-                        width: 32, height: 32,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(10),
+                      Text('Week $_weekNumber',
+                          style: const TextStyle(color: ITheme.textHi, fontSize: 13, fontWeight: FontWeight.w600)),
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _weekNumber = (_weekNumber < 52) ? _weekNumber + 1 : 1);
+                        },
+                        child: Container(
+                          width: 32, height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.chevron_right, color: ITheme.textHi, size: 16),
                         ),
-                        child: const Icon(Icons.chevron_right, color: Color(0xFFE2E8F0), size: 16),
                       ),
                     ],
                   ),
@@ -160,7 +215,10 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                   final isToday = index == 0;
 
                   return GestureDetector(
-                    onTap: () => setState(() => _selectedDayIndex = index),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedDayIndex = index);
+                    },
                     child: Container(
                       width: 50,
                       margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -221,23 +279,52 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
               ),
             ),
 
-            // Day summary
+            // Day summary with primary location
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${_currentSchedule.length} lessen',
-                    style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(Icons.people_outline, size: 12, color: Color(0xFF8E9BB3)),
-                      const SizedBox(width: 4),
-                      Text('$_totalStudents', style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
+                      Text(
+                        '${_currentSchedule.length} lessen',
+                        style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.people_outline, size: 12, color: Color(0xFF8E9BB3)),
+                          const SizedBox(width: 4),
+                          Text('$_totalStudents', style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
+                        ],
+                      ),
                     ],
                   ),
+                  if (_currentSchedule.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    // Location pill — shown once since 1 location/day typically
+                    Wrap(
+                      spacing: 6,
+                      children: _uniqueLocations().map((loc) => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF5C00).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: const Color(0xFFFF5C00).withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.location_on, size: 11, color: Color(0xFFFF5C00)),
+                            const SizedBox(width: 4),
+                            Text(loc,
+                                style: const TextStyle(color: Color(0xFFFF5C00), fontSize: 11, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      )).toList(),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -265,17 +352,84 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                         ),
                       ),
                     )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: _currentSchedule.length,
+                  : Builder(builder: (_) {
+                      final combined = _scheduleWithEmptySlots();
+                      return RefreshIndicator(
+                        color: ITheme.primary,
+                        backgroundColor: ITheme.bgElev,
+                        onRefresh: _onRefresh,
+                        child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                      itemCount: combined.length,
                       itemBuilder: (context, index) {
-                        final item = _currentSchedule[index];
+                        final item = combined[index];
+                        final isEmpty = item['isEmpty'] == true;
                         final type = item['type'] as String;
                         final accentColor = _typeColors[type] ?? const Color(0xFFFF5C00);
                         final names = (item['names'] as List).join(', ');
 
+                        // EMPTY slot — per Walter: show box so instructor sees availability
+                        if (isEmpty) {
+                          return GestureDetector(
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              _showEmptySlotActions(item['time'] as String);
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.08),
+                                  style: BorderStyle.solid,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 54,
+                                    child: Column(
+                                      children: [
+                                        Text(item['time'],
+                                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF4A5568))),
+                                        const SizedBox(height: 2),
+                                        const Text('30 min', style: TextStyle(fontSize: 9, color: Color(0xFF4A5568), fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.04), margin: const EdgeInsets.symmetric(horizontal: 12)),
+                                  const Expanded(
+                                    child: Text('LEEG — Beschikbaar',
+                                        style: TextStyle(color: Color(0xFF4A5568), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF27AE60).withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: const Text('+ OFFER',
+                                        style: TextStyle(color: Color(0xFF27AE60), fontSize: 9, fontWeight: FontWeight.w700)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+
                         return GestureDetector(
-                          onTap: () => context.push('/instructor/lesson/1'),
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            // Lesson-detail screen not implemented yet — show options menu instead.
+                            _showMoveLessonAction(item['time'] as String);
+                          },
+                          onLongPress: () {
+                            HapticFeedback.mediumImpact();
+                            _showMoveLessonAction(item['time'] as String);
+                          },
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
@@ -299,30 +453,38 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                                   padding: const EdgeInsets.all(16),
                                   child: Row(
                                     children: [
-                                      // Time
+                                      // Time (30 min — Walter: all lessons are 30min)
                                       SizedBox(
-                                        width: 50,
+                                        width: 54,
                                         child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
-                                            Text(item['time'], style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: accentColor)),
-                                            Text(item['end'], style: const TextStyle(fontSize: 10, color: Color(0xFF4A5568))),
+                                            Text(item['time'], style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: accentColor)),
+                                            const SizedBox(height: 2),
+                                            Text('30 min', style: const TextStyle(fontSize: 9, color: Color(0xFF4A5568), fontWeight: FontWeight.w500)),
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
-                                      // Info
+                                      Container(width: 1, height: 44, color: Colors.white.withValues(alpha: 0.06), margin: const EdgeInsets.symmetric(horizontal: 12)),
+                                      // Info — children names PRIMARY per Walter
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
-                                                Text(item['location'], style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 13, fontWeight: FontWeight.w700)),
+                                                Expanded(
+                                                  child: Text(
+                                                    names,
+                                                    style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 14, fontWeight: FontWeight.w700),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
                                                 const SizedBox(width: 8),
                                                 Container(
                                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                                   decoration: BoxDecoration(
-                                                    color: accentColor.withValues(alpha: 0.08),
+                                                    color: accentColor.withValues(alpha: 0.12),
                                                     borderRadius: BorderRadius.circular(10),
                                                   ),
                                                   child: Text(type, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: accentColor)),
@@ -330,15 +492,21 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                                               ],
                                             ),
                                             const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.people_outline, size: 11, color: Color(0xFF8E9BB3)),
-                                                const SizedBox(width: 6),
-                                                Expanded(
-                                                  child: Text(names, style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11), overflow: TextOverflow.ellipsis),
-                                                ),
-                                              ],
-                                            ),
+                                            // Location only shown if differs from main location of the day
+                                            if (_uniqueLocations().length > 1)
+                                              Row(
+                                                children: [
+                                                  const Icon(Icons.location_on_outlined, size: 11, color: Color(0xFF4A5568)),
+                                                  const SizedBox(width: 4),
+                                                  Text(item['location'],
+                                                      style: const TextStyle(color: Color(0xFF4A5568), fontSize: 11)),
+                                                ],
+                                              )
+                                            else
+                                              Text(
+                                                '${item['students']} ${(item['students'] as int) == 1 ? "leerling" : "leerlingen"}',
+                                                style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11),
+                                              ),
                                           ],
                                         ),
                                       ),
@@ -352,6 +520,149 @@ class _InstructorScheduleScreenState extends State<InstructorScheduleScreen> {
                         );
                       },
                     ),
+                    );
+                    }),
+            ),
+          ],
+        ),
+    );
+  }
+
+  /// Empty slot action sheet per Walter: "offer to another customer"
+  void _showEmptySlotActions(String time) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1D27),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text('Leeg slot — $time',
+                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            const Text('Biedt dit tijdslot aan een leerling aan',
+                style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
+            const SizedBox(height: 20),
+            _actionTile(ctx, Icons.send, 'Aanbieden aan wachtlijst', const Color(0xFF27AE60), () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Slot aangeboden aan wachtlijst klanten'), backgroundColor: Color(0xFF27AE60)),
+              );
+            }),
+            _actionTile(ctx, Icons.person_add_alt, 'Aanbieden aan specifieke leerling', const Color(0xFF0365C4), () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Kies leerling uit lijst')),
+              );
+            }),
+            _actionTile(ctx, Icons.block, 'Blokkeer dit slot', const Color(0xFFE74C3C), () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Slot geblokkeerd')),
+              );
+            }),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Move lesson action per Walter's drag-drop feedback
+  void _showMoveLessonAction(String currentTime) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1D27),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        final emptySlots = _scheduleWithEmptySlots().where((s) => s['isEmpty'] == true).toList();
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text('Verplaats les van $currentTime naar...',
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 16),
+              if (emptySlots.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text('Geen lege tijdslots beschikbaar', style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 13)),
+                )
+              else
+                SizedBox(
+                  height: 200,
+                  child: ListView(
+                    children: emptySlots.map((slot) => _actionTile(
+                      ctx,
+                      Icons.schedule,
+                      '${slot['time']} → ${slot['end']}',
+                      const Color(0xFF0365C4),
+                      () {
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Les verplaatst naar ${slot['time']}. Ouder op de hoogte gebracht.'),
+                            backgroundColor: const Color(0xFF27AE60),
+                          ),
+                        );
+                      },
+                    )).toList(),
+                  ),
+                ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _actionTile(BuildContext ctx, IconData icon, String label, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
             ),
           ],
         ),

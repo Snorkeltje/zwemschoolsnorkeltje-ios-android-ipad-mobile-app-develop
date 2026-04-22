@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class MonthlyReportScreen extends StatelessWidget {
   const MonthlyReportScreen({super.key});
@@ -19,7 +20,7 @@ class MonthlyReportScreen extends StatelessWidget {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: Container(
                     width: 40, height: 40,
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),

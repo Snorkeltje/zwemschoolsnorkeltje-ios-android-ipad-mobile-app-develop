@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class BookingSummaryScreen extends StatelessWidget {
   const BookingSummaryScreen({super.key});
@@ -32,7 +33,7 @@ class BookingSummaryScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () => smartBack(context),
                       child: Container(
                         width: 40,
                         height: 40,

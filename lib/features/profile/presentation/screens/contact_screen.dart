@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class ContactScreen extends StatefulWidget {
   const ContactScreen({super.key});
@@ -16,6 +17,9 @@ class _ContactScreenState extends State<ContactScreen> {
   final _subjectController = TextEditingController();
   final _messageController = TextEditingController();
   int _expandedLocationIndex = -1;
+  // Walter: contact regular instructor OR Snorkeltje team
+  String _recipient = 'team'; // 'instructor' or 'team'
+  bool _isComplaint = false;
 
   @override
   void dispose() {
@@ -127,7 +131,7 @@ class _ContactScreenState extends State<ContactScreen> {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () => smartBack(context),
                       child: Container(
                         width: 38,
                         height: 38,
@@ -527,14 +531,98 @@ class _ContactScreenState extends State<ContactScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Stuur ons een bericht',
+            'Stuur een bericht',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
+          const Text(
+            'Kies aan wie u wilt schrijven',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 14),
+          // Recipient selector — Walter: regular instructor OR team
+          Row(
+            children: [
+              Expanded(
+                child: _recipientCard(
+                  selected: _recipient == 'instructor',
+                  icon: Icons.person,
+                  title: 'Mijn Instructeur',
+                  subtitle: 'Jan de Vries',
+                  color: const Color(0xFF0365C4),
+                  onTap: () => setState(() {
+                    _recipient = 'instructor';
+                    _isComplaint = false;
+                  }),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _recipientCard(
+                  selected: _recipient == 'team',
+                  icon: Icons.groups_2,
+                  title: 'Snorkeltje Team',
+                  subtitle: 'Walter & team',
+                  color: const Color(0xFFFF5C00),
+                  onTap: () => setState(() => _recipient = 'team'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Complaint toggle — Walter: complaints always CC'd to team
+          GestureDetector(
+            onTap: () => setState(() => _isComplaint = !_isComplaint),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _isComplaint
+                    ? const Color(0xFFE74C3C).withValues(alpha: 0.08)
+                    : const Color(0xFFF4F7FC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _isComplaint
+                      ? const Color(0xFFE74C3C).withValues(alpha: 0.3)
+                      : Colors.transparent,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 20, height: 20,
+                    decoration: BoxDecoration(
+                      color: _isComplaint ? const Color(0xFFE74C3C) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: _isComplaint ? const Color(0xFFE74C3C) : const Color(0xFFD0D5DD),
+                        width: 2,
+                      ),
+                    ),
+                    child: _isComplaint
+                        ? const Icon(Icons.check, size: 14, color: Colors.white)
+                        : null,
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Dit is een klacht',
+                      style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  if (_isComplaint)
+                    const Text(
+                      'Team wordt ook ingelicht',
+                      style: TextStyle(color: Color(0xFFE74C3C), fontSize: 10, fontWeight: FontWeight.w600),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
           _buildFormField('Naam', 'Uw volledige naam', _nameController,
               Icons.person_outline),
           const SizedBox(height: 14),
@@ -555,11 +643,18 @@ class _ContactScreenState extends State<ContactScreen> {
           // Send button
           GestureDetector(
             onTap: () {
+              final target = _recipient == 'instructor' ? 'uw instructeur' : 'Snorkeltje team';
+              final complaintNote = _isComplaint ? ' (ook naar team verzonden)' : '';
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Bericht verzonden!'),
-                    backgroundColor: Color(0xFF27AE60)),
+                SnackBar(
+                    content: Text('Bericht verzonden naar $target$complaintNote'),
+                    backgroundColor: const Color(0xFF27AE60)),
               );
+              _nameController.clear();
+              _emailController.clear();
+              _subjectController.clear();
+              _messageController.clear();
+              setState(() => _isComplaint = false);
             },
             child: Container(
               width: double.infinity,
@@ -577,14 +672,14 @@ class _ContactScreenState extends State<ContactScreen> {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.send, color: Colors.white, size: 20),
-                  SizedBox(width: 10),
+                  const Icon(Icons.send, color: Colors.white, size: 20),
+                  const SizedBox(width: 10),
                   Text(
-                    'Versturen',
-                    style: TextStyle(
+                    _recipient == 'instructor' ? 'Verstuur naar instructeur' : 'Verstuur naar team',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -595,6 +690,63 @@ class _ContactScreenState extends State<ContactScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _recipientCard({
+    required bool selected,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: selected ? color.withValues(alpha: 0.08) : const Color(0xFFF4F7FC),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? color : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 32, height: 32,
+                  decoration: BoxDecoration(
+                    color: selected ? color : color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 17,
+                    color: selected ? Colors.white : color,
+                  ),
+                ),
+                const Spacer(),
+                if (selected)
+                  Icon(Icons.check_circle, color: color, size: 18),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(title,
+                style: TextStyle(
+                  color: selected ? color : AppColors.textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                )),
+            Text(subtitle,
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+          ],
+        ),
       ),
     );
   }

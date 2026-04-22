@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class LocationSelectionScreen extends StatefulWidget {
   const LocationSelectionScreen({super.key});
@@ -40,7 +41,7 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(children: [
               GestureDetector(
-                onTap: () => context.pop(),
+                onTap: () => smartBack(context),
                 child: Container(width: 40, height: 40, decoration: BoxDecoration(color: const Color(0xFFF4F7FC), borderRadius: BorderRadius.circular(12)),
                   child: const Icon(Icons.chevron_left, size: 20, color: Color(0xFF1A1A2E))),
               ),

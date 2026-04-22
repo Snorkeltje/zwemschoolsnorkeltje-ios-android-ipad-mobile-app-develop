@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class ReservationDetailScreen extends StatelessWidget {
   const ReservationDetailScreen({super.key});
@@ -23,7 +24,7 @@ class ReservationDetailScreen extends StatelessWidget {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: const Icon(Icons.chevron_left, color: Color(0xFF131827), size: 24),
                 ),
                 const SizedBox(width: 12),
@@ -81,42 +82,6 @@ class ReservationDetailScreen extends StatelessWidget {
                                 ],
                               ),
                             )),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-                  // QR code
-                  Center(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 144,
-                          height: 144,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF0F4FC),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: GridView.count(
-                            crossAxisCount: 7,
-                            mainAxisSpacing: 2,
-                            crossAxisSpacing: 2,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: List.generate(49, (i) {
-                              const filled = [0,1,2,7,8,10,14,21,24,28,30,31,32,33,34,35,36,37,38,40,42,43,44,45,48];
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: filled.contains(i) ? const Color(0xFF0365C4) : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text('Scan bij de ingang',
-                            style: TextStyle(color: Color(0xFF818EA6), fontSize: 12)),
                       ],
                     ),
                   ),

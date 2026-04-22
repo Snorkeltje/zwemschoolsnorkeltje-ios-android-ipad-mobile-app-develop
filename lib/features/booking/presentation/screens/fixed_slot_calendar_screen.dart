@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class FixedSlotCalendarScreen extends StatefulWidget {
   const FixedSlotCalendarScreen({super.key});
@@ -167,7 +168,7 @@ class _FixedSlotCalendarScreenState extends State<FixedSlotCalendarScreen> {
             children: [
               // Back button
               GestureDetector(
-                onTap: () => context.pop(),
+                onTap: () => smartBack(context),
                 child: Container(
                   width: 40,
                   height: 40,

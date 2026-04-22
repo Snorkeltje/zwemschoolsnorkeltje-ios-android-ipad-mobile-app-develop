@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/instructor_providers.dart';
+import '../../../../shared/utils/smart_back.dart';
+import '../theme/instructor_theme.dart';
 
-class InstructorChatScreen extends StatefulWidget {
+class InstructorChatScreen extends ConsumerStatefulWidget {
   final String chatId;
   const InstructorChatScreen({super.key, required this.chatId});
 
   @override
-  State<InstructorChatScreen> createState() => _InstructorChatScreenState();
+  ConsumerState<InstructorChatScreen> createState() => _InstructorChatScreenState();
 }
 
-class _InstructorChatScreenState extends State<InstructorChatScreen> {
+class _InstructorChatScreenState extends ConsumerState<InstructorChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  final List<Map<String, dynamic>> _messages = [
-    {'from': 'parent', 'text': 'Hoi Jan! Hoe ging de les vandaag met Sami?', 'time': '14:20', 'read': true},
-    {'from': 'instructor', 'text': 'Hoi Ahmed! Het ging echt heel goed vandaag. Sami heeft voor het eerst 10 meter vrije slag zonder stoppen gezwommen! 🎉', 'time': '14:22', 'read': true},
-    {'from': 'parent', 'text': 'Wauw, wat geweldig! Daar zijn we echt blij mee!', 'time': '14:24', 'read': true},
-    {'from': 'instructor', 'text': 'Ja, hij doet het echt fantastisch. Zijn ademhaling wordt steeds beter. Ik stuur zo de thuisoefeningen door.', 'time': '14:26', 'read': true},
-    {'from': 'instructor', 'text': 'Tip voor thuis: laat Sami in bad oefenen met blazen in het water. 3x per dag 10 keer. Dit helpt enorm met de ademhaling.', 'time': '14:28', 'read': true},
-    {'from': 'parent', 'text': 'Bedankt voor de feedback! We gaan thuis oefenen. Tot maandag! 👍', 'time': '14:32', 'read': true},
-  ];
+  int get _conversationId => int.tryParse(widget.chatId) ?? 1;
 
   final List<String> _quickReplies = [
     'Goede voortgang vandaag!',
@@ -29,24 +26,33 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
     'Les verplaatst ✓',
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(conversationsProvider.notifier).markRead(_conversationId);
+      _scrollToBottom();
+    });
+  }
+
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
   void _sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
-    setState(() {
-      _messages.add({
-        'from': 'instructor',
-        'text': _controller.text.trim(),
-        'time': TimeOfDay.now().format(context),
-        'read': false,
-      });
-      _controller.clear();
-    });
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    });
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    HapticFeedback.lightImpact();
+    ref.read(messagesProvider.notifier).sendMessage(_conversationId, text);
+    ref.read(conversationsProvider.notifier).updateLastMessage(_conversationId, text, 'Nu');
+    _controller.clear();
+    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
   }
 
   @override
@@ -58,8 +64,17 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final conversation = ref.read(conversationsProvider.notifier).getById(_conversationId);
+    final parentName = conversation?.parentName ?? 'Ahmed Khilji';
+    final studentName = conversation?.studentName ?? 'Sami';
+    final initial = conversation?.initial ?? 'A';
+    final online = conversation?.online ?? true;
+    final gradient = conversation?.gradient ?? const [Color(0xFF0365C4), Color(0xFF00C1FF)];
+
+    final messagesMap = ref.watch(messagesProvider);
+    final messages = messagesMap[_conversationId] ?? [];
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1117),
+      backgroundColor: ITheme.bg,
       body: Column(
         children: [
           // Header
@@ -76,37 +91,49 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    smartBack(context);
+                  },
                   child: Container(
                     width: 38, height: 38,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.chevron_left, color: Color(0xFFE2E8F0), size: 20),
+                    child: const Icon(Icons.chevron_left, color: ITheme.textHi, size: 20),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Container(
                   width: 42, height: 42,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF0365C4), Color(0xFF00C1FF)]),
+                    gradient: LinearGradient(colors: gradient),
                     borderRadius: BorderRadius.circular(13),
                   ),
-                  child: const Center(child: Text('A', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700))),
+                  child: Center(child: Text(initial, style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700))),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Ahmed Khilji', style: TextStyle(color: Color(0xFFE2E8F0), fontSize: 15, fontWeight: FontWeight.w700)),
+                      Text(parentName, style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 15, fontWeight: FontWeight.w700)),
                       Row(
                         children: [
-                          Container(width: 7, height: 7, decoration: const BoxDecoration(color: Color(0xFF27AE60), shape: BoxShape.circle)),
+                          Container(
+                            width: 7, height: 7,
+                            decoration: BoxDecoration(
+                              color: online ? const Color(0xFF27AE60) : const Color(0xFF4A5568),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
                           const SizedBox(width: 6),
-                          const Text('Online', style: TextStyle(color: Color(0xFF27AE60), fontSize: 11)),
-                          const Text(' · Sami & Noor', style: TextStyle(color: Color(0xFF4A5568), fontSize: 11)),
+                          Text(
+                            online ? 'Online' : 'Offline',
+                            style: TextStyle(color: online ? const Color(0xFF27AE60) : const Color(0xFF4A5568), fontSize: 11),
+                          ),
+                          Text(' · $studentName', style: const TextStyle(color: Color(0xFF4A5568), fontSize: 11)),
                         ],
                       ),
                     ],
@@ -135,84 +162,98 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
 
           // Messages
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(20),
-              itemCount: _messages.length + 1, // +1 for date separator
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Center(
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1D27),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text('Vandaag', style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
-                    ),
-                  );
-                }
-                final msg = _messages[index - 1];
-                final isInstructor = msg['from'] == 'instructor';
-
-                return Align(
-                  alignment: isInstructor ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: isInstructor
-                          ? const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)])
-                          : null,
-                      color: isInstructor ? null : const Color(0xFF1A1D27),
-                      borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(18),
-                        topRight: const Radius.circular(18),
-                        bottomLeft: Radius.circular(isInstructor ? 18 : 6),
-                        bottomRight: Radius.circular(isInstructor ? 6 : 18),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isInstructor ? const Color(0xFFFF5C00).withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+            child: messages.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_bubble_outline, size: 48, color: Colors.white.withValues(alpha: 0.2)),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Start een gesprek met $parentName',
+                          style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 13),
                         ),
                       ],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(msg['text'], style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.5)),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: isInstructor ? MainAxisAlignment.end : MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              msg['time'],
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: isInstructor ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF4A5568),
-                              ),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(20),
+                    itemCount: messages.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return Center(
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1A1D27),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            if (isInstructor) ...[
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.done_all,
-                                size: 12,
-                                color: msg['read'] == true ? const Color(0xFF00C1FF) : Colors.white.withValues(alpha: 0.4),
+                            child: const Text('Vandaag', style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+                          ),
+                        );
+                      }
+                      final msg = messages[index - 1];
+                      final isInstructor = msg.from == 'instructor';
+
+                      return Align(
+                        alignment: isInstructor ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            gradient: isInstructor
+                                ? const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)])
+                                : null,
+                            color: isInstructor ? null : const Color(0xFF1A1D27),
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(18),
+                              topRight: const Radius.circular(18),
+                              bottomLeft: Radius.circular(isInstructor ? 18 : 6),
+                              bottomRight: Radius.circular(isInstructor ? 6 : 18),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: isInstructor ? const Color(0xFFFF5C00).withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
                               ),
                             ],
-                          ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(msg.text, style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.5)),
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: isInstructor ? MainAxisAlignment.end : MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    msg.time,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isInstructor ? Colors.white.withValues(alpha: 0.6) : const Color(0xFF4A5568),
+                                    ),
+                                  ),
+                                  if (isInstructor) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.done_all,
+                                      size: 12,
+                                      color: msg.read ? const Color(0xFF00C1FF) : Colors.white.withValues(alpha: 0.4),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
 
           // Quick replies
@@ -243,57 +284,85 @@ class _InstructorChatScreenState extends State<InstructorChatScreen> {
           const SizedBox(height: 8),
 
           // Input area
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 36),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A1D27),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.attach_file, color: Color(0xFF4A5568), size: 20),
-                    onPressed: () {},
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 14),
-                      decoration: const InputDecoration(
-                        hintText: 'Typ een bericht...',
-                        hintStyle: TextStyle(color: Color(0xFF4A5568), fontSize: 14),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onSubmitted: (_) => _sendMessage(),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: ITheme.bgElev,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.attach_file, color: ITheme.textMid, size: 20),
+                      onPressed: () => HapticFeedback.selectionClick(),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: _sendMessage,
-                    child: Container(
-                      width: 40, height: 40,
-                      margin: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        gradient: _controller.text.trim().isNotEmpty
-                            ? const LinearGradient(colors: [Color(0xFFFF5C00), Color(0xFFF5A623)])
-                            : null,
-                        color: _controller.text.trim().isEmpty ? Colors.white.withValues(alpha: 0.06) : null,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: _controller.text.trim().isNotEmpty
-                            ? [BoxShadow(color: const Color(0xFFFF5C00).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))]
-                            : null,
-                      ),
-                      child: Icon(
-                        Icons.arrow_upward,
-                        size: 20,
-                        color: _controller.text.trim().isNotEmpty ? Colors.white : const Color(0xFF4A5568),
+                    Expanded(
+                      // Theme override: dark selection colors, no iOS light focus ring.
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          textSelectionTheme: const TextSelectionThemeData(
+                            cursorColor: ITheme.primary,
+                            selectionColor: Color(0x66FF5C00),
+                            selectionHandleColor: ITheme.primary,
+                          ),
+                        ),
+                        child: TextField(
+                          controller: _controller,
+                          maxLines: 4,
+                          minLines: 1,
+                          textInputAction: TextInputAction.send,
+                          cursorColor: ITheme.primary,
+                          keyboardAppearance: Brightness.dark,
+                          style: const TextStyle(color: ITheme.textHi, fontSize: 14, height: 1.4),
+                          decoration: const InputDecoration(
+                            hintText: 'Typ een bericht...',
+                            hintStyle: TextStyle(color: ITheme.textMid, fontSize: 14),
+                            filled: false,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          onSubmitted: (_) => _sendMessage(),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: GestureDetector(
+                        onTap: _sendMessage,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 40, height: 40,
+                          decoration: BoxDecoration(
+                            gradient: _controller.text.trim().isNotEmpty
+                                ? const LinearGradient(colors: [ITheme.primary, ITheme.primaryAlt])
+                                : null,
+                            color: _controller.text.trim().isEmpty ? Colors.white.withValues(alpha: 0.06) : null,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: _controller.text.trim().isNotEmpty
+                                ? [BoxShadow(color: ITheme.primary.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))]
+                                : null,
+                          ),
+                          child: Icon(
+                            Icons.arrow_upward,
+                            size: 20,
+                            color: _controller.text.trim().isNotEmpty ? Colors.white : ITheme.textMid,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

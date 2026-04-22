@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 const _days = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
 const _locations = ['De Bilt', 'Bad Hulckesteijn', 'Garderen', 'Wolfheze'];
@@ -26,7 +27,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: const Icon(Icons.chevron_left, color: Color(0xFF131827), size: 24),
                 ),
                 const SizedBox(width: 12),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class _Card {
   final String id;
@@ -20,7 +21,6 @@ const _cards = <_Card>[
 const _providers = [
   ('iDEAL', 'Direct betalen via je bank', '🏦', true),
   ('Creditcard', 'Visa, Mastercard, Amex', '💳', false),
-  ('Bancontact', 'Belgische betaalmethode', '🇧🇪', false),
 ];
 
 class PaymentMethodScreen extends StatefulWidget {
@@ -49,7 +49,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => smartBack(context),
                   child: Container(
                     width: 40, height: 40,
                     decoration: const BoxDecoration(color: Color(0xFFF4F7FC), shape: BoxShape.circle),

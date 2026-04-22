@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class _Reservation {
   final String id;
@@ -10,14 +11,21 @@ class _Reservation {
   final String instructor;
   final String type;
   final Color color;
-  const _Reservation(this.id, this.date, this.time, this.location, this.instructor, this.type, this.color);
+  final bool completed; // Walter: usage history under reservations
+  const _Reservation(this.id, this.date, this.time, this.location, this.instructor, this.type, this.color, {this.completed = false});
 }
 
 const _reservations = <_Reservation>[
+  // Upcoming
   _Reservation('1', 'Ma 28 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4)),
   _Reservation('2', 'Wo 30 apr', '16:00–16:30', 'Bad Hulckesteijn', 'Maria Jansen', 'Extra', Color(0xFFFF5C00)),
   _Reservation('3', 'Ma 5 mei', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4)),
   _Reservation('4', 'Wo 7 mei', '10:00–10:30', 'Ampt v. Nijkerk', 'Pieter Bakker', 'Extra', Color(0xFFFF5C00)),
+  // History (completed) — Walter: show lesson usage here too
+  _Reservation('h1', 'Ma 21 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4), completed: true),
+  _Reservation('h2', 'Wo 16 apr', '16:00–16:30', 'Bad Hulckesteijn', 'Maria Jansen', 'Extra', Color(0xFFFF5C00), completed: true),
+  _Reservation('h3', 'Ma 14 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4), completed: true),
+  _Reservation('h4', 'Ma 7 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4), completed: true),
 ];
 
 class MyReservationsScreen extends StatefulWidget {
@@ -31,9 +39,11 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
   String _filter = 'all';
 
   List<_Reservation> get _filtered {
-    if (_filter == 'all') return _reservations;
+    // Walter: tab 0 = upcoming, tab 1 = history (completed lessons)
+    var list = _reservations.where((r) => _tab == 0 ? !r.completed : r.completed).toList();
+    if (_filter == 'all') return list;
     final mapping = {'fixed': 'Vast', 'extra': 'Extra', 'holiday': 'Vakantie'};
-    return _reservations.where((r) => r.type == mapping[_filter]).toList();
+    return list.where((r) => r.type == mapping[_filter]).toList();
   }
 
   @override
@@ -64,7 +74,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () => smartBack(context),
                       child: Container(
                         width: 40,
                         height: 40,
@@ -226,17 +236,36 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Icon(Icons.chevron_right, color: Color(0xFFC4CDD9), size: 16),
-                                GestureDetector(
-                                  onTap: () => context.pushNamed(RouteNames.cancellationConfirm, pathParameters: {'id': r.id}),
-                                  child: const Row(
-                                    children: [
-                                      Icon(Icons.close, color: Color(0xFFE74C3C), size: 12),
-                                      SizedBox(width: 2),
-                                      Text('Annuleer',
-                                          style: TextStyle(color: Color(0xFFE74C3C), fontSize: 11, fontWeight: FontWeight.w600)),
-                                    ],
+                                if (r.completed)
+                                  // Completed lesson: show usage indicator (Walter)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF27AE60).withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.check_circle, color: Color(0xFF27AE60), size: 11),
+                                        SizedBox(width: 3),
+                                        Text('Voltooid',
+                                            style: TextStyle(color: Color(0xFF27AE60), fontSize: 10, fontWeight: FontWeight.w700)),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  GestureDetector(
+                                    onTap: () => context.pushNamed(RouteNames.cancellationConfirm, pathParameters: {'id': r.id}),
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.close, color: Color(0xFFE74C3C), size: 12),
+                                        SizedBox(width: 2),
+                                        Text('Annuleer',
+                                            style: TextStyle(color: Color(0xFFE74C3C), fontSize: 11, fontWeight: FontWeight.w600)),
+                                      ],
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           ],

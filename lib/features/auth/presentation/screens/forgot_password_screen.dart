@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -102,7 +103,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 20, top: 8),
               child: GestureDetector(
-                onTap: () => context.pop(),
+                onTap: () => smartBack(context),
                 child: Container(
                   width: 40, height: 40,
                   decoration: BoxDecoration(color: const Color(0xFFF4F7FC), borderRadius: BorderRadius.circular(12)),

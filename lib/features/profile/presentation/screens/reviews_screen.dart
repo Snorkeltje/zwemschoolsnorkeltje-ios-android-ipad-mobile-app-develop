@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class ReviewsScreen extends StatefulWidget {
   const ReviewsScreen({super.key});
@@ -21,101 +22,79 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   static const _divider = Color(0xFFF0F4FA);
 
   String _filter = 'Alle';
+  String _instructorFilter = 'Alle instructeurs'; // Walter: per-instructor view
 
   final List<_Review> _reviews = const [
-    _Review(
-      id: 1,
-      name: 'Familie De Vries',
-      rating: 10,
-      date: '2 weken geleden',
-      text:
-          'Fantastische zwemschool! Onze dochter Lisa heeft in recordtijd haar A-diploma gehaald. Walter en zijn team zijn geweldig met kinderen.',
-      helpful: 24,
-      location: 'De Bilt',
-    ),
-    _Review(
-      id: 2,
-      name: 'M. Jansen',
-      rating: 9,
-      date: '1 maand geleden',
-      text:
-          'Heel persoonlijke aanpak. De 1-op-1 lessen maken echt het verschil. Ons zoontje gaat met plezier naar zwemles!',
-      helpful: 18,
-      location: 'Nijkerk',
-    ),
-    _Review(
-      id: 3,
-      name: 'Familie Bakker',
-      rating: 10,
-      date: '1 maand geleden',
-      text:
-          'Beste zwemschool van Nederland! De instructeurs zijn geduldig en deskundig. Beide kinderen hebben hier hun diploma behaald.',
-      helpful: 31,
-      location: 'Garderen',
-    ),
-    _Review(
-      id: 4,
-      name: 'A. van Dijk',
-      rating: 9,
-      date: '2 maanden geleden',
-      text:
-          'Snorkeltje is echt top! De app is ook heel handig om lessen te boeken en voortgang te volgen. Aanrader!',
-      helpful: 15,
-      location: 'Mierlo',
-    ),
-    _Review(
-      id: 5,
-      name: 'Familie Smit',
-      rating: 10,
-      date: '2 maanden geleden',
-      text:
-          'Al onze 3 kinderen zwemmen bij Snorkeltje. De kwaliteit is constant hoog en het team is super vriendelijk.',
-      helpful: 27,
-      location: 'Wolfheze',
-    ),
-    _Review(
-      id: 6,
-      name: 'R. Peters',
-      rating: 8,
-      date: '3 maanden geleden',
-      text:
-          'Goede ervaring. Soms lastig om een tijdslot te vinden maar de kwaliteit van de lessen is uitstekend.',
-      helpful: 9,
-      location: 'Dordrecht',
-    ),
-    _Review(
-      id: 7,
-      name: 'Familie Visser',
-      rating: 10,
-      date: '3 maanden geleden',
-      text:
-          'Wij zijn enorm tevreden! De voortgangsrapportages zijn heel duidelijk en je ziet echt de groei van je kind.',
-      helpful: 22,
-      location: 'Soest',
-    ),
-    _Review(
-      id: 8,
-      name: 'K. de Groot',
-      rating: 9,
-      date: '4 maanden geleden',
-      text:
-          'Professioneel en kindvriendelijk. De knipkaartsysteem werkt heel goed. Duidelijke communicatie via de app.',
-      helpful: 14,
-      location: 'De Bilt',
-    ),
+    _Review(id: 1, name: 'Familie De Vries', rating: 10, date: '2 weken geleden',
+      text: 'Fantastische zwemschool! Onze dochter Lisa heeft in recordtijd haar A-diploma gehaald. Walter en zijn team zijn geweldig met kinderen.',
+      helpful: 24, location: 'De Bilt', instructor: 'Jan de Vries'),
+    _Review(id: 2, name: 'M. Jansen', rating: 9, date: '1 maand geleden',
+      text: 'Heel persoonlijke aanpak. De 1-op-1 lessen maken echt het verschil. Ons zoontje gaat met plezier naar zwemles!',
+      helpful: 18, location: 'Nijkerk', instructor: 'Maria Jansen'),
+    _Review(id: 3, name: 'Familie Bakker', rating: 10, date: '1 maand geleden',
+      text: 'Beste zwemschool van Nederland! De instructeurs zijn geduldig en deskundig. Beide kinderen hebben hier hun diploma behaald.',
+      helpful: 31, location: 'Garderen', instructor: 'Pieter Bakker'),
+    _Review(id: 4, name: 'A. van Dijk', rating: 9, date: '2 maanden geleden',
+      text: 'Snorkeltje is echt top! De app is ook heel handig om lessen te boeken en voortgang te volgen. Aanrader!',
+      helpful: 15, location: 'Mierlo', instructor: 'Jan de Vries'),
+    _Review(id: 5, name: 'Familie Smit', rating: 10, date: '2 maanden geleden',
+      text: 'Al onze 3 kinderen zwemmen bij Snorkeltje. De kwaliteit is constant hoog en het team is super vriendelijk.',
+      helpful: 27, location: 'Wolfheze', instructor: 'Maria Jansen'),
+    _Review(id: 6, name: 'R. Peters', rating: 8, date: '3 maanden geleden',
+      text: 'Goede ervaring. Soms lastig om een tijdslot te vinden maar de kwaliteit van de lessen is uitstekend.',
+      helpful: 9, location: 'Dordrecht', instructor: 'Pieter Bakker'),
+    _Review(id: 7, name: 'Familie Visser', rating: 10, date: '3 maanden geleden',
+      text: 'Wij zijn enorm tevreden! De voortgangsrapportages zijn heel duidelijk en je ziet echt de groei van je kind.',
+      helpful: 22, location: 'Soest', instructor: 'Jan de Vries'),
+    _Review(id: 8, name: 'K. de Groot', rating: 9, date: '4 maanden geleden',
+      text: 'Professioneel en kindvriendelijk. Duidelijke communicatie via de app.',
+      helpful: 14, location: 'De Bilt', instructor: 'Maria Jansen'),
+    _Review(id: 9, name: 'R. van der Berg', rating: 5, date: '2 weken geleden',
+      text: 'Les werd te vaak verplaatst, dat was vervelend voor mijn kind. Communicatie kon beter.',
+      helpful: 3, location: 'Garderen', instructor: 'Pieter Bakker',
+      ownerResponse: 'Dank voor uw feedback! We begrijpen uw zorgen en hebben de planning in Garderen sinds januari aangepast — minder wijzigingen. Neem gerust contact op als we verder kunnen helpen. — Walter'),
   ];
 
-  List<_Review> get _filtered {
-    if (_filter == 'Alle') return _reviews;
-    final score = int.parse(_filter);
-    return _reviews.where((r) => r.rating == score).toList();
+  /// Walter: reviews <6 without response are NOT shown publicly
+  List<_Review> get _publishable => _reviews.where((r) => r.isPublishable).toList();
+
+  /// Unique instructor names for the per-instructor filter
+  List<String> get _instructorNames {
+    final set = <String>{};
+    for (final r in _publishable) {
+      set.add(r.instructor);
+    }
+    final list = set.toList()..sort();
+    return ['Alle instructeurs', ...list];
   }
 
-  double get _avg =>
-      _reviews.fold<int>(0, (a, r) => a + r.rating) / _reviews.length;
+  List<_Review> get _filtered {
+    var list = _publishable;
+    if (_instructorFilter != 'Alle instructeurs') {
+      list = list.where((r) => r.instructor == _instructorFilter).toList();
+    }
+    if (_filter != 'Alle') {
+      final score = int.parse(_filter);
+      list = list.where((r) => r.rating == score).toList();
+    }
+    return list;
+  }
 
-  int _countByRating(int rating) =>
-      _reviews.where((r) => r.rating == rating).length;
+  /// Average rating for currently selected instructor scope
+  double get _avg {
+    final scope = _instructorFilter == 'Alle instructeurs'
+        ? _publishable
+        : _publishable.where((r) => r.instructor == _instructorFilter).toList();
+    if (scope.isEmpty) return 0;
+    return scope.fold<int>(0, (a, r) => a + r.rating) / scope.length;
+  }
+
+  int _countByRating(int rating) {
+    final scope = _instructorFilter == 'Alle instructeurs'
+        ? _publishable
+        : _publishable.where((r) => r.instructor == _instructorFilter).toList();
+    return scope.where((r) => r.rating == rating).length;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +107,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context, topPadding),
+            _buildInstructorFilter(),
             _buildStatsCard(),
             const SizedBox(height: 20),
             _buildFilters(),
@@ -164,7 +144,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () => context.pop(),
+            onTap: () => smartBack(context),
             child: Container(
               width: 40,
               height: 40,
@@ -299,6 +279,60 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 
+  Widget _buildInstructorFilter() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      padding: const EdgeInsets.all(4),
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: _instructorNames.map((name) {
+          final isSelected = _instructorFilter == name;
+          return GestureDetector(
+            onTap: () => setState(() => _instructorFilter = name),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: isSelected
+                    ? const LinearGradient(colors: [_orange, _amber])
+                    : null,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    name == 'Alle instructeurs' ? Icons.groups : Icons.person,
+                    size: 13,
+                    color: isSelected ? Colors.white : _textSecondary,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? Colors.white : _textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildFilters() {
     final filters = ['Alle', '10', '9', '8'];
     return Padding(
@@ -414,14 +448,21 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     Row(
                       children: [
                         Text(review.location,
-                            style: const TextStyle(
-                                fontSize: 10, color: _textSecondary)),
+                            style: const TextStyle(fontSize: 10, color: _textSecondary)),
                         const Text('  ·  ',
-                            style: TextStyle(
-                                fontSize: 10, color: Color(0xFFC4CDD9))),
+                            style: TextStyle(fontSize: 10, color: Color(0xFFC4CDD9))),
                         Text(review.date,
-                            style: const TextStyle(
-                                fontSize: 10, color: _textSecondary)),
+                            style: const TextStyle(fontSize: 10, color: _textSecondary)),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    // Instructor name — Walter's feedback: per-instructor attribution
+                    Row(
+                      children: [
+                        const Icon(Icons.person, size: 10, color: _blue),
+                        const SizedBox(width: 3),
+                        Text(review.instructor,
+                            style: const TextStyle(fontSize: 10, color: _blue, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ],
@@ -453,6 +494,53 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             style: const TextStyle(
                 fontSize: 13, color: _textBody, height: 1.5),
           ),
+          // Owner response (Walter: shown alongside lower-rated reviews)
+          if (review.ownerResponse != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _blue.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _blue.withValues(alpha: 0.15)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 22, height: 22,
+                        decoration: BoxDecoration(
+                          color: _blue,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text('W',
+                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('Reactie van Snorkeltje',
+                          style: TextStyle(color: _blue, fontSize: 12, fontWeight: FontWeight.w700)),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: _blue.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: const Text('Officieel',
+                            style: TextStyle(color: _blue, fontSize: 9, fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(review.ownerResponse!,
+                      style: const TextStyle(fontSize: 12, color: _textBody, height: 1.5)),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           Row(
             children: [
@@ -479,6 +567,8 @@ class _Review {
   final String text;
   final int helpful;
   final String location;
+  final String instructor; // Walter: per-instructor breakdown
+  final String? ownerResponse; // Walter: admin response for reviews <6
 
   const _Review({
     required this.id,
@@ -488,5 +578,10 @@ class _Review {
     required this.text,
     required this.helpful,
     required this.location,
+    required this.instructor,
+    this.ownerResponse,
   });
+
+  /// Per Walter: reviews below 6 only publish WITH owner response
+  bool get isPublishable => rating >= 6 || ownerResponse != null;
 }

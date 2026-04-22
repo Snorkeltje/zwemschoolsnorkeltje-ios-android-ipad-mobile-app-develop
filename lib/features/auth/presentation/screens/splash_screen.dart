@@ -97,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 children: [
                   SvgPicture.asset(
                     'assets/images/snorkeltje_logo.svg',
-                    height: 110,
+                    height: 100,
                     fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 24),
@@ -171,19 +171,19 @@ class _WavePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    void drawWave(Color color, double topY1, double topY2) {
+    void drawWave(Color color, double topY, double peakUp, double peakDown) {
       final path = Path()
-        ..moveTo(0, topY1)
-        ..quadraticBezierTo(w * 0.25, topY1 - 60, w * 0.5, topY1)
-        ..quadraticBezierTo(w * 0.75, topY2, w, topY1)
+        ..moveTo(0, topY)
+        ..quadraticBezierTo(w * 0.25, peakUp, w * 0.5, topY)
+        ..quadraticBezierTo(w * 0.75, peakDown, w, topY)
         ..lineTo(w, h)
         ..lineTo(0, h)
         ..close();
       canvas.drawPath(path, Paint()..color = color);
     }
-    drawWave(const Color(0xFF00C1FF), 120, 60);
-    drawWave(const Color(0xFF5BC1DB), 150, 30);
-    drawWave(const Color(0xFF00AEFF), 180, 0);
+    drawWave(const Color(0xFF00C1FF), 120, 60, 180);
+    drawWave(const Color(0xFF5BC1DB), 150, 90, 210);
+    drawWave(const Color(0xFF00AEFF), 180, 140, 220);
   }
 
   @override

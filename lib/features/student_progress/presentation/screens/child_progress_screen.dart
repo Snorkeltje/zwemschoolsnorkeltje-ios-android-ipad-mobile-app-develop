@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/utils/smart_back.dart';
 
 class _Skill {
   final String name;
@@ -37,22 +38,24 @@ class ChildProgressScreen extends StatelessWidget {
                 bottomLeft: Radius.circular(32),
                 bottomRight: Radius.circular(32),
               ),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(20, 58, 20, 32),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF0365C4), Color(0xFF034DA9)],
-                  ),
-                ),
-                child: Column(
+              child: Stack(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(20, 58, 20, 32),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF0365C4), Color(0xFF034DA9)],
+                      ),
+                    ),
+                    child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         GestureDetector(
-                          onTap: () => context.pop(),
+                          onTap: () => smartBack(context),
                           child: Container(
                             width: 40,
                             height: 40,
@@ -133,6 +136,17 @@ class ChildProgressScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+                  ),
+                  Positioned(
+                    left: 0, right: 0, bottom: 0,
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        size: const Size(double.infinity, 30),
+                        painter: _ChildProgressWavePainter(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -328,4 +342,22 @@ class ChildProgressScreen extends StatelessWidget {
       ],
     );
   }
+}
+
+class _ChildProgressWavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.1);
+    final path = Path()
+      ..moveTo(0, size.height * 0.5)
+      ..quadraticBezierTo(size.width * 0.25, 0, size.width * 0.5, size.height * 0.5)
+      ..quadraticBezierTo(size.width * 0.75, size.height, size.width, size.height * 0.5)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

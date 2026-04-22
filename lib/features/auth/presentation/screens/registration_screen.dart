@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../../shared/widgets/app_popup.dart';
+import '../providers/auth_provider.dart';
 
-class RegistrationScreen extends StatefulWidget {
+class RegistrationScreen extends ConsumerStatefulWidget {
   const RegistrationScreen({super.key});
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  ConsumerState<RegistrationScreen> createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   int _step = 1;
   bool _showPass = false;
   bool _agreed = false;
@@ -38,11 +42,98 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool get _hasNumber => _passwordCtrl.text.contains(RegExp(r'[0-9]'));
   bool get _hasSpecial => _passwordCtrl.text.contains(RegExp(r'[!@#\$%\^&\*\(\)_\+\-=\[\]\{\};:,.<>?]'));
 
-  void _next() {
+  Future<void> _next() async {
     if (_step == 1) {
+      if (_firstNameCtrl.text.trim().isEmpty ||
+          _lastNameCtrl.text.trim().isEmpty ||
+          _emailCtrl.text.trim().isEmpty) {
+        await AppPopup.show(
+          context,
+          type: AppPopupType.warning,
+          title: 'Velden missen',
+          message: 'Vul alstublieft uw voornaam, achternaam en e-mailadres in om door te gaan.',
+        );
+        return;
+      }
+      final email = _emailCtrl.text.trim();
+      final emailValid = RegExp(r'^[\w.+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$').hasMatch(email);
+      if (!emailValid) {
+        await AppPopup.show(
+          context,
+          type: AppPopupType.warning,
+          title: 'Ongeldig e-mailadres',
+          message: 'Voer een geldig e-mailadres in, bijvoorbeeld "jan@voorbeeld.nl".',
+        );
+        return;
+      }
       setState(() => _step = 2);
-    } else {
+      return;
+    }
+
+    // Step 2
+    if (!_hasMinLength) {
+      await AppPopup.show(
+        context,
+        type: AppPopupType.warning,
+        title: 'Wachtwoord te kort',
+        message: 'Uw wachtwoord moet minimaal 8 tekens bevatten om veilig te zijn.',
+      );
+      return;
+    }
+    if (_passwordCtrl.text != _confirmPassCtrl.text) {
+      await AppPopup.show(
+        context,
+        type: AppPopupType.warning,
+        title: 'Wachtwoorden komen niet overeen',
+        message: 'De twee wachtwoorden die u heeft ingevoerd verschillen. Controleer en probeer opnieuw.',
+      );
+      return;
+    }
+    if (!_agreed) {
+      await AppPopup.show(
+        context,
+        type: AppPopupType.warning,
+        title: 'Accepteer de voorwaarden',
+        message: 'Om een account aan te maken moet u akkoord gaan met onze Algemene Voorwaarden en Privacybeleid.',
+      );
+      return;
+    }
+
+    final ok = await ref.read(authProvider.notifier).register(
+          email: _emailCtrl.text.trim(),
+          password: _passwordCtrl.text,
+          firstName: _firstNameCtrl.text.trim(),
+          lastName: _lastNameCtrl.text.trim(),
+          phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
+        );
+    if (!mounted) return;
+
+    if (ok && ref.read(authProvider).isAuthenticated) {
+      // Success celebration
+      await AppPopup.show(
+        context,
+        type: AppPopupType.success,
+        title: 'Welkom bij Snorkeltje! 🎉',
+        message: 'Uw account is succesvol aangemaakt. We gaan nu direct naar de startpagina.',
+        primaryButtonText: 'Ga naar Home',
+        autoDismissAfter: const Duration(seconds: 3),
+      );
+      if (!mounted) return;
       context.goNamed(RouteNames.home);
+    } else {
+      final err = ref.read(authProvider).errorMessage ?? 'Er ging iets mis.';
+      final isEmailTaken = err.toLowerCase().contains('al in gebruik');
+      await AppPopup.show(
+        context,
+        type: AppPopupType.error,
+        title: isEmailTaken ? 'E-mail al in gebruik' : 'Registratie mislukt',
+        message: err,
+        primaryButtonText: isEmailTaken ? 'Inloggen' : 'Opnieuw proberen',
+        secondaryButtonText: isEmailTaken ? 'Andere e-mail' : null,
+        onPrimary: isEmailTaken
+            ? () => context.goNamed(RouteNames.login)
+            : null,
+      );
     }
   }
 
@@ -139,11 +230,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
 
-                // Logo
+                // Logo (small = 40px per Figma SnorkeltjeLogo component)
                 Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: SvgPicture.asset('assets/images/snorkeltje_logo.svg', height: 48,
-                    colorFilter: const ColorFilter.mode(Color(0xFF0365C4), BlendMode.srcIn)),
+                  padding: const EdgeInsets.only(top: 20),
+                  child: SvgPicture.asset('assets/images/snorkeltje_logo.svg', height: 40),
                 ),
 
                 // Form content
@@ -159,26 +249,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
                   child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: (_step == 2 && !_agreed) ? null : _next,
-                        child: Container(
-                          width: double.infinity, height: 56,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft, end: Alignment.bottomRight,
-                              colors: [Color(0xFF0365C4), Color(0xFF0D7FE8)],
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF0365C4).withValues(alpha: 0.3),
-                                blurRadius: 24, offset: const Offset(0, 8),
+                      Opacity(
+                        opacity: (_step == 2 && !_agreed) ? 0.5 : 1.0,
+                        child: GestureDetector(
+                          onTap: (_step == 2 && !_agreed) ? null : _next,
+                          child: Container(
+                            width: double.infinity, height: 56,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft, end: Alignment.bottomRight,
+                                colors: [Color(0xFF0365C4), Color(0xFF0D7FE8)],
                               ),
-                            ],
-                          ),
-                          alignment: Alignment.center,
-                          child: Opacity(
-                            opacity: (_step == 2 && !_agreed) ? 0.5 : 1.0,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF0365C4).withValues(alpha: 0.3),
+                                  blurRadius: 24, offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            alignment: Alignment.center,
                             child: Text(
                               _step == 1 ? 'Volgende' : 'Account aanmaken',
                               style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
@@ -302,11 +392,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         TextSpan(
                           text: 'Algemene Voorwaarden',
                           style: const TextStyle(color: Color(0xFF0365C4), fontWeight: FontWeight.w600),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.goNamed(RouteNames.termsConditions),
                         ),
                         const TextSpan(text: ' en het '),
                         TextSpan(
                           text: 'Privacybeleid',
                           style: const TextStyle(color: Color(0xFF0365C4), fontWeight: FontWeight.w600),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.goNamed(RouteNames.termsConditions),
                         ),
                       ],
                     ),
