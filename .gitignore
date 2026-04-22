@@ -67,3 +67,4 @@ supabase/.env.local
 # Figma source and screenshots
 imagesscreenshotsforclaude/
 assets/fonts/inter.zip
+supabase/.temp/
