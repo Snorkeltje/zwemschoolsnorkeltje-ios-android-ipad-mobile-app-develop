@@ -79,6 +79,10 @@ import '../../features/instructor/presentation/screens/offline_mode_screen.dart'
 import '../../features/instructor/presentation/screens/availability_request_screen.dart';
 import '../../features/instructor/presentation/screens/instructor_notifications_screen.dart';
 import '../../features/instructor/presentation/widgets/instructor_shell.dart';
+// Schedule
+import '../../features/schedule/presentation/screens/slot_interest_screen.dart';
+import '../../features/schedule/presentation/screens/slot_offers_screen.dart';
+import '../../features/schedule/presentation/screens/exam_continuation_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -339,6 +343,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/notification-settings',
         name: RouteNames.notificationSettings,
         builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+
+      // === SCHEDULE — Walter 2026-04-22 ===
+      GoRoute(
+        path: '/slot-interest',
+        name: RouteNames.slotInterest,
+        builder: (context, state) => const SlotInterestScreen(),
+      ),
+      GoRoute(
+        path: '/slot-offers',
+        name: RouteNames.slotOffers,
+        builder: (context, state) => const SlotOffersScreen(),
+      ),
+      GoRoute(
+        path: '/exam-continuation',
+        name: RouteNames.examContinuation,
+        builder: (context, state) => const ExamContinuationScreen(),
       ),
 
       // === WAITLIST ===

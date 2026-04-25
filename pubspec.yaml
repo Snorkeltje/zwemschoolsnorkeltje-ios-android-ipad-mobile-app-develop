@@ -62,6 +62,9 @@ dependencies:
   # Env vars
   flutter_dotenv: ^5.2.1
 
+  # HTTP — used to call Supabase Edge Function for Stripe PaymentIntent
+  http: ^1.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
