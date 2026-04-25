@@ -7,42 +7,57 @@ class FixedScheduleNotifier extends StateNotifier<List<FixedSlot>> {
   FixedScheduleNotifier() : super(_seed());
 
   static List<FixedSlot> _seed() => [
-    // Monday — De Bilt
-    FixedSlot(id: 'fs1', day: WeekDay.maandag, time: '15:00', endTime: '15:30',
+    // Monday — De Bilt (15:00 = single, 15:30 = 1-op-2 shared, 16:00 = 1-op-3 shared)
+    const FixedSlot(id: 'fs1', day: WeekDay.maandag, time: '15:00', endTime: '15:30',
         location: 'De Bilt', locationColor: Locations.deBilt,
-        assignedChildId: 'c1', assignedChildName: 'Sami Khilji',
+        assignedChildren: [AssignedChild(id: 'c1', name: 'Sami Khilji')],
         instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-1'),
-    FixedSlot(id: 'fs2', day: WeekDay.maandag, time: '15:30', endTime: '16:00',
+    const FixedSlot(id: 'fs2', day: WeekDay.maandag, time: '15:30', endTime: '16:00',
         location: 'De Bilt', locationColor: Locations.deBilt,
-        assignedChildId: 'c2', assignedChildName: 'Noor Khilji',
+        assignedChildren: [
+          AssignedChild(id: 'c2', name: 'Noor Khilji'),
+          AssignedChild(id: 'c3', name: 'Daan Bakker'),
+        ],
         instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-2'),
-    FixedSlot(id: 'fs3', day: WeekDay.maandag, time: '16:00', endTime: '16:30',
+    const FixedSlot(id: 'fs3', day: WeekDay.maandag, time: '16:15', endTime: '16:45',
         location: 'De Bilt', locationColor: Locations.deBilt,
-        assignedChildId: 'c3', assignedChildName: 'Daan Bakker',
-        instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-1'),
-    FixedSlot(id: 'fs4', day: WeekDay.maandag, time: '16:30', endTime: '17:00',
+        assignedChildren: [
+          AssignedChild(id: 'c4', name: 'Sophie d.W.'),
+          AssignedChild(id: 'c5', name: 'Finn M.'),
+          AssignedChild(id: 'c6', name: 'Max V.'),
+        ],
+        instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-3'),
+    const FixedSlot(id: 'fs4', day: WeekDay.maandag, time: '16:30', endTime: '17:00',
         location: 'De Bilt', locationColor: Locations.deBilt,
         instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-1'),
     // Wednesday — Garderen
-    FixedSlot(id: 'fs5', day: WeekDay.woensdag, time: '14:00', endTime: '14:30',
+    const FixedSlot(id: 'fs5', day: WeekDay.woensdag, time: '14:00', endTime: '14:30',
         location: 'Garderen', locationColor: Locations.garderen,
-        assignedChildId: 'c4', assignedChildName: 'Lisa Bos',
+        assignedChildren: [AssignedChild(id: 'c7', name: 'Lisa Bos')],
         instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-1'),
-    FixedSlot(id: 'fs6', day: WeekDay.woensdag, time: '14:30', endTime: '15:00',
+    const FixedSlot(id: 'fs6', day: WeekDay.woensdag, time: '14:45', endTime: '15:15',
         location: 'Garderen', locationColor: Locations.garderen,
-        assignedChildId: 'c5', assignedChildName: 'Tim van Dijk',
+        assignedChildren: [
+          AssignedChild(id: 'c8', name: 'Tim van Dijk'),
+          AssignedChild(id: 'c9', name: 'Mila D.'),
+        ],
         instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-2'),
-    FixedSlot(id: 'fs7', day: WeekDay.woensdag, time: '15:00', endTime: '15:30',
+    const FixedSlot(id: 'fs7', day: WeekDay.woensdag, time: '15:30', endTime: '16:00',
         location: 'Garderen', locationColor: Locations.garderen,
         instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-3'),
     // Friday — Bad Hulckesteijn
-    FixedSlot(id: 'fs8', day: WeekDay.vrijdag, time: '16:00', endTime: '16:30',
+    const FixedSlot(id: 'fs8', day: WeekDay.vrijdag, time: '16:00', endTime: '16:30',
         location: 'Bad Hulckesteijn', locationColor: Locations.badHulck,
-        assignedChildId: 'c6', assignedChildName: 'Emma Jansen',
+        assignedChildren: [AssignedChild(id: 'c10', name: 'Emma Jansen')],
         instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-1'),
-    FixedSlot(id: 'fs9', day: WeekDay.vrijdag, time: '16:30', endTime: '17:00',
+    const FixedSlot(id: 'fs9', day: WeekDay.vrijdag, time: '16:30', endTime: '17:00',
         location: 'Bad Hulckesteijn', locationColor: Locations.badHulck,
         instructorId: 'i1', instructorName: 'Jan de Vries', lessonType: '1-op-1'),
+    // Wednesday — Doorwerth (newly supported per Excel legend)
+    const FixedSlot(id: 'fs10', day: WeekDay.woensdag, time: '17:00', endTime: '17:30',
+        location: 'Doorwerth', locationColor: Locations.doorwerth,
+        assignedChildren: [AssignedChild(id: 'c11', name: 'Noah B.')],
+        instructorId: 'i2', instructorName: 'Maria Jansen', lessonType: '1-op-1'),
   ];
 
   /// Free a slot (e.g. student stops or chooses not to continue after exam).
@@ -50,7 +65,7 @@ class FixedScheduleNotifier extends StateNotifier<List<FixedSlot>> {
     state = [
       for (final s in state)
         if (s.id == slotId)
-          s.copyWith(assignedChildId: null, assignedChildName: null, pendingRelease: false)
+          s.copyWith(assignedChildren: const [], pendingRelease: false)
         else
           s,
     ];
@@ -64,16 +79,21 @@ class FixedScheduleNotifier extends StateNotifier<List<FixedSlot>> {
     ];
   }
 
-  /// Assign a slot to a child (after waitlist auto-assignment or admin action).
-  void assignSlot(String slotId, String childId, String childName) {
+  /// Assign a slot to one or more children. For 1-op-2 / 1-op-3 lessons
+  /// pass multiple. Existing assignments are replaced.
+  void assignSlot(String slotId, List<AssignedChild> children) {
     state = [
       for (final s in state)
         if (s.id == slotId)
-          s.copyWith(assignedChildId: childId, assignedChildName: childName)
+          s.copyWith(assignedChildren: children)
         else
           s,
     ];
   }
+
+  /// Convenience for single-child 1-op-1 assignment.
+  void assignSlotSingle(String slotId, String childId, String childName) =>
+      assignSlot(slotId, [AssignedChild(id: childId, name: childName)]);
 
   List<FixedSlot> emptySlots() => state.where((s) => s.isEmpty).toList();
   List<FixedSlot> forDay(WeekDay day) =>
