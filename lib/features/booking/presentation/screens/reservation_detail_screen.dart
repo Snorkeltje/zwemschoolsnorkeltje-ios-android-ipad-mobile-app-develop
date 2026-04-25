@@ -12,7 +12,7 @@ class ReservationDetailScreen extends StatelessWidget {
       ('⏰', 'Tijd:', '15:00 – 15:30 (30 min)'),
       ('📍', 'Locatie:', 'De Bilt Zwembad'),
       ('👨‍🏫', 'Instructeur:', 'Jan de Vries'),
-      ('💳', 'Betaald via:', 'Knipkaart (7 resterend)'),
+      ('💳', 'Betaald via:', 'Tegoed (€39 afgetrokken)'),
     ];
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),

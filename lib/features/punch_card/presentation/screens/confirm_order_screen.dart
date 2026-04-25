@@ -34,8 +34,6 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
   final _dagController = TextEditingController();
   final _tijdstipController = TextEditingController();
 
-  bool _autoConversion = false;
-
   @override
   void initState() {
     super.initState();
@@ -140,11 +138,6 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                               _tijdstipController,
                               hintText: 'bijv. 14:00',
                             ),
-
-                            const SizedBox(height: 24),
-
-                            // Auto-conversion section
-                            _buildAutoConversionSection(),
 
                             const SizedBox(height: 20),
 
@@ -297,93 +290,6 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAutoConversionSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Automatische omzetting',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Wilt u dat uw knipkaart automatisch wordt omgezet naar een '
-            'vaste lesplaats wanneer er een plek vrijkomt?',
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildRadioOption('Ja', true),
-              const SizedBox(width: 20),
-              _buildRadioOption('Nee', false),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRadioOption(String label, bool value) {
-    final isSelected = _autoConversion == value;
-    return GestureDetector(
-      onTap: () => setState(() => _autoConversion = value),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected
-                    ? const Color(0xFF5492B5)
-                    : const Color(0xFFD1D5DB),
-                width: 2,
-              ),
-            ),
-            child: isSelected
-                ? Center(
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF5492B5),
-                      ),
-                    ),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textPrimary,
             ),
           ),
         ],

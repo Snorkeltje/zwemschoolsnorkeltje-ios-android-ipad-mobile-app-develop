@@ -280,7 +280,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/stripe-payment',
         name: RouteNames.stripePayment,
-        builder: (context, state) => const StripePaymentScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return StripePaymentScreen(
+            amount: extra?['amount'] as double?,
+            balanceAmount: extra?['balanceAmount'] as double?,
+            description: extra?['description'] as String?,
+            isTopUp: extra?['isTopUp'] as bool? ?? false,
+            isLessonPayPerUse: extra?['isLessonPayPerUse'] as bool? ?? false,
+          );
+        },
       ),
       GoRoute(
         path: '/invoice/:id',

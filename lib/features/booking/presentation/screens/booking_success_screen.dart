@@ -108,9 +108,9 @@ class BookingSuccessScreen extends StatelessWidget {
                                   ),
                                   child: const Row(
                                     children: [
-                                      Icon(Icons.credit_card, color: Color(0xFF27AE60), size: 14),
+                                      Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF27AE60), size: 14),
                                       SizedBox(width: 8),
-                                      Text('Knipkaart: nog 7 credits resterend',
+                                      Text('€39 afgetrokken van uw tegoed',
                                           style: TextStyle(color: Color(0xFF27AE60), fontSize: 12, fontWeight: FontWeight.w600)),
                                     ],
                                   ),

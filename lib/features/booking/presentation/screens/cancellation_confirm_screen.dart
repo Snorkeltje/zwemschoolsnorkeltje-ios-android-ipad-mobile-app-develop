@@ -270,7 +270,7 @@ class _CancellationConfirmScreenState extends State<CancellationConfirmScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
                       Text(
-                        'Knipkaart tegoed wordt teruggestort',
+                        'Tegoed wordt teruggestort',
                         style: TextStyle(
                           color: _green,
                           fontSize: 13,
@@ -279,7 +279,7 @@ class _CancellationConfirmScreenState extends State<CancellationConfirmScreen> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        '1 credit wordt automatisch teruggestort op knipkaart #22976',
+                        '€39 wordt automatisch teruggestort op uw saldo',
                         style: TextStyle(
                           color: _subtitle,
                           fontSize: 12,
@@ -469,7 +469,7 @@ class _CancellationConfirmScreenState extends State<CancellationConfirmScreen> {
               child: Column(
                 children: const [
                   Text(
-                    '1 credit teruggestort',
+                    '€39 teruggestort',
                     style: TextStyle(
                       color: _green,
                       fontSize: 16,
@@ -478,7 +478,7 @@ class _CancellationConfirmScreenState extends State<CancellationConfirmScreen> {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Knipkaart #22976 — Nieuw saldo: 9 credits',
+                    'Teruggestort op uw tegoed',
                     style: TextStyle(
                       color: _subtitle,
                       fontSize: 13,
