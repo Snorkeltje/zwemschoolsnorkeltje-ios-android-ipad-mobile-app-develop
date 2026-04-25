@@ -12,15 +12,22 @@ extension WeekDayLabel on WeekDay {
 }
 
 /// One permanent weekly slot.
+///
+/// Walter's Excel grid (image 2026-04-22): 15-minute row granularity from
+/// 08:30 to 19:00. A lesson is 30 minutes long and starts on any 15-min
+/// boundary (so a slot could start at 09:00, 09:15, 09:30, etc.).
+///
+/// 1-op-2 / 1-op-3 lessons share a slot — multiple children listed (separated
+/// by "/" in the Excel). [assignedChildren] holds all of them.
 class FixedSlot {
   final String id;
   final WeekDay day;
-  final String time;       // 'HH:mm' start
-  final String endTime;    // 'HH:mm' end (always +30 min per Walter)
+  final String time;       // 'HH:mm' start (any 15-min boundary)
+  final String endTime;    // 'HH:mm' end (start + 30 min)
   final String location;
   final Color locationColor;
-  final String? assignedChildId;     // null = empty/free slot
-  final String? assignedChildName;   // display
+  /// All children sharing this slot. Empty = free slot.
+  final List<AssignedChild> assignedChildren;
   final String instructorId;
   final String instructorName;
   final String lessonType; // '1-op-1' / '1-op-2' / '1-op-3'
@@ -34,30 +41,50 @@ class FixedSlot {
     required this.endTime,
     required this.location,
     required this.locationColor,
-    this.assignedChildId,
-    this.assignedChildName,
+    this.assignedChildren = const [],
     required this.instructorId,
     required this.instructorName,
     required this.lessonType,
     this.pendingRelease = false,
   });
 
-  bool get isEmpty => assignedChildId == null;
+  /// Backwards-compatible accessors.
+  String? get assignedChildId =>
+      assignedChildren.isEmpty ? null : assignedChildren.first.id;
+  String? get assignedChildName => assignedChildren.isEmpty
+      ? null
+      : assignedChildren.map((c) => c.name).join(' / ');
+
+  bool get isEmpty => assignedChildren.isEmpty;
 
   FixedSlot copyWith({
-    String? assignedChildId,
+    List<AssignedChild>? assignedChildren,
+    String? assignedChildId,    // legacy single-child convenience
     String? assignedChildName,
     bool? pendingRelease,
-  }) =>
-      FixedSlot(
-        id: id, day: day, time: time, endTime: endTime,
-        location: location, locationColor: locationColor,
-        assignedChildId: assignedChildId,
-        assignedChildName: assignedChildName,
-        instructorId: instructorId, instructorName: instructorName,
-        lessonType: lessonType,
-        pendingRelease: pendingRelease ?? this.pendingRelease,
-      );
+  }) {
+    final children = assignedChildren ??
+        (assignedChildId != null
+            ? [AssignedChild(id: assignedChildId, name: assignedChildName ?? '')]
+            : (assignedChildName == null && assignedChildId == null && this.assignedChildren.isNotEmpty
+                ? this.assignedChildren
+                : <AssignedChild>[]));
+    return FixedSlot(
+      id: id, day: day, time: time, endTime: endTime,
+      location: location, locationColor: locationColor,
+      assignedChildren: children,
+      instructorId: instructorId, instructorName: instructorName,
+      lessonType: lessonType,
+      pendingRelease: pendingRelease ?? this.pendingRelease,
+    );
+  }
+}
+
+/// One child assigned to a fixed slot.
+class AssignedChild {
+  final String id;
+  final String name;
+  const AssignedChild({required this.id, required this.name});
 }
 
 /// A parent's standing interest in a specific slot.
@@ -156,16 +183,17 @@ class ExamContinuation {
 
 enum ExamContinuationStatus { pending, continuing, leaving, expired }
 
-/// Standard locations + color codes (Walter's Excel).
+/// Standard locations + color codes — exact match to Walter's Excel legend.
 class Locations {
   Locations._();
-  static const ampt = Color(0xFFFFB370);    // orange
+  static const ampt = Color(0xFFFFB370);     // orange
   static const badHulck = Color(0xFFFFE680); // yellow
   static const deBilt = Color(0xFFFF6B6B);   // red
-  static const garderen = Color(0xFFB8E994); // green
-  static const wolfheze = Color(0xFFB6CFFF); // blue
-  static const swadde = Color(0xFFD4A5FF);   // purple
+  static const garderen = Color(0xFFE8B4D8); // pink/purple (per Excel)
+  static const wolfheze = Color(0xFFB8E994); // green (per Excel)
+  static const swadde = Color(0xFF8FE3DD);   // teal
   static const mineo = Color(0xFFC9C9C9);    // grey
+  static const doorwerth = Color(0xFFE0E0E0); // lighter grey
 
   static const Map<String, Color> byName = {
     'Ampt v. Nijkerk': ampt,
@@ -175,5 +203,31 @@ class Locations {
     'Wolfheze': wolfheze,
     'Swaddecuen': swadde,
     'Mineo': mineo,
+    'Doorwerth': doorwerth,
   };
+}
+
+/// Schedule grid spec from Walter's Excel:
+///   - Operating hours: 08:30 → 19:00 (10.5 hours)
+///   - Row granularity: 15 minutes (every slot start time is on :00/:15/:30/:45)
+///   - Lesson length: 30 minutes (always)
+///   - Cells = (day × 15-min slot) — one student (or 2-3 for group lessons) per cell
+class ScheduleGrid {
+  ScheduleGrid._();
+  static const String dayStart = '08:30';
+  static const String dayEnd = '19:00';
+  static const int slotMinutes = 15;
+  static const int lessonMinutes = 30;
+
+  /// Generate every 15-minute start time string from dayStart to dayEnd.
+  static List<String> allStartTimes() {
+    final out = <String>[];
+    var h = 8, m = 30;
+    while (h < 19 || (h == 19 && m == 0)) {
+      out.add('${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}');
+      m += slotMinutes;
+      if (m >= 60) { m -= 60; h += 1; }
+    }
+    return out;
+  }
 }
