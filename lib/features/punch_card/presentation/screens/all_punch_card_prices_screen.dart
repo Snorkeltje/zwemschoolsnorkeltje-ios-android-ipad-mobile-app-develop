@@ -1,27 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../shared/utils/smart_back.dart';
+import '../../../wallet/data/models/wallet_model.dart';
 
-/// Credit vouchers pricing page per Walter's feedback.
-/// Replaces the old punch card prices with credit-based system.
-class _Tier {
-  final int amount;
-  final double discount;
-  final String label;
-  final Color color;
-  final List<Color> gradient;
-  const _Tier(this.amount, this.discount, this.label, this.color, this.gradient);
-}
-
-const _tiers = <_Tier>[
-  _Tier(100, 0, 'Starter', Color(0xFF0365C4), [Color(0xFF0365C4), Color(0xFF00C1FF)]),
-  _Tier(200, 1, 'Voordelig', Color(0xFFFF5C00), [Color(0xFFFF5C00), Color(0xFFF5A623)]),
-  _Tier(300, 1.5, 'Populair', Color(0xFF27AE60), [Color(0xFF27AE60), Color(0xFF2ECC71)]),
-  _Tier(400, 2, 'Beste keuze', Color(0xFF9B59B6), [Color(0xFF9B59B6), Color(0xFF8E44AD)]),
-];
-
+/// All prices overview — Walter 2026-04-22:
+/// - 3 top-up packages (€200/€400/€1000) with small bonus
+/// - 3 lesson types (1-op-1 €39, 1-op-2 €28, 1-op-3 €22)
 class AllPunchCardPricesScreen extends StatelessWidget {
   const AllPunchCardPricesScreen({super.key});
 
@@ -57,154 +44,100 @@ class AllPunchCardPricesScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Tegoed opwaarderen',
-                        style: TextStyle(color: Color(0xFF26323F), fontSize: 22, fontWeight: FontWeight.w800)),
-                    const SizedBox(height: 4),
-                    const Text('Kies een voucher en bespaar met bonus tegoed',
-                        style: TextStyle(color: Color(0xFF4A6072), fontSize: 13)),
-                    const SizedBox(height: 20),
+                    const Text('Prijsoverzicht',
+                        style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 24, fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Koop tegoed en gebruik het voor elke lessoorten. '
+                      'Geen onderscheid tussen 1-op-1 en 1-op-2 lessen.',
+                      style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 13, height: 1.5),
+                    ),
+                    const SizedBox(height: 24),
 
-                    // Tiers
-                    ..._tiers.map((t) {
-                      final bonus = t.amount * t.discount / 100;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: GestureDetector(
-                          onTap: () => context.pushNamed(RouteNames.purchasePunchCard),
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: t.gradient,
-                              ),
-                              borderRadius: BorderRadius.circular(22),
-                              boxShadow: [BoxShadow(color: t.color.withValues(alpha: 0.25), blurRadius: 24, offset: const Offset(0, 8))],
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  top: -20, right: -20,
-                                  child: Icon(Icons.account_balance_wallet, size: 120, color: Colors.white.withValues(alpha: 0.08)),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.2),
-                                        borderRadius: BorderRadius.circular(999),
-                                      ),
-                                      child: Text(t.label.toUpperCase(),
-                                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text('€${t.amount}',
-                                            style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w800, height: 1.0)),
-                                        const SizedBox(width: 12),
-                                        if (t.discount > 0)
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 6),
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(999),
-                                              ),
-                                              child: Text('+${t.discount.toStringAsFixed(t.discount.truncateToDouble() == t.discount ? 0 : 1)}% bonus',
-                                                  style: TextStyle(color: t.color, fontSize: 11, fontWeight: FontWeight.w800)),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      t.discount > 0
-                                          ? 'Totaal tegoed: €${(t.amount + bonus).toStringAsFixed(bonus.truncateToDouble() == bonus ? 0 : 2)} (inclusief bonus €${bonus.toStringAsFixed(bonus.truncateToDouble() == bonus ? 0 : 2)})'
-                                          : 'Totaal tegoed: €${t.amount}',
-                                      style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12),
-                                    ),
-                                    const SizedBox(height: 14),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(999),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text('Kies deze',
-                                                  style: TextStyle(color: t.color, fontSize: 12, fontWeight: FontWeight.w800)),
-                                              const SizedBox(width: 6),
-                                              Icon(Icons.arrow_forward, color: t.color, size: 14),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-
-                    const SizedBox(height: 20),
-                    // Pay per lesson info
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE8F4FD),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFF0365C4).withValues(alpha: 0.2)),
+                    // Top-up packages
+                    const _SectionTitle('Tegoed opwaarderen'),
+                    const SizedBox(height: 12),
+                    for (final pkg in kWalletPackages)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _PackageTile(pkg: pkg),
                       ),
-                      child: Row(
+
+                    const SizedBox(height: 24),
+
+                    // Lesson prices
+                    const _SectionTitle('Lesprijzen per les'),
+                    const SizedBox(height: 12),
+                    _LessonTile(
+                      label: '1-op-1 zwemles',
+                      subtitle: 'Individueel · Maximaal aandacht',
+                      price: LessonPricing.oneOnOne,
+                      color: const Color(0xFF0365C4),
+                      icon: Icons.person,
+                    ),
+                    const SizedBox(height: 8),
+                    _LessonTile(
+                      label: '1-op-2 zwemles',
+                      subtitle: 'Met één andere leerling',
+                      price: LessonPricing.oneOnTwo,
+                      color: const Color(0xFFFF5C00),
+                      icon: Icons.people_alt_outlined,
+                    ),
+                    const SizedBox(height: 8),
+                    _LessonTile(
+                      label: '1-op-3 zwemles',
+                      subtitle: 'Kleine groep · Voordelig',
+                      price: LessonPricing.oneOnThree,
+                      color: const Color(0xFF27AE60),
+                      icon: Icons.groups_2_outlined,
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Info
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F7FC),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 40, height: 40,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0365C4).withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.payment_outlined, color: Color(0xFF0365C4), size: 20),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Liever per les betalen?',
-                                    style: TextStyle(color: Color(0xFF0365C4), fontSize: 14, fontWeight: FontWeight.w700)),
-                                SizedBox(height: 4),
-                                Text('Geen voucher nodig — betaal direct met iDEAL per les. Binnen 10 minuten afrekenen.',
-                                    style: TextStyle(color: Color(0xFF3282AE), fontSize: 12, height: 1.4)),
-                              ],
+                          Icon(Icons.info_outline, size: 18, color: Color(0xFF0365C4)),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Alle prijzen zijn inclusief 9% BTW. '
+                              'Annuleringen komen als tegoed terug op uw saldo. '
+                              'Geen verloopdatum.',
+                              style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 12, height: 1.5),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 16),
-                    // Special services
-                    Row(
-                      children: [
-                        Expanded(child: _specialCard('📝 Inschrijfgeld', '€30 éénmalig')),
-                        const SizedBox(width: 10),
-                        Expanded(child: _specialCard('🔄 Rooster wijzigen', '€60 per verzoek')),
-                      ],
+                    const SizedBox(height: 24),
+
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        context.pushNamed(RouteNames.purchasePunchCard);
+                      },
+                      child: Container(
+                        height: 54,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Center(
+                          child: Text('Tegoed kopen →',
+                              style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -215,23 +148,108 @@ class AllPunchCardPricesScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _specialCard(String title, String subtitle) {
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  const _SectionTitle(this.text);
+  @override
+  Widget build(BuildContext context) => Text(text,
+      style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 17, fontWeight: FontWeight.w700));
+}
+
+class _PackageTile extends StatelessWidget {
+  final WalletPackage pkg;
+  const _PackageTile({required this.pkg});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0365C4).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.account_balance_wallet_outlined,
+                color: Color(0xFF0365C4), size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(pkg.payFormatted,
+                    style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 18, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 2),
+                Text('U ontvangt ${pkg.balanceFormatted} tegoed',
+                    style: const TextStyle(color: Color(0xFF27AE60), fontSize: 12, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, size: 20, color: Color(0xFF8E9BB3)),
+        ],
+      ),
+    );
+  }
+}
+
+class _LessonTile extends StatelessWidget {
+  final String label, subtitle;
+  final double price;
+  final Color color;
+  final IconData icon;
+  const _LessonTile({
+    required this.label, required this.subtitle,
+    required this.price, required this.color, required this.icon,
+  });
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE8ECF4)),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(title,
-              style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 13, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 4),
-          Text(subtitle,
-              style: const TextStyle(color: Color(0xFF4A6072), fontSize: 11)),
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+                Text(subtitle,
+                    style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('€${price.toStringAsFixed(0)}',
+                  style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w800)),
+              const Text('per les',
+                  style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 10)),
+            ],
+          ),
         ],
       ),
     );

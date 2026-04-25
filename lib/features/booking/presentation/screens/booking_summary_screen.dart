@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../shared/utils/smart_back.dart';
+import '../../../wallet/data/models/wallet_model.dart';
+import '../../../wallet/presentation/providers/wallet_provider.dart';
 
-class BookingSummaryScreen extends StatelessWidget {
+class BookingSummaryScreen extends ConsumerWidget {
   const BookingSummaryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final wallet = ref.watch(walletProvider);
+    // Default to 1-op-1; booking flow would pass the actual lesson type.
+    final lessonPrice = LessonPricing.oneOnOne;
+    final newBalance = wallet.amount - lessonPrice;
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),
       body: SingleChildScrollView(
@@ -192,14 +199,14 @@ class BookingSummaryScreen extends StatelessWidget {
                               child: const Icon(Icons.credit_card, color: Colors.white, size: 18),
                             ),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Knipkaart #22976',
+                                  const Text('Tegoed',
                                       style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
-                                  Text('8/10 credits resterend',
-                                      style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+                                  Text('Beschikbaar: ${wallet.formatted}',
+                                      style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
                                 ],
                               ),
                             ),
@@ -224,12 +231,23 @@ class BookingSummaryScreen extends StatelessWidget {
                           const Text('Prijsoverzicht',
                               style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
                           const SizedBox(height: 12),
-                          const Row(
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Les:', style: TextStyle(color: Color(0xFF6B7B94), fontSize: 13)),
-                              Text('€0 (knipkaart)',
-                                  style: TextStyle(color: Color(0xFF27AE60), fontSize: 13, fontWeight: FontWeight.w600)),
+                              const Text('1-op-1 zwemles (incl. 9% BTW):',
+                                  style: TextStyle(color: Color(0xFF6B7B94), fontSize: 13)),
+                              Text('€${lessonPrice.toStringAsFixed(0)}',
+                                  style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 13, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Huidig tegoed:',
+                                  style: TextStyle(color: Color(0xFF6B7B94), fontSize: 13)),
+                              Text(wallet.formatted,
+                                  style: const TextStyle(color: Color(0xFF6B7B94), fontSize: 13)),
                             ],
                           ),
                           Container(
@@ -237,15 +255,37 @@ class BookingSummaryScreen extends StatelessWidget {
                             height: 1,
                             color: const Color(0xFFF0F4FA),
                           ),
-                          const Row(
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Totaal:',
+                              const Text('Nieuw saldo na boeking:',
                                   style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 15, fontWeight: FontWeight.w700)),
-                              Text('1 credit inhouden',
-                                  style: TextStyle(color: Color(0xFF0365C4), fontSize: 15, fontWeight: FontWeight.w700)),
+                              Text('€${newBalance.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                      color: newBalance < 0 ? const Color(0xFFE74C3C) : const Color(0xFF0365C4),
+                                      fontSize: 15, fontWeight: FontWeight.w700)),
                             ],
                           ),
+                          if (newBalance < 0) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF2F2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.warning_amber_rounded, size: 16, color: Color(0xFFE74C3C)),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text('Onvoldoende tegoed — waardeer eerst op.',
+                                        style: TextStyle(color: Color(0xFFE74C3C), fontSize: 12)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

@@ -1,31 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../shared/utils/smart_back.dart';
+import '../../../wallet/data/models/wallet_model.dart';
+import '../../../wallet/presentation/providers/wallet_provider.dart';
 
-/// Credit Voucher screen — per Walter's feedback.
-/// Replaces traditional punch cards with credit-based system.
-/// Customers buy €100/€200/€300/€400 vouchers with tiered discounts.
-/// Credits are used to book lessons. Refunds go back to the voucher.
-class _VoucherTier {
-  final int amount;
-  final double discount;
-  final String label;
-  const _VoucherTier(this.amount, this.discount, this.label);
-}
-
-const _tiers = <_VoucherTier>[
-  _VoucherTier(100, 0, 'Starter'),
-  _VoucherTier(200, 1, 'Voordelig'),
-  _VoucherTier(300, 1.5, 'Populair'),
-  _VoucherTier(400, 2, 'Beste keuze'),
-];
-
-class MyPunchCardsScreen extends StatelessWidget {
+/// Unified wallet/balance screen (replaces old multi-punch-card system).
+/// Walter 2026-04-22: single balance used for any lesson type.
+class MyPunchCardsScreen extends ConsumerWidget {
   const MyPunchCardsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final wallet = ref.watch(walletProvider);
+    final txs = ref.watch(walletTxProvider);
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),
       body: SingleChildScrollView(
@@ -58,311 +48,244 @@ class MyPunchCardsScreen extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        alignment: Alignment.center,
-                        child: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
+                        child: const Icon(Icons.chevron_left, color: Colors.white, size: 22),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Mijn Tegoed',
-                            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
-                        Text('Saldo & vouchers',
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
-                      ],
+                    const Expanded(
+                      child: Text(
+                        'Mijn Tegoed',
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
 
-            // Active credit balance card
+            // Balance card
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: GestureDetector(
-                onTap: () => context.pushNamed(RouteNames.punchCardDetail, pathParameters: {'id': 'V2026001'}),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF0365C4), Color(0xFF034DA9)],
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF0365C4), Color(0xFF00C1FF)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0365C4).withValues(alpha: 0.3),
+                      blurRadius: 24, offset: const Offset(0, 10),
                     ),
-                    boxShadow: [BoxShadow(color: const Color(0xFF0365C4).withValues(alpha: 0.3), blurRadius: 32, offset: const Offset(0, 12))],
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: -10, right: -15,
-                        child: Icon(Icons.account_balance_wallet, color: Colors.white.withValues(alpha: 0.08), size: 90),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.account_balance_wallet, color: Colors.white, size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Beschikbaar tegoed',
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12)),
+                            Text(wallet.formatted,
+                                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        context.pushNamed(RouteNames.purchasePunchCard);
+                      },
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add, color: Color(0xFF0365C4), size: 18),
+                            SizedBox(width: 8),
+                            Text('Tegoed opwaarderen',
+                                style: TextStyle(color: Color(0xFF0365C4), fontSize: 14, fontWeight: FontWeight.w700)),
+                          ],
+                        ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.account_balance_wallet_outlined, color: Color(0xFF00C1FF), size: 18),
-                                  const SizedBox(width: 8),
-                                  Text('Actueel tegoed',
-                                      style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13, fontWeight: FontWeight.w600)),
-                                ],
-                              ),
-                              Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.4), size: 18),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          RichText(
-                            text: TextSpan(
-                              style: const TextStyle(color: Colors.white, fontSize: 42, fontWeight: FontWeight.w700),
-                              children: [
-                                const TextSpan(text: '€164'),
-                                TextSpan(
-                                  text: ',50',
-                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white.withValues(alpha: 0.7)),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Beschikbaar voor boekingen',
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
-                          ),
-                          const SizedBox(height: 12),
-                          // Progress bar showing how much used
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(999),
-                            child: Container(
-                              height: 6,
-                              color: Colors.white.withValues(alpha: 0.15),
-                              child: FractionallySizedBox(
-                                alignment: Alignment.centerLeft,
-                                widthFactor: 0.82,
-                                child: Container(
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(colors: [Color(0xFF00C1FF), Colors.white]),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Voucher #V2026001',
-                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11)),
-                              Text('82% van €200',
-                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            // Recent usage quick view
+            // Lesson prices info
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Gebruik deze maand',
-                      style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 15, fontWeight: FontWeight.w700)),
-                  GestureDetector(
-                    onTap: () => context.pushNamed(RouteNames.paymentHistory),
-                    child: const Text('Geschiedenis →',
-                        style: TextStyle(color: Color(0xFF0365C4), fontSize: 12, fontWeight: FontWeight.w600)),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _usageRow(Icons.water, '1-op-1 Zwemles', '4 lessen', '-€152,00', const Color(0xFF0365C4)),
-                    const Divider(height: 20, color: Color(0xFFF0F4FA)),
-                    _usageRow(Icons.people_outline, '1-op-2 Zwemles', '2 lessen', '-€54,00', const Color(0xFFFF5C00)),
+                    const Text('Lesprijzen',
+                        style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 15, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    const Text('Bedragen worden van uw tegoed afgetrokken bij boeking',
+                        style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+                    const SizedBox(height: 12),
+                    _priceRow('1-op-1', LessonPricing.oneOnOne, const Color(0xFF0365C4)),
+                    const SizedBox(height: 8),
+                    _priceRow('1-op-2', LessonPricing.oneOnTwo, const Color(0xFFFF5C00)),
+                    const SizedBox(height: 8),
+                    _priceRow('1-op-3', LessonPricing.oneOnThree, const Color(0xFF27AE60)),
                   ],
                 ),
               ),
             ),
 
-            // Purchase new voucher section
+            // Transaction history
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Tegoed opwaarderen',
-                      style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 16, fontWeight: FontWeight.w700)),
-                  GestureDetector(
-                    onTap: () => context.pushNamed(RouteNames.allPunchCardPrices),
-                    child: const Text('Alle opties →',
-                        style: TextStyle(color: Color(0xFF0365C4), fontSize: 12, fontWeight: FontWeight.w600)),
-                  ),
+                  const Text('Recente transacties',
+                      style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 15, fontWeight: FontWeight.w700)),
+                  Text('${txs.length} items',
+                      style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
                 ],
               ),
             ),
-
-            // Voucher tiers
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: _tiers.map((t) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: GestureDetector(
-                    onTap: () => context.pushNamed(RouteNames.purchasePunchCard),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: t.discount > 0
-                            ? Border.all(color: const Color(0xFF27AE60).withValues(alpha: 0.3), width: 1.5)
-                            : null,
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 52, height: 52,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: t.amount >= 400
-                                    ? const [Color(0xFF9B59B6), Color(0xFF8E44AD)]
-                                    : t.amount >= 300
-                                        ? const [Color(0xFF27AE60), Color(0xFF2ECC71)]
-                                        : t.amount >= 200
-                                            ? const [Color(0xFFFF5C00), Color(0xFFF5A623)]
-                                            : const [Color(0xFF0365C4), Color(0xFF00C1FF)],
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 22),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text('€${t.amount}',
-                                        style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 18, fontWeight: FontWeight.w800)),
-                                    const SizedBox(width: 8),
-                                    if (t.discount > 0)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF27AE60).withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(999),
-                                        ),
-                                        child: Text('+${t.discount.toStringAsFixed(t.discount.truncateToDouble() == t.discount ? 0 : 1)}% bonus',
-                                            style: const TextStyle(color: Color(0xFF27AE60), fontSize: 10, fontWeight: FontWeight.w700)),
-                                      ),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  t.discount > 0
-                                      ? '${t.label} · Krijg €${(t.amount * (1 + t.discount / 100)).toStringAsFixed(t.discount.truncateToDouble() == t.discount ? 0 : 2)} tegoed'
-                                      : '${t.label} · Krijg €${t.amount} tegoed',
-                                  style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: 32, height: 32,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0365C4).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.arrow_forward, color: Color(0xFF0365C4), size: 16),
-                          ),
-                        ],
-                      ),
-                    ),
+            const SizedBox(height: 8),
+            if (txs.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                )).toList(),
-              ),
-            ),
-
-            // Info card about pay-per-lesson option
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F4FD),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF0365C4).withValues(alpha: 0.15)),
+                  child: const Center(
+                    child: Text('Nog geen transacties',
+                        style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 13)),
+                  ),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.info_outline, color: Color(0xFF0365C4), size: 18),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Liever per les betalen? Kies iDEAL bij het boeken — geen voucher nodig.',
-                        style: TextStyle(color: Color(0xFF0365C4), fontSize: 12, fontWeight: FontWeight.w500, height: 1.4),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+              )
+            else
+              ...txs.map((tx) => Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                    child: _TxTile(tx: tx),
+                  )),
           ],
         ),
       ),
     );
   }
 
-  Widget _usageRow(IconData icon, String title, String count, String amount, Color color) {
+  Widget _priceRow(String label, double price, Color color) {
     return Row(
       children: [
         Container(
-          width: 36, height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: color, size: 18),
+          child: Text(label,
+              style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700)),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 13, fontWeight: FontWeight.w600)),
-              Text(count, style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
-            ],
-          ),
-        ),
-        Text(amount,
-            style: const TextStyle(color: Color(0xFFE74C3C), fontSize: 13, fontWeight: FontWeight.w700)),
+        const Spacer(),
+        Text('€${price.toStringAsFixed(0)}',
+            style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 15, fontWeight: FontWeight.w700)),
+        const Text(' / les',
+            style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
       ],
     );
+  }
+}
+
+class _TxTile extends StatelessWidget {
+  final WalletTransaction tx;
+  const _TxTile({required this.tx});
+
+  @override
+  Widget build(BuildContext context) {
+    final isCredit = tx.amount >= 0;
+    final color = isCredit ? const Color(0xFF27AE60) : const Color(0xFF8E9BB3);
+    final icon = switch (tx.type) {
+      WalletTxType.topUp => Icons.add_circle_outline,
+      WalletTxType.lessonDebit => Icons.pool_outlined,
+      WalletTxType.refund => Icons.undo,
+      WalletTxType.adjustment => Icons.edit_note,
+    };
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38, height: 38,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tx.description,
+                    style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 13, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(_formatDate(tx.date),
+                    style: const TextStyle(color: Color(0xFF8E9BB3), fontSize: 11)),
+              ],
+            ),
+          ),
+          Text(tx.signed,
+              style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime d) {
+    final now = DateTime.now();
+    final diff = now.difference(d);
+    if (diff.inMinutes < 60) return '${diff.inMinutes} min geleden';
+    if (diff.inHours < 24) return '${diff.inHours}u geleden';
+    if (diff.inDays == 1) return 'Gisteren';
+    if (diff.inDays < 7) return '${diff.inDays} dagen geleden';
+    return '${d.day}/${d.month}/${d.year}';
   }
 }

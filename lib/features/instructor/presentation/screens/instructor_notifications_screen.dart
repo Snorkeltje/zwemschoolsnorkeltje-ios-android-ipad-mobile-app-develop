@@ -29,7 +29,7 @@ class _InstructorNotificationsScreenState extends ConsumerState<InstructorNotifi
       'type': 'admin',
       'emoji': '📢',
       'emojiBg': const Color(0xFF0365C4),
-      'title': 'Bericht van hoofdkantoor',
+      'title': 'Bericht van het Snorkeltje team',
       'subtitle': 'Nieuwe lesplan update voor Diploma B',
       'time': '1u',
       'unread': true,

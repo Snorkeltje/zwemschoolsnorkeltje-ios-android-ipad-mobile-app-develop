@@ -5,7 +5,7 @@ class AppStrings {
 
   // === APP INFO ===
   static const String appName = 'Zwemschool Snorkeltje';
-  static const String appTagline = 'Zwemles op maat';
+  static const String appTagline = 'Nu en later, vol vertrouwen in het water';
 
   // === ONBOARDING ===
   static const String onboarding1Title = 'Boek lessen wanneer je wilt';
