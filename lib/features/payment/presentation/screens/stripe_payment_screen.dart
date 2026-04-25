@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' show StripeException;
 import 'package:go_router/go_router.dart';
+import '../../../../core/services/stripe_service.dart';
 import '../../../../shared/utils/smart_back.dart';
 import '../../../wallet/data/models/wallet_model.dart';
 import '../../../wallet/presentation/providers/wallet_provider.dart';
@@ -35,9 +37,7 @@ class StripePaymentScreen extends ConsumerStatefulWidget {
 
 class _StripePaymentScreenState extends ConsumerState<StripePaymentScreen> {
   bool _processing = false;
-  String _bank = 'ING';
-
-  static const _banks = ['ING', 'ABN AMRO', 'Rabobank', 'SNS', 'ASN', 'Knab', 'Bunq', 'Triodos'];
+  String? _error;
 
   double get _baseAmount => widget.amount ?? 39.0;
 
@@ -51,23 +51,52 @@ class _StripePaymentScreenState extends ConsumerState<StripePaymentScreen> {
 
   Future<void> _payNow() async {
     HapticFeedback.mediumImpact();
-    setState(() => _processing = true);
-    // Simulated iDEAL redirect.
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    if (widget.isTopUp && widget.balanceAmount != null) {
-      ref.read(walletProvider.notifier).topUp(widget.balanceAmount!);
-      ref.read(walletTxProvider.notifier).add(WalletTransaction(
-        id: 't${DateTime.now().millisecondsSinceEpoch}',
-        type: WalletTxType.topUp,
-        amount: widget.balanceAmount!,
-        description: 'Tegoed opgewaardeerd via iDEAL ($_bank)',
-        date: DateTime.now(),
-      ));
+    setState(() {
+      _processing = true;
+      _error = null;
+    });
+
+    try {
+      // Real Stripe iDEAL flow — opens native PaymentSheet → bank picker → bank app → return.
+      await StripeService.payIDEAL(
+        amount: _totalAmount,
+        description: widget.description ?? 'Zwemschool Snorkeltje betaling',
+        metadata: {
+          'type': widget.isTopUp ? 'wallet_topup' : 'lesson_payment',
+          if (widget.isTopUp && widget.balanceAmount != null)
+            'balance_credit': widget.balanceAmount!.toStringAsFixed(2),
+        },
+      );
+
+      // PaymentSheet returned without throwing → user completed iDEAL.
+      if (!mounted) return;
+      if (widget.isTopUp && widget.balanceAmount != null) {
+        ref.read(walletProvider.notifier).topUp(widget.balanceAmount!);
+        ref.read(walletTxProvider.notifier).add(WalletTransaction(
+          id: 't${DateTime.now().millisecondsSinceEpoch}',
+          type: WalletTxType.topUp,
+          amount: widget.balanceAmount!,
+          description: 'Tegoed opgewaardeerd via iDEAL',
+          date: DateTime.now(),
+          reference: 'iDEAL',
+        ));
+      }
+      if (!mounted) return;
+      setState(() => _processing = false);
+      _showSuccess();
+    } on StripeException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _processing = false;
+        _error = e.error.localizedMessage ?? e.error.message ?? 'Betaling geannuleerd';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _processing = false;
+        _error = 'Er ging iets mis: $e';
+      });
     }
-    if (!mounted) return;
-    setState(() => _processing = false);
-    _showSuccess();
   }
 
   void _showSuccess() {
@@ -217,70 +246,63 @@ class _StripePaymentScreenState extends ConsumerState<StripePaymentScreen> {
                     ),
                     const SizedBox(height: 18),
 
-                    // Bank picker
-                    const Text('Kies uw bank',
-                        style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 15, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 10),
+                    // iDEAL info
                     Container(
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: const Color(0xFFE5E7EB)),
                       ),
-                      child: Column(
-                        children: List.generate(_banks.length, (i) {
-                          final bank = _banks[i];
-                          final selected = bank == _bank;
-                          return GestureDetector(
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              setState(() => _bank = bank);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: i == _banks.length - 1
-                                      ? BorderSide.none
-                                      : const BorderSide(color: Color(0xFFF0F4FA)),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 36, height: 36,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFEEF7FF),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(Icons.account_balance, size: 18, color: Color(0xFF0365C4)),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(bank,
-                                        style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w600)),
-                                  ),
-                                  Container(
-                                    width: 22, height: 22,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: selected ? const Color(0xFF0365C4) : const Color(0xFFE0E5EC),
-                                        width: 2,
-                                      ),
-                                      color: selected ? const Color(0xFF0365C4) : Colors.transparent,
-                                    ),
-                                    child: selected
-                                        ? const Icon(Icons.check, color: Colors.white, size: 14)
-                                        : null,
-                                  ),
-                                ],
-                              ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44, height: 44,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEEF7FF),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          );
-                        }),
+                            child: const Icon(Icons.account_balance, size: 22, color: Color(0xFF0365C4)),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('iDEAL',
+                                    style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+                                SizedBox(height: 2),
+                                Text('U kiest uw bank na "Betalen"',
+                                    style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.check_circle, color: Color(0xFF27AE60), size: 22),
+                        ],
                       ),
                     ),
+
+                    if (_error != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE74C3C).withValues(alpha: 0.2)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, size: 16, color: Color(0xFFE74C3C)),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(_error!,
+                                  style: const TextStyle(color: Color(0xFFE74C3C), fontSize: 12, height: 1.4)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 18),
 
@@ -297,7 +319,7 @@ class _StripePaymentScreenState extends ConsumerState<StripePaymentScreen> {
                           SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Veilige betaling via iDEAL. Wij slaan geen bankgegevens op.',
+                              'Veilige betaling via Stripe + iDEAL. Wij slaan geen bankgegevens op.',
                               style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 12, height: 1.4),
                             ),
                           ),

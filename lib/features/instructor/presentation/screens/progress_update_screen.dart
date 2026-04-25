@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/instructor_providers.dart';
 import '../../../../shared/utils/smart_back.dart';
+import '../../../schedule/presentation/providers/fixed_schedule_provider.dart';
 import '../theme/instructor_theme.dart';
 
 class ProgressUpdateScreen extends ConsumerStatefulWidget {
@@ -451,6 +452,50 @@ class _ProgressUpdateScreenState extends ConsumerState<ProgressUpdateScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // Plan exam button — Walter 2026-04-23 exam continuation flow
+                  if (_selectedLevel >= 3) ...[
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        final levelName = _levels[_selectedLevel]['nl']!;
+                        final nextLevel = _selectedLevel < _levels.length - 1
+                            ? _levels[_selectedLevel + 1]['nl']
+                            : null;
+                        ref.read(examContinuationProvider.notifier).send(
+                          childId: widget.studentInitial,
+                          childName: 'Sami Khilji',
+                          currentLevel: levelName,
+                          nextLevel: nextLevel,
+                          examDate: DateTime.now().add(const Duration(days: 7)),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Examen gepland — ouder krijgt 24h vervolgvraag'),
+                            backgroundColor: Color(0xFFF5A623),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        height: 48,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF7E6),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFF5A623).withValues(alpha: 0.4)),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.emoji_events, color: Color(0xFFF5A623), size: 18),
+                            SizedBox(width: 8),
+                            Text('Examen plannen — vervolgvraag aan ouder',
+                                style: TextStyle(color: Color(0xFFF5A623), fontSize: 13, fontWeight: FontWeight.w700)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
 
                   // Save button
                   GestureDetector(

@@ -75,6 +75,11 @@ class RouteNames {
   static const String addEditChild = 'addEditChild';
   static const String emergencyContacts = 'emergencyContacts';
 
+  // Schedule (Walter 2026-04-22 fixed-schedule + slot-interest)
+  static const String slotInterest = 'slotInterest';
+  static const String slotOffers = 'slotOffers';
+  static const String examContinuation = 'examContinuation';
+
   // Misc
   static const String contactScreen = 'contactScreen';
   static const String reviewsScreen = 'reviewsScreen';

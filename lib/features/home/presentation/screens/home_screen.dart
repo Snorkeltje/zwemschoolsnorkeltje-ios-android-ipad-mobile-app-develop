@@ -399,6 +399,8 @@ class _HomeScreenState extends State<HomeScreen> {
       (Icons.list_alt, 'Reserveringen', [const Color(0xFFFF5C00), const Color(0xFFF5A623)], const Color(0x33FF5C00), RouteNames.myReservations),
       (Icons.account_balance_wallet, 'Tegoed', [const Color(0xFF27AE60), const Color(0xFF2ECC71)], const Color(0x3327AE60), RouteNames.myPunchCards),
       (Icons.bar_chart, 'Voortgang', [const Color(0xFF9B59B6), const Color(0xFF8E44AD)], const Color(0x339B59B6), RouteNames.childProgress),
+      (Icons.bookmark_outline, 'Vaste plek', [const Color(0xFFE67E22), const Color(0xFFF5A623)], const Color(0x33E67E22), RouteNames.slotInterest),
+      (Icons.local_offer_outlined, 'Aanbiedingen', [const Color(0xFF1ABC9C), const Color(0xFF16A085)], const Color(0x331ABC9C), RouteNames.slotOffers),
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
