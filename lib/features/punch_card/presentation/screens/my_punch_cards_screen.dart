@@ -14,8 +14,11 @@ class MyPunchCardsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wallet = ref.watch(walletProvider);
-    final txs = ref.watch(walletTxProvider);
+    final walletAsync = ref.watch(walletProvider);
+    final txAsync = ref.watch(walletTxProvider);
+    final wallet = walletAsync.value ?? WalletBalance(amount: 0, updatedAt: DateTime.now());
+    final txs = txAsync.value ?? const <WalletTransaction>[];
+    final loading = walletAsync.isLoading || txAsync.isLoading;
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),
       body: SingleChildScrollView(
@@ -102,8 +105,13 @@ class MyPunchCardsScreen extends ConsumerWidget {
                           children: [
                             Text('Beschikbaar tegoed',
                                 style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12)),
-                            Text(wallet.formatted,
-                                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800)),
+                            loading
+                                ? const SizedBox(
+                                    height: 32, width: 32,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  )
+                                : Text(wallet.formatted,
+                                    style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800)),
                           ],
                         ),
                       ],

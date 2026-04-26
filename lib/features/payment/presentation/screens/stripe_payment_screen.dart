@@ -71,15 +71,10 @@ class _StripePaymentScreenState extends ConsumerState<StripePaymentScreen> {
       // PaymentSheet returned without throwing → user completed iDEAL.
       if (!mounted) return;
       if (widget.isTopUp && widget.balanceAmount != null) {
-        ref.read(walletProvider.notifier).topUp(widget.balanceAmount!);
-        ref.read(walletTxProvider.notifier).add(WalletTransaction(
-          id: 't${DateTime.now().millisecondsSinceEpoch}',
-          type: WalletTxType.topUp,
-          amount: widget.balanceAmount!,
-          description: 'Tegoed opgewaardeerd via iDEAL',
-          date: DateTime.now(),
-          reference: 'iDEAL',
-        ));
+        await ref.read(walletProvider.notifier).recordTopUp(
+          payAmountCents: (widget.amount! * 100).round(),
+          balanceCents: (widget.balanceAmount! * 100).round(),
+        );
       }
       if (!mounted) return;
       setState(() => _processing = false);
