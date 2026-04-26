@@ -11,7 +11,7 @@ class BookingSummaryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wallet = ref.watch(walletProvider);
+    final wallet = ref.watch(walletProvider).value ?? WalletBalance(amount: 0, updatedAt: DateTime.now());
     // Default to 1-op-1; booking flow would pass the actual lesson type.
     final lessonPrice = LessonPricing.oneOnOne;
     final newBalance = wallet.amount - lessonPrice;

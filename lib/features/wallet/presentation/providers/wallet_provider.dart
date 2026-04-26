@@ -1,73 +1,74 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/wallet_model.dart';
+import '../../data/wallet_repository.dart';
 
-class WalletNotifier extends StateNotifier<WalletBalance> {
-  WalletNotifier()
-      : super(WalletBalance(amount: 164.50, updatedAt: DateTime.now()));
+/// Real Supabase-backed wallet repository.
+final walletRepoProvider = Provider<WalletRepository>(
+  (_) => WalletRepository(Supabase.instance.client),
+);
 
-  /// Add funds (iDEAL top-up).
-  void topUp(double amount) {
-    state = state.copyWith(
-      amount: state.amount + amount,
-      updatedAt: DateTime.now(),
-    );
+/// Current authenticated user id (null if logged out).
+String? _userId() {
+  return Supabase.instance.client.auth.currentUser?.id;
+}
+
+/// Wallet balance for the logged-in user. Returns €0 for guests.
+class WalletNotifier extends AsyncNotifier<WalletBalance> {
+  @override
+  Future<WalletBalance> build() async {
+    final id = _userId();
+    if (id == null) return WalletBalance(amount: 0, updatedAt: DateTime.now());
+    return ref.read(walletRepoProvider).fetchBalance(id);
   }
 
-  /// Deduct lesson price. Returns false if insufficient funds.
-  bool debitLesson(double price) {
-    if (state.amount < price) return false;
-    state = state.copyWith(
-      amount: state.amount - price,
-      updatedAt: DateTime.now(),
+  Future<void> refresh() async {
+    final id = _userId();
+    if (id == null) return;
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => ref.read(walletRepoProvider).fetchBalance(id));
+  }
+
+  Future<bool> recordTopUp({
+    required int payAmountCents,
+    required int balanceCents,
+    String? paymentIntentId,
+  }) async {
+    final id = _userId();
+    if (id == null) return false;
+    await ref.read(walletRepoProvider).recordTopUp(
+      userId: id, payAmountCents: payAmountCents,
+      balanceCents: balanceCents, paymentIntentId: paymentIntentId,
     );
+    await refresh();
+    ref.invalidate(walletTxProvider);
     return true;
   }
 
-  /// Refund (cancellation).
-  void refund(double amount) {
-    state = state.copyWith(
-      amount: state.amount + amount,
-      updatedAt: DateTime.now(),
+  Future<bool> debitLesson({
+    required int costCents,
+    required String description,
+    String? reservationId,
+  }) async {
+    final id = _userId();
+    if (id == null) return false;
+    final ok = await ref.read(walletRepoProvider).debitLesson(
+      userId: id, costCents: costCents,
+      description: description, reservationId: reservationId,
     );
-  }
-
-  bool canAfford(double price) => state.amount >= price;
-}
-
-final walletProvider = StateNotifierProvider<WalletNotifier, WalletBalance>(
-  (ref) => WalletNotifier(),
-);
-
-/// Transaction history.
-class WalletTxNotifier extends StateNotifier<List<WalletTransaction>> {
-  WalletTxNotifier()
-      : super([
-          WalletTransaction(
-            id: 't1', type: WalletTxType.topUp, amount: 202,
-            description: 'Tegoed opgewaardeerd',
-            date: DateTime.now().subtract(const Duration(days: 2)),
-            reference: 'iDEAL #TX83921',
-          ),
-          WalletTransaction(
-            id: 't2', type: WalletTxType.lessonDebit, amount: -39,
-            description: 'Les van Jan de Vries · 1-op-1',
-            date: DateTime.now().subtract(const Duration(days: 1)),
-            reference: 'Les #L1029',
-          ),
-          WalletTransaction(
-            id: 't3', type: WalletTxType.lessonDebit, amount: -28,
-            description: 'Les van Jan de Vries · 1-op-2',
-            date: DateTime.now().subtract(const Duration(hours: 4)),
-            reference: 'Les #L1030',
-          ),
-        ]);
-
-  void add(WalletTransaction tx) {
-    state = [tx, ...state];
+    await refresh();
+    ref.invalidate(walletTxProvider);
+    return ok;
   }
 }
 
-final walletTxProvider =
-    StateNotifierProvider<WalletTxNotifier, List<WalletTransaction>>(
-  (ref) => WalletTxNotifier(),
+final walletProvider = AsyncNotifierProvider<WalletNotifier, WalletBalance>(
+  WalletNotifier.new,
 );
+
+/// Live transaction history.
+final walletTxProvider = FutureProvider<List<WalletTransaction>>((ref) async {
+  final id = _userId();
+  if (id == null) return const <WalletTransaction>[];
+  return ref.read(walletRepoProvider).fetchTransactions(id);
+});
