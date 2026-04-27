@@ -1,54 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../shared/utils/smart_back.dart';
+import '../../data/reservations_repository.dart';
+import '../providers/reservations_provider.dart';
 
-class _Reservation {
-  final String id;
-  final String date;
-  final String time;
-  final String location;
-  final String instructor;
-  final String type;
-  final Color color;
-  final bool completed; // Walter: usage history under reservations
-  const _Reservation(this.id, this.date, this.time, this.location, this.instructor, this.type, this.color, {this.completed = false});
-}
-
-const _reservations = <_Reservation>[
-  // Upcoming
-  _Reservation('1', 'Ma 28 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4)),
-  _Reservation('2', 'Wo 30 apr', '16:00–16:30', 'Bad Hulckesteijn', 'Maria Jansen', 'Extra', Color(0xFFFF5C00)),
-  _Reservation('3', 'Ma 5 mei', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4)),
-  _Reservation('4', 'Wo 7 mei', '10:00–10:30', 'Ampt v. Nijkerk', 'Pieter Bakker', 'Extra', Color(0xFFFF5C00)),
-  // History (completed) — Walter: show lesson usage here too
-  _Reservation('h1', 'Ma 21 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4), completed: true),
-  _Reservation('h2', 'Wo 16 apr', '16:00–16:30', 'Bad Hulckesteijn', 'Maria Jansen', 'Extra', Color(0xFFFF5C00), completed: true),
-  _Reservation('h3', 'Ma 14 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4), completed: true),
-  _Reservation('h4', 'Ma 7 apr', '15:00–15:30', 'De Bilt', 'Jan de Vries', 'Vast', Color(0xFF0365C4), completed: true),
-];
-
-class MyReservationsScreen extends StatefulWidget {
+class MyReservationsScreen extends ConsumerStatefulWidget {
   const MyReservationsScreen({super.key});
   @override
-  State<MyReservationsScreen> createState() => _MyReservationsScreenState();
+  ConsumerState<MyReservationsScreen> createState() => _MyReservationsScreenState();
 }
 
-class _MyReservationsScreenState extends State<MyReservationsScreen> {
+class _MyReservationsScreenState extends ConsumerState<MyReservationsScreen> {
   int _tab = 0; // 0=upcoming, 1=history
   String _filter = 'all';
 
-  List<_Reservation> get _filtered {
-    // Walter: tab 0 = upcoming, tab 1 = history (completed lessons)
-    var list = _reservations.where((r) => _tab == 0 ? !r.completed : r.completed).toList();
+  List<ReservationItem> _applyFilter(List<ReservationItem> all) {
+    var list = all.where((r) => _tab == 0 ? r.isUpcoming : r.isHistory).toList();
     if (_filter == 'all') return list;
-    final mapping = {'fixed': 'Vast', 'extra': 'Extra', 'holiday': 'Vakantie'};
-    return list.where((r) => r.type == mapping[_filter]).toList();
+    final typeMap = {'fixed': '1-op-1', 'extra': '1-op-2', 'holiday': '1-op-3'};
+    final t = typeMap[_filter];
+    if (t == null) return list;
+    return list.where((r) => r.type == t).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final items = _filtered;
+    final async = ref.watch(myReservationsProvider);
+    final all = async.value ?? const <ReservationItem>[];
+    final items = _applyFilter(all);
+    final loading = async.isLoading;
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),
       body: SingleChildScrollView(
@@ -146,6 +128,31 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
             const SizedBox(height: 16),
 
             // Cards
+            if (loading && items.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (items.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  child: const Center(
+                    child: Column(children: [
+                      Text('🏊', style: TextStyle(fontSize: 32)),
+                      SizedBox(height: 8),
+                      Text('Nog geen reserveringen',
+                          style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
+                      SizedBox(height: 4),
+                      Text('Boek uw eerste les vanaf het home scherm',
+                          style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
+                    ]),
+                  ),
+                ),
+              )
+            else
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -164,24 +171,24 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Container(width: 4, decoration: BoxDecoration(color: r.color, borderRadius: BorderRadius.circular(2))),
+                            Container(width: 4, decoration: BoxDecoration(color: r.accentColor, borderRadius: BorderRadius.circular(2))),
                             const SizedBox(width: 12),
                             Container(
                               width: 52,
                               height: 52,
                               decoration: BoxDecoration(
-                                color: r.color.withValues(alpha: 0.06),
+                                color: r.accentColor.withValues(alpha: 0.06),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(r.date.split(' ')[0],
-                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: r.color)),
-                                  Text(r.date.split(' ')[1],
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: r.color)),
-                                  Text(r.date.split(' ')[2],
-                                      style: TextStyle(fontSize: 10, color: r.color)),
+                                  Text(_dayShort(r.date),
+                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: r.accentColor)),
+                                  Text('${r.date.day}',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: r.accentColor)),
+                                  Text(_monthShort(r.date),
+                                      style: TextStyle(fontSize: 10, color: r.accentColor)),
                                 ],
                               ),
                             ),
@@ -197,18 +204,18 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                                         children: [
                                           const Icon(Icons.access_time, size: 13, color: Color(0xFF8E9BB3)),
                                           const SizedBox(width: 6),
-                                          Text(r.time,
+                                          Text('${r.startTime}–${r.endTime}',
                                               style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
                                         ],
                                       ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                                         decoration: BoxDecoration(
-                                          color: r.color.withValues(alpha: 0.07),
+                                          color: r.accentColor.withValues(alpha: 0.07),
                                           borderRadius: BorderRadius.circular(999),
                                         ),
                                         child: Text(r.type,
-                                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: r.color)),
+                                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: r.accentColor)),
                                       ),
                                     ],
                                   ),
@@ -217,7 +224,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                                     children: [
                                       const Icon(Icons.location_on_outlined, size: 13, color: Color(0xFF8E9BB3)),
                                       const SizedBox(width: 6),
-                                      Text(r.location, style: const TextStyle(color: Color(0xFF6B7B94), fontSize: 12)),
+                                      Expanded(child: Text(r.location, style: const TextStyle(color: Color(0xFF6B7B94), fontSize: 12), overflow: TextOverflow.ellipsis)),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -236,7 +243,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Icon(Icons.chevron_right, color: Color(0xFFC4CDD9), size: 16),
-                                if (r.completed)
+                                if (r.isHistory)
                                   // Completed lesson: show usage indicator (Walter)
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -281,6 +288,13 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
       ),
     );
   }
+
+  String _dayShort(DateTime d) =>
+      const ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'][d.weekday - 1];
+  String _monthShort(DateTime d) => const [
+        'jan', 'feb', 'mrt', 'apr', 'mei', 'jun',
+        'jul', 'aug', 'sep', 'okt', 'nov', 'dec'
+      ][d.month - 1];
 
   Widget _tabBtn(int i, IconData icon, String label) {
     final sel = _tab == i;

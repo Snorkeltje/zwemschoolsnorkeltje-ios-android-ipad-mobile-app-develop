@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/utils/smart_back.dart';
+import '../../data/reviews_repository.dart';
+import '../providers/reviews_provider.dart';
 
-class ReviewsScreen extends StatefulWidget {
+class ReviewsScreen extends ConsumerStatefulWidget {
   const ReviewsScreen({super.key});
 
   @override
-  State<ReviewsScreen> createState() => _ReviewsScreenState();
+  ConsumerState<ReviewsScreen> createState() => _ReviewsScreenState();
 }
 
-class _ReviewsScreenState extends State<ReviewsScreen> {
+class _ReviewsScreenState extends ConsumerState<ReviewsScreen> {
   static const _orange = Color(0xFFFF5C00);
   static const _amber = Color(0xFFF5A623);
   static const _blue = Color(0xFF0365C4);
@@ -24,51 +26,26 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   String _filter = 'Alle';
   String _instructorFilter = 'Alle instructeurs'; // Walter: per-instructor view
 
-  final List<_Review> _reviews = const [
-    _Review(id: 1, name: 'Familie De Vries', rating: 10, date: '2 weken geleden',
-      text: 'Fantastische zwemschool! Onze dochter Lisa heeft in recordtijd haar A-diploma gehaald. Walter en zijn team zijn geweldig met kinderen.',
-      helpful: 24, location: 'De Bilt', instructor: 'Jan de Vries'),
-    _Review(id: 2, name: 'M. Jansen', rating: 9, date: '1 maand geleden',
-      text: 'Heel persoonlijke aanpak. De 1-op-1 lessen maken echt het verschil. Ons zoontje gaat met plezier naar zwemles!',
-      helpful: 18, location: 'Nijkerk', instructor: 'Maria Jansen'),
-    _Review(id: 3, name: 'Familie Bakker', rating: 10, date: '1 maand geleden',
-      text: 'Beste zwemschool van Nederland! De instructeurs zijn geduldig en deskundig. Beide kinderen hebben hier hun diploma behaald.',
-      helpful: 31, location: 'Garderen', instructor: 'Pieter Bakker'),
-    _Review(id: 4, name: 'A. van Dijk', rating: 9, date: '2 maanden geleden',
-      text: 'Snorkeltje is echt top! De app is ook heel handig om lessen te boeken en voortgang te volgen. Aanrader!',
-      helpful: 15, location: 'Mierlo', instructor: 'Jan de Vries'),
-    _Review(id: 5, name: 'Familie Smit', rating: 10, date: '2 maanden geleden',
-      text: 'Al onze 3 kinderen zwemmen bij Snorkeltje. De kwaliteit is constant hoog en het team is super vriendelijk.',
-      helpful: 27, location: 'Wolfheze', instructor: 'Maria Jansen'),
-    _Review(id: 6, name: 'R. Peters', rating: 8, date: '3 maanden geleden',
-      text: 'Goede ervaring. Soms lastig om een tijdslot te vinden maar de kwaliteit van de lessen is uitstekend.',
-      helpful: 9, location: 'Dordrecht', instructor: 'Pieter Bakker'),
-    _Review(id: 7, name: 'Familie Visser', rating: 10, date: '3 maanden geleden',
-      text: 'Wij zijn enorm tevreden! De voortgangsrapportages zijn heel duidelijk en je ziet echt de groei van je kind.',
-      helpful: 22, location: 'Soest', instructor: 'Jan de Vries'),
-    _Review(id: 8, name: 'K. de Groot', rating: 9, date: '4 maanden geleden',
-      text: 'Professioneel en kindvriendelijk. Duidelijke communicatie via de app.',
-      helpful: 14, location: 'De Bilt', instructor: 'Maria Jansen'),
-    _Review(id: 9, name: 'R. van der Berg', rating: 5, date: '2 weken geleden',
-      text: 'Les werd te vaak verplaatst, dat was vervelend voor mijn kind. Communicatie kon beter.',
-      helpful: 3, location: 'Garderen', instructor: 'Pieter Bakker',
-      ownerResponse: 'Dank voor uw feedback! We begrijpen uw zorgen en hebben de planning in Garderen sinds januari aangepast — minder wijzigingen. Neem gerust contact op als we verder kunnen helpen. — Walter'),
-  ];
+  /// Live reviews list (Supabase-backed, refreshed via provider).
+  List<ReviewItem> get _reviews =>
+      ref.watch(allReviewsProvider).value ?? const [];
 
   /// Walter: reviews <6 without response are NOT shown publicly
-  List<_Review> get _publishable => _reviews.where((r) => r.isPublishable).toList();
+  List<ReviewItem> get _publishable => _reviews.where((r) => r.isPublishable).toList();
 
   /// Unique instructor names for the per-instructor filter
   List<String> get _instructorNames {
     final set = <String>{};
     for (final r in _publishable) {
-      set.add(r.instructor);
+      if (r.instructor != null && r.instructor!.isNotEmpty) {
+        set.add(r.instructor!);
+      }
     }
     final list = set.toList()..sort();
     return ['Alle instructeurs', ...list];
   }
 
-  List<_Review> get _filtered {
+  List<ReviewItem> get _filtered {
     var list = _publishable;
     if (_instructorFilter != 'Alle instructeurs') {
       list = list.where((r) => r.instructor == _instructorFilter).toList();
@@ -398,7 +375,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     );
   }
 
-  Widget _buildReviewCard(_Review review) {
+  Widget _buildReviewCard(ReviewItem review) {
     final isHighRating = review.rating >= 9;
     return Container(
       padding: const EdgeInsets.all(16),
@@ -428,7 +405,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  review.name[0],
+                  review.parentName[0],
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
@@ -440,18 +417,18 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(review.name,
+                    Text(review.parentName,
                         style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: _textPrimary)),
                     Row(
                       children: [
-                        Text(review.location,
+                        Text(review.location ?? '',
                             style: const TextStyle(fontSize: 10, color: _textSecondary)),
                         const Text('  ·  ',
                             style: TextStyle(fontSize: 10, color: Color(0xFFC4CDD9))),
-                        Text(review.date,
+                        Text(review.relativeDate(),
                             style: const TextStyle(fontSize: 10, color: _textSecondary)),
                       ],
                     ),
@@ -461,7 +438,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                       children: [
                         const Icon(Icons.person, size: 10, color: _blue),
                         const SizedBox(width: 3),
-                        Text(review.instructor,
+                        Text(review.instructor ?? 'Snorkeltje',
                             style: const TextStyle(fontSize: 10, color: _blue, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -548,7 +525,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                   color: _textSecondary, size: 13),
               const SizedBox(width: 6),
               Text(
-                '${review.helpful} nuttig',
+                '${review.helpfulCount} nuttig',
                 style: const TextStyle(fontSize: 11, color: _textSecondary),
               ),
             ],
@@ -559,29 +536,3 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
   }
 }
 
-class _Review {
-  final int id;
-  final String name;
-  final int rating;
-  final String date;
-  final String text;
-  final int helpful;
-  final String location;
-  final String instructor; // Walter: per-instructor breakdown
-  final String? ownerResponse; // Walter: admin response for reviews <6
-
-  const _Review({
-    required this.id,
-    required this.name,
-    required this.rating,
-    required this.date,
-    required this.text,
-    required this.helpful,
-    required this.location,
-    required this.instructor,
-    this.ownerResponse,
-  });
-
-  /// Per Walter: reviews below 6 only publish WITH owner response
-  bool get isPublishable => rating >= 6 || ownerResponse != null;
-}
