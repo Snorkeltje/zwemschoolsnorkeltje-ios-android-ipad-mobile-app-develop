@@ -40,7 +40,11 @@ class _InstructorStudentsScreenState extends ConsumerState<InstructorStudentsScr
 
   @override
   Widget build(BuildContext context) {
-    final students = ref.watch(studentsProvider);
+    // Walter 2026-04-26: real students from Supabase children. Falls back to
+    // legacy seed list while loading so screen stays populated for demo.
+    final liveAsync = ref.watch(liveStudentsProvider);
+    final seed = ref.watch(studentsProvider);
+    final students = liveAsync.value ?? seed;
     final filtered = _applyFilters(students);
     final stats = ref.watch(instructorStatsProvider);
 
