@@ -1,36 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/router/route_names.dart';
+import '../providers/chat_provider.dart';
 
-class _Chat {
-  final String id;
-  final String initial;
-  final String name;
-  final String role;
-  final String msg;
-  final String time;
-  final int unread;
-  final Color color;
-  final Color bg;
-  const _Chat(this.id, this.initial, this.name, this.role, this.msg, this.time, this.unread, this.color, this.bg);
-}
-
-const _chats = <_Chat>[
-  _Chat('1', 'J', 'Jan de Vries', 'Uw Instructeur', 'See you Monday at 15:00 🏊', '14:33', 2, Color(0xFF1A6FBF), Color(0xFFE8F4FD)),
-  _Chat('2', 'M', 'Maria Jansen', 'Extra Les Instructeur', 'Great session today! Sami really...', 'Gisteren', 0, Color(0xFF27AE60), Color(0xFFE8F7ED)),
-  _Chat('3', 'S', 'Snorkeltje Admin', 'Schooladministratie', 'Uw knipkaart verloopt over 30 dagen.', '2d', 1, Color(0xFFF5A623), Color(0xFFFEF3DB)),
-];
-
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(conversationsProvider);
+    final chats = async.value ?? const [];
+    final me = Supabase.instance.client.auth.currentUser?.id;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
         children: [
-          // Header
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(20, 56, 20, 12),
@@ -45,76 +32,97 @@ class ChatListScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              itemCount: _chats.length,
-              separatorBuilder: (_, __) => const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Divider(height: 1, color: Color(0xFFE5E7EB)),
-              ),
-              itemBuilder: (context, i) {
-                final chat = _chats[i];
-                return GestureDetector(
-                  onTap: () => context.pushNamed(RouteNames.chat, pathParameters: {'id': chat.id}),
-                  child: Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(color: chat.bg, shape: BoxShape.circle),
-                          alignment: Alignment.center,
-                          child: Text(chat.initial,
-                              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: chat.color)),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(conversationsProvider);
+                await ref.read(conversationsProvider.future);
+              },
+              child: async.isLoading && chats.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : chats.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            const SizedBox(height: 80),
+                            Center(
+                              child: Column(
                                 children: [
-                                  Text(chat.name,
-                                      style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700)),
-                                  Text(chat.time,
-                                      style: const TextStyle(color: Color(0xFF8E8EA0), fontSize: 11)),
+                                  Icon(Icons.forum_outlined, size: 48,
+                                      color: Colors.black.withValues(alpha: 0.15)),
+                                  const SizedBox(height: 12),
+                                  const Text('Nog geen gesprekken',
+                                      style: TextStyle(color: Color(0xFF8E8EA0), fontSize: 13)),
                                 ],
                               ),
-                              Text(chat.role,
-                                  style: const TextStyle(color: Color(0xFF8E8EA0), fontSize: 11)),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(chat.msg,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(color: Color(0xFF4A4A6A), fontSize: 12)),
-                                  ),
-                                  if (chat.unread > 0) ...[
-                                    const SizedBox(width: 8),
+                            ),
+                          ],
+                        )
+                      : ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                          itemCount: chats.length,
+                          separatorBuilder: (_, __) => const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Divider(height: 1, color: Color(0xFFE5E7EB)),
+                          ),
+                          itemBuilder: (context, i) {
+                            final chat = chats[i];
+                            // For parent view: counterpart = instructor; for instructor view: counterpart = parent.
+                            final isParent = me == chat.parentId;
+                            final counterpartName = isParent ? chat.instructorName : chat.parentName;
+                            final counterpartInitial = counterpartName.isEmpty ? '?' : counterpartName[0].toUpperCase();
+                            final role = isParent ? 'Uw Instructeur' : 'Ouder van ${chat.childName}';
+                            return GestureDetector(
+                              onTap: () => context.pushNamed(RouteNames.chat, pathParameters: {'id': chat.id}),
+                              child: Container(
+                                color: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Container(
-                                      width: 22,
-                                      height: 22,
-                                      decoration: const BoxDecoration(color: Color(0xFF1A6FBF), shape: BoxShape.circle),
+                                      width: 52, height: 52,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(colors: chat.gradient),
+                                        shape: BoxShape.circle,
+                                      ),
                                       alignment: Alignment.center,
-                                      child: Text('${chat.unread}',
-                                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                                      child: Text(counterpartInitial,
+                                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(counterpartName,
+                                                    style: const TextStyle(color: Color(0xFF1A1A2E), fontSize: 14, fontWeight: FontWeight.w700),
+                                                    overflow: TextOverflow.ellipsis),
+                                              ),
+                                              Text(chat.relativeTime(),
+                                                  style: const TextStyle(color: Color(0xFF8E8EA0), fontSize: 11)),
+                                            ],
+                                          ),
+                                          Text(role,
+                                              style: const TextStyle(color: Color(0xFF8E8EA0), fontSize: 11)),
+                                          const SizedBox(height: 4),
+                                          Text(chat.lastMessage,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(color: Color(0xFF4A4A6A), fontSize: 12)),
+                                        ],
+                                      ),
                                     ),
                                   ],
-                                ],
+                                ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
             ),
           ),
         ],

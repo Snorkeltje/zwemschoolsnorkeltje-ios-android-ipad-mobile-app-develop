@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_names.dart';
+import '../../../auth/data/models/child_model.dart';
+import '../../../children/presentation/providers/children_provider.dart';
 
 class _Child {
-  final int id;
+  final String id;
   final String name;
   final String initial;
   final int age;
@@ -12,21 +15,28 @@ class _Child {
   final int progress;
   final List<Color> gradient;
   const _Child(this.id, this.name, this.initial, this.age, this.level, this.progress, this.gradient);
+
+  factory _Child.fromModel(ChildModel m, List<Color> gradient) => _Child(
+        m.id, m.name, m.initials, m.age, m.currentLevel, 0, gradient,
+      );
 }
 
-const _children = <_Child>[
-  _Child(1, 'Sami Khilji', 'S', 7, 'Gevorderd Beginner', 72, [Color(0xFF0365C4), Color(0xFF00C1FF)]),
-  _Child(2, 'Noor Khilji', 'N', 5, 'Beginner', 35, [Color(0xFFFF5C00), Color(0xFFF5A623)]),
+/// Pleasant gradient palette cycled per child.
+const _kChildGradients = <List<Color>>[
+  [Color(0xFF0365C4), Color(0xFF00C1FF)],
+  [Color(0xFFFF5C00), Color(0xFFF5A623)],
+  [Color(0xFF27AE60), Color(0xFF2ECC71)],
+  [Color(0xFF9B59B6), Color(0xFF8E44AD)],
 ];
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedChild = 0;
   bool _showChildPicker = false;
 
@@ -39,30 +49,90 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final child = _children[_selectedChild];
+    final childrenAsync = ref.watch(myChildrenProvider);
+    final children = childrenAsync.maybeWhen(
+      data: (list) => [
+        for (var i = 0; i < list.length; i++)
+          _Child.fromModel(list[i], _kChildGradients[i % _kChildGradients.length]),
+      ],
+      orElse: () => const <_Child>[],
+    );
+    if (_selectedChild >= children.length) _selectedChild = 0;
+    final child = children.isEmpty
+        ? const _Child('', 'Geen kind', '?', 0, 'Beginner', 0, [Color(0xFF0365C4), Color(0xFF00C1FF)])
+        : children[_selectedChild];
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 28),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(myChildrenProvider.notifier).load();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              if (childrenAsync.isLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (children.isEmpty) ...[
+                _buildAddFirstChildCard(context),
+              ] else ...[
+                _buildChildSwitcher(child, children),
+                const SizedBox(height: 16),
+                _buildNextLessonCard(child),
+                const SizedBox(height: 24),
+                _buildQuickActions(),
+                const SizedBox(height: 24),
+                _buildChildProgress(child),
+                const SizedBox(height: 24),
+                _buildRecentNotifications(child),
+                const SizedBox(height: 24),
+                _buildPunchCardBanner(),
+                const SizedBox(height: 16),
+                _buildCharactersBanner(),
+                const SizedBox(height: 16),
+                _buildReviewsBanner(),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddFirstChildCard(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            _buildChildSwitcher(child),
+            const Text('🏊', style: TextStyle(fontSize: 40)),
+            const SizedBox(height: 12),
+            const Text('Nog geen kind toegevoegd',
+                style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 16, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            const Text('Voeg uw eerste kind toe om te beginnen met boeken',
+                style: TextStyle(color: Color(0xFF8E9BB3), fontSize: 12)),
             const SizedBox(height: 16),
-            _buildNextLessonCard(child),
-            const SizedBox(height: 24),
-            _buildQuickActions(),
-            const SizedBox(height: 24),
-            _buildChildProgress(child),
-            const SizedBox(height: 24),
-            _buildRecentNotifications(child),
-            const SizedBox(height: 24),
-            _buildPunchCardBanner(),
-            const SizedBox(height: 16),
-            _buildCharactersBanner(),
-            const SizedBox(height: 16),
-            _buildReviewsBanner(),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF0365C4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              onPressed: () => context.pushNamed(RouteNames.addEditChild),
+              child: const Text('+ Kind toevoegen'),
+            ),
           ],
         ),
       ),
@@ -176,8 +246,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildChildSwitcher(_Child child) {
-    if (_children.length <= 1) return const SizedBox.shrink();
+  Widget _buildChildSwitcher(_Child child, List<_Child> children) {
+    if (children.length <= 1) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Column(
@@ -218,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(color: const Color(0xFFE8F0FE), borderRadius: BorderRadius.circular(999)),
-                    child: Text('${_children.length} kinderen',
+                    child: Text('${children.length} kinderen',
                         style: const TextStyle(color: Color(0xFF0365C4), fontSize: 10, fontWeight: FontWeight.w700)),
                   ),
                   const SizedBox(width: 8),
@@ -240,8 +310,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 24, offset: const Offset(0, 8))],
               ),
               child: Column(
-                children: List.generate(_children.length, (i) {
-                  final c = _children[i];
+                children: List.generate(children.length, (i) {
+                  final c = children[i];
                   final isSel = i == _selectedChild;
                   return GestureDetector(
                     onTap: () => setState(() {
@@ -253,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: BoxDecoration(
                         color: isSel ? const Color(0xFFF0F6FF) : Colors.transparent,
                         border: i > 0 ? const Border(top: BorderSide(color: Color(0xFFF0F4FA))) : null,
-                        borderRadius: i == 0 ? const BorderRadius.vertical(top: Radius.circular(14)) : i == _children.length - 1 ? const BorderRadius.vertical(bottom: Radius.circular(14)) : null,
+                        borderRadius: i == 0 ? const BorderRadius.vertical(top: Radius.circular(14)) : i == children.length - 1 ? const BorderRadius.vertical(bottom: Radius.circular(14)) : null,
                       ),
                       child: Row(
                         children: [
