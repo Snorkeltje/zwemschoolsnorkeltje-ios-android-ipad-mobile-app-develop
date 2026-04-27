@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../children/presentation/providers/children_provider.dart';
 import '../../data/models/instructor_models.dart';
+
+SupabaseClient _supa() => Supabase.instance.client;
 
 // ============= STUDENTS =============
 class StudentsNotifier extends StateNotifier<List<Student>> {
@@ -278,3 +282,73 @@ final instructorStatsProvider = Provider<InstructorStats>((ref) {
 
 // ============= NOTIFICATIONS (unread count) =============
 final unreadNotificationsProvider = StateProvider<int>((ref) => 5);
+
+// ============= LIVE LESSONS (Supabase-backed) =============
+/// Today's lessons for the current instructor, from `lessons` table.
+final instructorTodayLessonsProvider = FutureProvider<List<Lesson>>((ref) async {
+  final client = _supa();
+  final uid = client.auth.currentUser?.id;
+  if (uid == null) return const [];
+  final today = DateTime.now();
+  final dateStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+  final rows = await client
+      .from('lessons')
+      .select('id, start_time, end_time, type, locations:location_id ( name )')
+      .eq('instructor_id', uid)
+      .eq('date', dateStr)
+      .order('start_time', ascending: true);
+  return rows.map<Lesson>((r) {
+    final loc = (r['locations'] as Map?) ?? const {};
+    final start = (r['start_time'] as String?) ?? '00:00';
+    final end = (r['end_time'] as String?) ?? '00:00';
+    return Lesson(
+      id: r['id'] as String,
+      time: start.length >= 5 ? start.substring(0, 5) : start,
+      end: end.length >= 5 ? end.substring(0, 5) : end,
+      location: (loc['name'] as String?) ?? '—',
+      students: 0,
+      type: (r['type'] as String?) ?? '1-op-1',
+      studentNames: const <String>[],
+    );
+  }).toList();
+});
+
+// ============= LIVE STUDENTS (Supabase-backed) =============
+/// Derives Student objects from real Supabase children rows.
+/// Replaces the hardcoded studentsProvider seed data.
+final liveStudentsProvider = FutureProvider<List<Student>>((ref) async {
+  final children = await ref.watch(allChildrenProvider.future);
+  // Stable color palette for avatars cycled by index.
+  const palettes = <List<Color>>[
+    [Color(0xFF0365C4), Color(0xFF00C1FF)],
+    [Color(0xFFFF5C00), Color(0xFFF5A623)],
+    [Color(0xFF27AE60), Color(0xFF2ECC71)],
+    [Color(0xFF9B59B6), Color(0xFF8E44AD)],
+    [Color(0xFFE74C3C), Color(0xFFC0392B)],
+    [Color(0xFF1ABC9C), Color(0xFF16A085)],
+    [Color(0xFFF39C12), Color(0xFFE67E22)],
+    [Color(0xFF3498DB), Color(0xFF2980B9)],
+  ];
+  final list = <Student>[];
+  for (var i = 0; i < children.length; i++) {
+    final c = children[i];
+    list.add(Student(
+      id: c.id.hashCode & 0x7fffffff,
+      name: c.name,
+      initial: c.initials.isEmpty ? 'K' : c.initials.substring(0, 1).toUpperCase(),
+      age: c.age,
+      level: c.currentLevel,
+      progress: 0,
+      gradient: palettes[i % palettes.length],
+      location: '—',
+      nextLesson: '—',
+      parentName: '—',
+      lessonsTotal: 0,
+      trendUp: true,
+      medicalNotes: 'Zie volledig profiel',
+      allergies: const [],
+      emergencyContact: '',
+    ));
+  }
+  return list;
+});

@@ -67,9 +67,12 @@ class _InstructorHomeScreenState extends ConsumerState<InstructorHomeScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(profileProvider);
     final stats = ref.watch(instructorStatsProvider);
+    // Walter 2026-04-26: prefer real Supabase lessons; fall back to seed schedule
+    // until first DB row appears so the demo screen never goes empty.
+    final liveLessons = ref.watch(instructorTodayLessonsProvider).value ?? const [];
     final schedule = ref.watch(scheduleProvider);
     final key = _todayKey(schedule);
-    final todayLessons = schedule[key] ?? [];
+    final todayLessons = liveLessons.isNotEmpty ? liveLessons : (schedule[key] ?? []);
     final unread = ref.watch(unreadNotificationsProvider);
     ref.watch(conversationsProvider);
     final totalChatUnread = ref.read(conversationsProvider.notifier).totalUnread;
